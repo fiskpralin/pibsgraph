@@ -1,0 +1,156 @@
+      Sveriges lantbruksuniversitet
+      Institutionen fîr skogsteknik                              1988-09-06
+      770 73 Garpenberg
+      Bengt Gyldberg
+
+
+
+
+      TYPBESTèND I FôRSTAGèNGSGALLRINGAR  -  kort information
+
+
+
+
+      ==========================================================================
+      PUBLIKATION: 
+      ==========================================================================
+
+      Bredberg, C-J., 1972. TypbestÜnd i fîrstagÜngsgallringar. Skogshîg-
+      skolan, inst. fîr skogsteknik. Rapporter och Uppsatser nr 55.
+      Stockholm.
+
+      I Skogshîgskolans arkiv i Garpenberg finns inbundna trÑdlistor och
+      plottbilder samt fotografier frÜn typbestÜnden i original.
+
+
+      ==========================================================================
+      KODNING: 
+      ==========================================================================
+
+      1) BestÜndsdata:
+      -------------------------------------------------------------
+        Pos.        Variabel
+       -----        --------
+        1-3         Yta nr
+        4-5         èlder
+
+        7-10        Stamantal per ha
+       11-12        Medeldiameter, cm
+       13-15        Bestockning
+
+
+      2) TrÑddata:
+      -------------------------------------------------------------
+        Pos.        Variabel
+       -----        --------
+       22-24        TrÑd nr
+          25        TrÑdslag (1=tall, 2=gran, 3=lîv)
+       26-28        X - koordinat (kortsida), dm
+       29-31        Y - koordinat (lÜngsida), dm
+       32-34        Brîsthîjdsdiameter pb, mm
+       35-36        Dubbel bark, mm
+       37-39        Diameter stubbe pb, mm
+       40-42        TrÑdhîjd, dm
+       43-45        Torr krongrÑns, dm
+       46-48        Grîn krongrÑns, dm
+       49-51        GagnvirkeslÑngd i dm vid grÑnsdiam. 7,5 cm
+       52-54        GagnvirkeslÑngd i dm vid grÑnsdiam. 10 cm
+          55        Antalet kronkontakter
+       56-58        Kronkontakt med trÑd nr
+          59        Kronkontaktens intensitet (1-3, 3 "tÑtast")
+          60        Grîvsta kvist, cm
+          61        Skadetyp (1-9, 0=oskadat)
+          62        TrÑdklass (1-5, 1=fristÜende, 5=undertryckt)
+          63        GallringsangelÑgenhetsgrad (1-7, 1 gallras fîrst)
+       64-66        TrÑdvikt, kg
+       67-69        Stamvikt, kg
+       70-72        Tyngdpunktens hîjd îver stubbe fîr trÑd, dm
+       73-74        Tyngdpunktens hîjd îver stubbe fîr stam, dm
+       75-77        Volym pb, dm3
+       78-80        Volym ub, dm3
+
+
+      ==========================================================================
+      ANTAL TRéD MM.
+      ==========================================================================
+
+      BestÜnd     Antal     Fîrsta     Sista
+      nr          trÑd      trÑdnr     trÑdnr        ôverhoppade trÑdnr
+      -------     -----     ------     ------     ------------------------
+
+        101        100         1         100
+        102        158         1         163       28, 31, 105, 137, 149
+        103        232         1         232
+        104        260         1         260
+        105        135         1         135
+        106        191         1         191
+        107        245         1         245
+        108        173         1         173
+        109        102         1         102
+        110        225         1         225
+        201        135         1         135
+        202        177  *)     1         177
+        203        176         1         177       141
+        204        141         1         141
+        205        106         1         106
+        206        140         1         140
+        207        125         1         125
+        208        148         1         148
+        209        118         1         118
+        210        244         2         245       1
+        211        197         1         198       34
+        212        114  *)     1         114
+        213        200         1         201       98
+        214        319         1         320       49
+        215        116         1         116
+        216        148         1         148
+        217        130         1         130
+        218        159         1         159
+        219        141         1         141
+        220        196         1         197       7
+        221        150         1         150
+        222        202         1         202
+        223        150         1         151       89
+        224        158         1         158
+        225        182         1         183       179
+        226        259         1         259
+        227        265         1         265
+        301        154         1         157       30, 87, 102
+        302        135         1         135
+        303        207         1         207
+        304        237         1         237
+        305        145         1         145
+        306        190         1         191       102
+        307        162         1         162
+        308        245         1         245
+        309        217         1         217
+        310        204         1         204
+        311        193         1         194       30
+        401        208         1         208
+        402        140         1         140
+        403        278         1         278
+        404        150         1         150
+        405        222         1         222
+        406        205         1         205
+        407        203         1         204       112
+        408        284         1         284
+        409        235         1         235
+        410        359         1         359
+        501        172         1         174       80, 82
+        502        241         1         241
+        503        187         1         187
+        504        323         1         323
+        505        125         1         127       80, 97
+        506        146         1         147       22
+        601        219         1         220       203
+        602        285         1         286       200
+        603        387         1         388       363
+        604        336         1         336
+
+
+        *) Felaktigt trÑdantal angivet i publikationen p.g.a. dubbelrÑkning
+           av trÑd. (TrÑd nr 71 i bestÜnd 202 och trÑd nr 65 i bestÜnd 212)
+
+
+      ==========================================================================
+

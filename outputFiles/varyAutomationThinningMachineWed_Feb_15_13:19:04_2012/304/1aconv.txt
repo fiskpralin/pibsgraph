@@ -1,0 +1,111 @@
+outputFiles/varyAutomationThinningMachineWed_Feb_15_13:19:04_2012/304//1aconv.txt
+stat					value			unit
+--------------------------------------------
+clustering agg. index	289.162185182	-
+leaf tree percentage	7.59493670886	%
+trees					237.0			-
+pine percentage			88.1856540084	%
+tree density			0.237			trees/m2
+spruce percentage		4.2194092827	%
+i	cranes		cranehead		Prod	QueuePerc	WorkPerc	ChopPerc	groundAratio	Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	1	conv	106.5644	0.9031	98.6761	24.8945	False	False	False	False	False
+2	1	conv	117.4665	0.6992	98.9454	32.4895	False	False	False	False	False
+3	1	conv	108.3962	0.9033	98.6758	25.3165	False	False	False	False	False
+4	1	conv	106.4317	0.9175	98.6550	24.4726	False	False	False	False	False
+5	1	conv	118.5436	0.7141	98.9531	35.0211	False	False	False	False	False
+6	1	conv	112.8089	0.9822	98.6256	28.2700	False	False	False	False	False
+7	1	conv	114.1432	0.9378	98.6877	29.9578	False	False	False	False	False
+8	1	conv	119.0363	0.6820	98.9714	33.7553	False	False	False	False	False
+9	1	conv	112.3665	0.9500	98.6706	29.1139	False	False	False	False	False
+10	1	conv	119.1249	0.7007	98.9728	35.8650	False	False	False	False	False
+11	1	conv	114.1558	0.9249	98.7057	30.3797	False	False	False	False	False
+12	1	conv	105.5720	0.9101	98.6658	24.4726	False	False	False	False	False
+13	1	conv	115.9377	0.8561	98.8020	33.3333	False	False	False	False	False
+14	1	conv	119.1142	0.7007	98.9728	35.8650	False	False	False	False	False
+15	1	conv	118.7865	0.7156	98.9510	35.0211	False	False	False	False	False
+16	1	conv	118.8100	0.6807	98.9733	33.7553	False	False	False	False	False
+17	1	conv	119.2185	0.6830	98.9698	33.7553	False	False	False	False	False
+18	1	conv	112.3155	0.9635	98.6517	28.6920	False	False	False	False	False
+19	1	conv	106.4335	0.9175	98.6549	24.4726	False	False	False	False	False
+20	1	conv	119.2386	0.6831	98.9696	33.7553	False	False	False	False	False
+21	1	conv	106.4332	0.9020	98.6777	24.8945	False	False	False	False	False
+22	1	conv	118.8412	0.7074	98.9630	35.4430	False	False	False	False	False
+23	1	conv	118.8097	0.7072	98.9633	35.4430	False	False	False	False	False
+24	1	conv	117.2026	0.7259	98.9051	31.2236	False	False	False	False	False
+25	1	conv	114.1736	0.9250	98.7055	30.3797	False	False	False	False	False
+26	1	conv	115.9310	0.8560	98.8021	33.3333	False	False	False	False	False
+27	1	conv	114.0245	0.9502	98.6703	29.5359	False	False	False	False	False
+28	1	conv	117.1769	0.7258	98.9053	31.2236	False	False	False	False	False
+29	1	conv	118.4917	0.7406	98.9143	33.7553	False	False	False	False	False
+30	1	conv	117.5053	0.7956	98.8622	33.7553	False	False	False	False	False
+31	1	conv	119.1638	0.6827	98.9703	33.7553	False	False	False	False	False
+32	1	conv	118.4906	0.7406	98.9144	33.7553	False	False	False	False	False
+33	1	conv	117.1716	0.7257	98.9054	31.2236	False	False	False	False	False
+34	1	conv	118.3375	0.7216	98.9422	34.5992	False	False	False	False	False
+35	1	conv	106.4322	0.9020	98.6778	24.8945	False	False	False	False	False
+36	1	conv	109.6080	0.9277	98.6733	27.0042	False	False	False	False	False
+37	1	conv	115.9593	0.8562	98.8018	33.3333	False	False	False	False	False
+38	1	conv	106.5049	0.9026	98.6768	24.8945	False	False	False	False	False
+39	1	conv	115.5354	0.8753	98.7752	32.4895	False	False	False	False	False
+40	1	conv	115.5082	0.8638	98.7911	32.9114	False	False	False	False	False
+41	1	conv	117.4933	0.7955	98.8623	33.7553	False	False	False	False	False
+42	1	conv	116.9332	0.7820	98.8817	34.1772	False	False	False	False	False
+43	1	conv	119.0358	0.6820	98.9714	33.7553	False	False	False	False	False
+44	1	conv	118.4665	0.7137	98.9538	35.0211	False	False	False	False	False
+45	1	conv	119.1184	0.7263	98.9352	34.5992	False	False	False	False	False
+46	1	conv	118.5103	0.7407	98.9142	33.7553	False	False	False	False	False
+47	1	conv	118.4913	0.7406	98.9144	33.7553	False	False	False	False	False
+48	1	conv	106.3836	0.9016	98.6784	24.8945	False	False	False	False	False
+49	1	conv	113.4971	0.9595	98.6573	29.1139	False	False	False	False	False
+50	1	conv	106.8920	0.9059	98.6720	24.8945	False	False	False	False	False
+51	1	conv	112.3339	0.9636	98.6515	28.6920	False	False	False	False	False
+52	1	conv	106.4595	0.9022	98.6774	24.8945	False	False	False	False	False
+53	1	conv	117.3632	0.7269	98.9036	31.2236	False	False	False	False	False
+54	1	conv	104.9779	0.9904	98.5482	22.3629	False	False	False	False	False
+55	1	conv	106.3045	0.9325	98.6330	24.0506	False	False	False	False	False
+56	1	conv	106.4846	0.9024	98.6771	24.8945	False	False	False	False	False
+57	1	conv	118.5410	0.7141	98.9532	35.0211	False	False	False	False	False
+58	1	conv	114.2397	0.9256	98.7048	30.3797	False	False	False	False	False
+59	1	conv	105.5647	0.9100	98.6659	24.4726	False	False	False	False	False
+60	1	conv	118.8275	0.7158	98.9506	35.0211	False	False	False	False	False
+61	1	conv	106.5175	0.9027	98.6767	24.8945	False	False	False	False	False
+62	1	conv	115.9326	0.8560	98.8021	33.3333	False	False	False	False	False
+63	1	conv	117.3612	0.7269	98.9036	31.2236	False	False	False	False	False
+64	1	conv	119.1283	0.7008	98.9727	35.8650	False	False	False	False	False
+65	1	conv	115.5416	0.8753	98.7751	32.4895	False	False	False	False	False
+66	1	conv	117.0809	0.7252	98.9062	31.2236	False	False	False	False	False
+67	1	conv	112.7528	0.9817	98.6262	28.2700	False	False	False	False	False
+68	1	conv	116.2132	0.7198	98.9143	31.2236	False	False	False	False	False
+69	1	conv	112.5216	0.9797	98.6291	28.2700	False	False	False	False	False
+70	1	conv	106.4647	0.9022	98.6773	24.8945	False	False	False	False	False
+71	1	conv	115.4824	0.8749	98.7757	32.4895	False	False	False	False	False
+72	1	conv	119.0826	0.7261	98.9355	34.5992	False	False	False	False	False
+73	1	conv	106.8459	0.9055	98.6726	24.8945	False	False	False	False	False
+74	1	conv	106.5542	0.9030	98.6762	24.8945	False	False	False	False	False
+75	1	conv	117.1835	0.7258	98.9053	31.2236	False	False	False	False	False
+76	1	conv	117.3616	0.7269	98.9036	31.2236	False	False	False	False	False
+77	1	conv	114.8618	0.9178	98.7156	30.8017	False	False	False	False	False
+78	1	conv	114.1436	0.9378	98.6876	29.9578	False	False	False	False	False
+79	1	conv	117.2203	0.7260	98.9049	31.2236	False	False	False	False	False
+80	1	conv	116.6902	0.7131	98.9244	31.6456	False	False	False	False	False
+81	1	conv	116.7712	0.7332	98.8942	30.8017	False	False	False	False	False
+82	1	conv	106.4080	0.9018	98.6781	24.8945	False	False	False	False	False
+83	1	conv	112.1495	0.9621	98.6537	28.6920	False	False	False	False	False
+84	1	conv	106.4966	0.9025	98.6770	24.8945	False	False	False	False	False
+85	1	conv	113.3999	0.9450	98.6776	29.5359	False	False	False	False	False
+86	1	conv	119.2338	0.6831	98.9697	33.7553	False	False	False	False	False
+87	1	conv	115.9432	0.8561	98.8019	33.3333	False	False	False	False	False
+88	1	conv	119.1515	0.7265	98.9349	34.5992	False	False	False	False	False
+89	1	conv	114.1480	0.9378	98.6876	29.9578	False	False	False	False	False
+90	1	conv	117.4681	0.6992	98.9454	32.4895	False	False	False	False	False
+91	1	conv	106.8884	0.9058	98.6721	24.8945	False	False	False	False	False
+92	1	conv	115.6603	0.8877	98.7577	32.0675	False	False	False	False	False
+93	1	conv	114.8888	0.9181	98.7153	30.8017	False	False	False	False	False
+94	1	conv	116.2183	0.7198	98.9143	31.2236	False	False	False	False	False
+95	1	conv	107.1123	0.8926	98.6915	25.3165	False	False	False	False	False
+96	1	conv	118.7958	0.7071	98.9634	35.4430	False	False	False	False	False
+97	1	conv	106.4339	0.9175	98.6549	24.4726	False	False	False	False	False
+98	1	conv	115.5446	0.8753	98.7751	32.4895	False	False	False	False	False
+99	1	conv	119.1138	0.7007	98.9728	35.8650	False	False	False	False	False
+100	1	conv	113.4676	0.9456	98.6768	29.5359	False	False	False	False	False

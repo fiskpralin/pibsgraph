@@ -1,0 +1,8 @@
+outputFiles/varyAutomationPMachine_Sat_May_28_13:02:41_2011.txt
+meanProd 	std.dev.of.mean		std. dev		queuePerc.		Amound	Aplant	Amove	ACMicro	Ahalt
+####
+456.73984	10.94622	42.39453		64.68988	False	True	False	False	False
+577.65395	16.44827	63.70388		28.78453	True	True	False	False	False
+514.11507	9.70223	37.57657		58.13690	False	True	True	False	False
+587.03056	13.53344	52.41479		23.86090	True	True	False	False	True
+576.26750	15.25089	59.06643		20.74254	True	True	True	False	True

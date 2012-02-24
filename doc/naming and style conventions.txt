@@ -1,0 +1,20 @@
+So.. just some info about style and naming conventions. Enjoy!
+
+//Linus
+
+
+- First a note from me, I haven't really followed Python's guidelines for this. For example I use too much Camelcase. The below info is not that well written, read some code and you'll understand the style.
+
+
+
+Info:
+
+-Classes are written with capital first letter. Camelcase may be used. e.g. "ExampleClass"
+-A file containing a single class has the same name as the class, but with small first letter, "exampleClass.py"
+-Functions are written with small first letter. E.g. "exampleFunction" or "example_function"
+-Methods have the same rules as functions
+-Variables never start with capital first letter.
+-Variables intended to be "private", and not accessed from outside, begins with _, e.g. "_provVar"
+-each class, function or method begins with a """ dsfsfds """ -comment, with """ on separate lines.
+-always use "import" instead of "from", to avoid circular imports. 
+

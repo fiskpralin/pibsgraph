@@ -1,0 +1,7 @@
+meanProd 		std.dev.of.mean	std. dev		Amound	Aplant	Amove	ACMicro	Ahalt
+####
+433.51697204	9.1282379371	20.4113605421	False	True	False	False	False
+559.553622243	9.98422033959	63.1457538682	True	True	False	False	False
+474.856243715	9.57673703899	34.5294164457	False	True	True	False	False
+581.283542411	3.61567472655	7.23134945309	True	True	False	False	True
+609.417589343	6.85043639864	13.7008727973	True	True	True	False	True

@@ -1,0 +1,15 @@
+outputFiles/varyAutomationThinningMachine_Wed_Jun_8_10:57:36_2011.txt
+cranes		cranehead	meanProd	std.dev.of.mean		std.dev		QueuePerc		Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	RJ		219.53400	5.05123	27.66674	0.00000	False	False	False	False	False
+1	conv	118.79697	0.69146	3.78729		0.00000	False	False	False	False	False
+2	RJ		206.28195	5.64952	30.94370	51.60147	False	False	False	False	False
+2	RJ		260.90381	6.68978	36.64141	47.90200	False	True	False	False	False
+2	RJ		293.16965	8.12894	44.52403	23.93986	False	True	False	True	False
+2	RJ		338.48503	9.89526	54.19858	5.31494	False	True	True	True	False
+2	RJ		348.96064	10.3112	56.47708	0.00000	False	True	True	True	True
+2	conv	119.34768	0.52542	2.87786		50.90056	False	False	False	False	False
+2	conv	152.48862	0.71957	3.94122		47.93595	False	True	False	False	False
+2	conv	186.50405	1.52197	8.33618		10.21790	False	True	False	True	False
+2	conv	200.82209	1.57331	8.61736		0.91645	False	True	True	True	False
+2	conv	198.48122	1.43631	7.86700		0.00000	False	True	True	True	True

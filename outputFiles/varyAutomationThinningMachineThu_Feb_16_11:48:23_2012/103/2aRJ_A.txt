@@ -1,0 +1,13 @@
+outputFiles/varyAutomationThinningMachineThu_Feb_16_11:48:23_2012/103/2aRJ_A.txt
+stat					value			unit
+--------------------------------------------
+clustering agg. index	1.34487400007	-
+leaf tree percentage	1.26582278481	%
+trees					158.0			-
+pine percentage			95.5696202532	%
+tree density			0.158			trees/m2
+spruce percentage		3.16455696203	%
+stand no				102				-
+i	cranes		cranehead		Prod	QueuePerc	WorkPerc	ChopPerc	groundAratio	Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	1	RJ	242.8371	30.6289	97.1400	37.5000	0.2624	False	False	False	False	False

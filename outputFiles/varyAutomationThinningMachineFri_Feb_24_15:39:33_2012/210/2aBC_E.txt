@@ -1,0 +1,13 @@
+outputFiles/varyAutomationThinningMachineFri_Feb_24_15:39:33_2012/210/2aBC_E.txt
+stat					value			unit
+--------------------------------------------
+clustering agg. index	1.20684456163	-
+leaf tree percentage	0.0				%
+trees					244.0			-
+pine percentage			100.0			%
+tree density			0.244			trees/m2
+spruce percentage		0.0				%
+stand no				210				-
+i	cranes		cranehead		Prod	QueuePerc	WorkPerc	ChopPerc	groundAratio	Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	1	BC	451.1540	0.0000	6.3663	56.9672	0.4586	False	True	True	True	True
