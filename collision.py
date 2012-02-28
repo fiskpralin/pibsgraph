@@ -194,6 +194,7 @@ def linesIntersect(ray1, ray2, getPoint=False):
 		if p[0]==p[1]==0:
 			point=A
 		else:
+			if getPoint: return False, (np.nan, np.nan) #point does not exist, but have to give it
 			return False #infinitely far away
 	else:
 		point=A+t*(B-A)
