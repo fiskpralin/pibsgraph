@@ -4,11 +4,7 @@ import matplotlib.pyplot as plt
 import pylab
 import os, sys, shutil
 import functions as fun
-try:
-	from SimPy.Simulation  import *
-except ImportError:
-	print "Error: You don't have the SimPy module installed."
-
+from SimPy.Simulation  import *
 
 class PlotWorld(Process):
 	"""

@@ -3,12 +3,7 @@ from terrain import *
 from math import *
 import numpy as np
 import collision as col
-try:
-	from SimPy.Monitor import *  
-	from SimPy.Simulation  import *
-	from SimPy.Monitor import *
-except ImportError:
-	print "Error: You don't have the SimPy module installed."
+from SimPy.Simulation  import *
 
 def cleanMonitors(sim):
 	"""clears some ugly "bumps" of infinitely short timelengths"""

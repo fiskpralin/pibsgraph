@@ -108,8 +108,7 @@ class TheSimulation(SimExtend):
 	def __init__(self):
 		G=globalVar() #create a global variable. 
 		SimExtend.__init__(self,G=G)
-		G.xlim=[0, 40]#the borders.
-		G.ylim=[0,40] 
+		G.areaPoly=[(40,0),(40,40),(0,40),(0,0)]
 		self.G.terrain=Terrain(G=self.G)
 		self.tree=Tree(pos=[20,25], radius=0.5, specie='pine', terrain=self.G.terrain)
 		m1=DumbMachine(sim=self, G=G, color='b') #color is definitely the most important thing here.

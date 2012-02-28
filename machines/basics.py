@@ -1,7 +1,4 @@
-from SimPy.Monitor import *  
 from SimPy.Simulation  import *
-from SimPy.Monitor import *
-
 from math import *
 import terrain
 from terrain.obstacle import Obstacle

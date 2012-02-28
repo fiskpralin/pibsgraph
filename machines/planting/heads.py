@@ -1,7 +1,4 @@
-from SimPy.Monitor import *  
 from SimPy.Simulation  import *
-from SimPy.Monitor import *
-
 import machines
 from machines.basics import Machine, UsesDriver, Operator
 import terrain

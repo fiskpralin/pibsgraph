@@ -6,7 +6,6 @@ from functions import *
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
-
 from obstacle import *
 
 

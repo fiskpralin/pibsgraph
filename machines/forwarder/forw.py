@@ -5,7 +5,6 @@ import time
 from math import *
 
 from SimPy.Simulation  import *
-from SimPy.Monitor import *
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
