@@ -72,10 +72,10 @@ class DumbMachine(Machine):
 		self.corners=[]
 		dx=1 #width of the machine
 		dy=2 #length of the machine
-		self.corners.append([self.pos[0]+dx, self.pos[1]+dy])
-		self.corners.append([self.pos[0]-dx, self.pos[1]+dy])
-		self.corners.append([self.pos[0]-dx, self.pos[1]-dy])
-		self.corners.append([self.pos[0]+dx, self.pos[1]-dy])		
+		self.corners.append([+dx, +dy])
+		self.corners.append([-dx, +dy])
+		self.corners.append([-dx, -dy])
+		self.corners.append([+dx, -dy])		
 		p=Polygon(np.array(self.makedirectional()), closed=True, facecolor=self.color)#here was the np.array(self.corners) command before
 		ax.add_patch(p)
 
@@ -84,17 +84,21 @@ class DumbMachine(Machine):
 		makes new positions of the nodes of the machine as to draw it in the correct direction
 		honestly i don't think anythin is correct in this 'attempt'. stupid-
 		"""
-		newcorner=[]
+		nc=[[],[],[],[]]
+		i=0
 		for a in self.corners:
-			x=a[0]-self.pos[0]
-			y=a[1]-self.pos[1]
+			x=a[0]
+			y=a[1]
 			r=sqrt(x*x+y*y)
 			dposx=self.positions[-2][0]-self.positions[-1][0]
 			dposy=self.positions[-2][1]-self.positions[-1][1]
-			direction=atan(-dposx/(dposy+0.0001))
-			theta=atan(-x/y)
-			newcorner.append(r*sin(theta+direction), r*cos(theta+direction))
-		return newcorner 
+			direction=atan(dposx/(dposy+0.0001))
+			theta=atan(x/(y+0.0001))
+			nc[i].append(r*cos(theta+direction)+self.pos[0])
+			nc[i].append(r*sin(theta+direction)+self.pos[1])
+			i=i+1
+			
+		return nc #append above does only take ONE argument!
 			
 			
 
