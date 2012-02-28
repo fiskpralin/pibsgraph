@@ -27,9 +27,12 @@ if __name__=='__main__':
 		if sys.argv[1] == 'findBugs':
 			sim.tools.findBugs()
 		elif sys.argv[1] == 'tryItAll': #tests for all simulations so far. See if they throw exception
-			s=PM.PlantmSim(vis=False,anim=anim,mtype=random.choice(['1a1h', '1a2h', '2a2h', '2a4h']))
-			TH.ThinningSim(vis=False,anim=anim, head=random.choice(['conv', 'BC']), nCranes=random.choice([1,2]))
-			FW.ForwarderSim(vis=False, anim=anim)
+			for i in range(3):
+				s=PM.PlantmSim(vis=False,anim=anim,mtype=random.choice(['1a1h', '1a2h', '2a2h', '2a4h']))
+				TH.ThinningSim(vis=False,anim=anim, head=random.choice(['conv', 'BC']), nCranes=random.choice([1,2]))
+				FW.ForwarderSim(vis=False, anim=anim)
+			print "--------------"
+			print "you passed the test. Feel free to commit."
 		elif sys.argv[1]=='varyCrane':
 			rMax=np.linspace(9,12,15)
 			rMin=4
