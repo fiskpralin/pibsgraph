@@ -70,12 +70,12 @@ class DumbMachine(Machine):
 			y.append(pos[1])
 		ax.plot(x,y, self.color)
 		self.corners=[]
-		dx=1 #width of the machine
-		dy=2 #length of the machine
+		dx=1 #halfwidth of the machine
+		dy=2 #halflength of the machine
 		self.corners.append([+dx, +dy])
 		self.corners.append([-dx, +dy])
 		self.corners.append([-dx, -dy])
-		self.corners.append([+dx, -dy])		
+		self.corners.append([+dx, -dy])
 		p=Polygon(np.array(self.makedirectional()), closed=True, facecolor=self.color)#here was the np.array(self.corners) command before
 		ax.add_patch(p)
 
@@ -94,13 +94,11 @@ class DumbMachine(Machine):
 			dposy=self.positions[-2][1]-self.positions[-1][1]
 			direction=atan(dposx/(dposy+0.0001))
 			theta=atan(x/(y+0.0001))
-			nc[i].append(r*cos(theta+direction)+self.pos[0])
-			nc[i].append(r*sin(theta+direction)+self.pos[1])
-			i=i+1
-			
-		return nc #append above does only take ONE argument!
-			
-			
+			if y<0: theta=theta+pi
+			nc[i].append(r*sin(theta+direction)+self.pos[0])
+			nc[i].append(r*cos(theta+direction)+self.pos[1])
+			i=i+1	
+		return nc
 
 
 class TheSimulation(SimExtend):
