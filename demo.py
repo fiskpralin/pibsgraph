@@ -37,11 +37,11 @@ class DumbMachine(Machine):
 			temp_treelist=t.GetTrees(self.pos,10)
 			for a in temp_treelist:
 				if a.harvested==False:
+					self.trees.append(a)
+					yield hold,self, 30#the time it takes to chop the tree (half a minute!)
 					a.harvested=True
 					a.isSpherical=False
 					a.nodes=[[a.pos[0]-6,a.pos[1]-0.1],[a.pos[0]-6,a.pos[1]+0.1],[a.pos[0],a.pos[1]+0.1],[a.pos[0],a.pos[1]-0.1]]
-					self.trees.append(a)
-					yield hold,self, 30#the time it takes to chop the tree (half a minute!)			
 			time=self.setPos([newX, newY])#the time it takes to move to the new place
 			self.positions.append(self.pos)
 			yield hold, self, time #waits
@@ -76,7 +76,7 @@ class DumbMachine(Machine):
 		self.corners.append([self.pos[0]-dx, self.pos[1]+dy])
 		self.corners.append([self.pos[0]-dx, self.pos[1]-dy])
 		self.corners.append([self.pos[0]+dx, self.pos[1]-dy])		
-		p=Polygon(np.array(self.corners), closed=True, facecolor=self.color)#here was the np.array(self.corners) command before
+		p=Polygon(np.array(self.makedirectional()), closed=True, facecolor=self.color)#here was the np.array(self.corners) command before
 		ax.add_patch(p)
 
 	def makedirectional(self):
@@ -84,18 +84,19 @@ class DumbMachine(Machine):
 		makes new positions of the nodes of the machine as to draw it in the correct direction
 		honestly i don't think anythin is correct in this 'attempt'. stupid-
 		"""
-		widthx=self.pos[0]-self.positions[-1][0]
-		if widthx==0: widthx=0.01
-		widthy=self.pos[1]-self.positions[-1][1]
-		r=[]
-		for i in [0,1,2,3]:
-			r.append(sqrt(self.corners[i][0]*self.corners[i][0]+self.corners[i][1]*self.corners[i][1]))
-		direction=atan(widthy/widthx)
-		b=[]
-		for i in [0,1,2,3]:
-			b.append(self.corners[i]+[r[i]*cos(direction),r[i]*sin(direction)])
-		return b
-		
+		newcorner=[]
+		for a in self.corners:
+			x=a[0]-self.pos[0]
+			y=a[1]-self.pos[1]
+			r=sqrt(x*x+y*y)
+			dposx=self.positions[-2][0]-self.positions[-1][0]
+			dposy=self.positions[-2][1]-self.positions[-1][1]
+			direction=atan(-dposx/(dposy+0.0001))
+			theta=atan(-x/y)
+			newcorner.append(r*sin(theta+direction), r*cos(theta+direction))
+		return newcorner 
+			
+			
 
 
 class TheSimulation(SimExtend):
