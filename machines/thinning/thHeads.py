@@ -385,7 +385,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 							for c in cmd: yield c
 					time=self.setPos(sPoint) # trees have been gathered. return to machine after each tree.
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #add time for each chop and change of position of the trees
+					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #
 					for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
