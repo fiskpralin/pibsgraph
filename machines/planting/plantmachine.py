@@ -24,8 +24,10 @@ from math import *
 # The planting machine
 ##################################################
 class PlantMachine(Machine):
-	"""The planting machine. A Volvo EC210C. Has one or two planting devices which in turn have two planting heads each. 
-This machine is not really intelligent, the sofisticated behavious is programmed in the planting devices. Machine does not move."""
+	"""
+	The planting machine. A Volvo EC210C. Has one or two planting devices which in turn have two planting heads each. 
+This machine is not really intelligent, the sofisticated behavious is programmed in the planting devices. Machine does not move.
+	"""
 	def __init__(self, name, sim, G, mtype='1a2h', craneLim=None):
 		if not craneLim: craneLim=[4.0,9.0]
 		Machine.__init__(self, name, sim, G=G, mass=21000)
@@ -219,9 +221,11 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 	def stopControl(self):
 		"""Checks if simulations should be stopped"""
 		reason=None
+		print "trees:", self.G.simParam['planted'], "area:", self.G.simParam['areaCovered']
+		print (len(self.treesPlanted)+self.G.simParam['planted'])/(self.G.simParam['areaCovered']+self.workingArea), self.stockingRate/10000.0
 		if self.driver.resting:
 			return False #wait until he's not at rest, should not result in an infinite loop.
-		elif (len(self.treesPlanted)+self.G.simParam['planted'])/(self.G.simParam['areaCovered']+self.workingArea)>self.stockingRate/10000.0:
+		elif (len(self.treesPlanted)+self.G.simParam['planted'])/(self.G.simParam['areaCovered']+self.workingArea)>=self.stockingRate/10000.0:
 			#last is to ensure that machine is above productivity maximum
 			reason="the desired no. of trees are planted"
 		elif len(self.pDevs)==1 and self.pDevs[0].noMoreSpots:

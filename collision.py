@@ -179,7 +179,7 @@ def closestLinePoint(posIn, ray, additionalInfo=False):
 def linesIntersect(ray1, ray2, getPoint=False):
 	"""
 	checks if the two lines defined by ray1 and 2 intersect.
-	if getPoint=True, the point of intersection for infiniter rays is also returned. 
+	if getPoint=True, the point of intersection for infinite rays is also returned. 
 	"""
 	A=ray1[0]
 	B=ray1[1]
