@@ -1,7 +1,7 @@
 from SimPy.Simulation  import *
 
 from machines.basics import UsesDriver, Machine, Operator
-from thHeads import ThinningCraneHead, BCHead, ConventionalHead
+from thHeads import ThinningCraneHead, BCHead, ConventionalHead, ConventionalHeadAcc
 from thRoad import ThinningRoad
 from terrain.obstacle import Obstacle
 from terrain.tree import Tree
@@ -39,7 +39,9 @@ class ThinningMachine(Machine, UsesDriver):
 				self.automatic={'move': False, 'moveArmIn': True, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop':True} #default, override before activating machine
 			elif head=='conv':
 				self.automatic={'move': False, 'moveArmIn': False, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop':False} #default, override before activating machine
-			else: raise Exception('head typ could not be identified', head)
+			elif head=='convAcc':
+				self.automatic={'move': False,'moveArmIn': False, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop': False}
+			else: raise Exception('head type could not be identified', head)
 			
 		self.times={'crane const':1.5, 'chop const':3, 'move const':5, 'dumpTrees': 10, 'switchFocus': 3} #same as above, change before activating. may be changed from cranHead constructor
 		self.craneMaxL=11
@@ -57,6 +59,8 @@ class ThinningMachine(Machine, UsesDriver):
 		elif head=='conv':
 			for i in range(nCranes):
 				h=ConventionalHead(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
+		elif head=='convAcc':
+			h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
 		else:
 			raise Exception('ThinningMachine did not recognize head %s'%str(head))
 		for h in self.heads.values():
