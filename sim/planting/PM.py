@@ -59,7 +59,7 @@ class PMSimSeries(SimSeries):
 		t=self.timeData
 		t.append(self.cumTime) #total time in s
 		t.append(self.cumTrees) #total number of seedlings planted
-		t.append(self.cumTrees/float(self.cumTime))
+		t.append(float(self.cumTrees)/(float(self.cumTime)/3600.0))
 		t.append(self.sims)
 		t.append(len(s.m.treesPlanted))
 		t.append(s.stats['plant attempts'])
@@ -580,8 +580,6 @@ class PlantmSim(SimExtend):
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(G=self.G, ttype=ttype)
-		else:
-			self.G=copy.deepcopy(G)
 		try:
 			tmp=self.G.simParam['planted']
 		except KeyError:
@@ -601,7 +599,7 @@ class PlantmSim(SimExtend):
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
 		self.setQueuePerc()
 		self.G.simParam['planted']+=len(self.m.treesPlanted)
-		self.G.simParam['areaCovered']+=0.5*(self.m.craneMaxL**2*pi-self.m.craneMinL**2*pi)
+		self.G.simParam['areaCovered']+=self.m.workingArea
 		print "stumps in WA sum diameter:", self.stats['stumps in WA sum diamater']
 		print "number of remounds", self.stats['remound attempts']
 		if self.p: #if we have a plotter instance

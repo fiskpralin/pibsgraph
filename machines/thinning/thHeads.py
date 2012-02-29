@@ -244,7 +244,9 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
 		
 class ConventionalHead(ThinningCraneHead, UsesDriver):
-	"""This is a conventional cranehead for thinning."""
+	"""
+	This is a conventional cranehead for thinning.
+	"""
 	def __init__(self, sim, driver, machine):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="ConvHead", machine=machine)

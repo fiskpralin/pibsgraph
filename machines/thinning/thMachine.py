@@ -76,7 +76,6 @@ class ThinningMachine(Machine, UsesDriver):
 		"""
 		#first, take the trees in the main road:
 		while True:
-			#trees=self.G.terrain.GetTrees([19.1,9.7], 0.5)
 			r=self.roads['main']
 			self.heads['left'].road=r #only one head in the two armed case because of balance. left is default 1a.
 			print "Mainroad assigned"
