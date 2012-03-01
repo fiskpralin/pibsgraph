@@ -104,6 +104,7 @@ class ThinningMachine(Machine, UsesDriver):
 		for h in self.heads.values():
 			if h.road: return False #if road is assigned, head is still working.
 		return True
+	
    	def setUpCorridors(self):
 		"""
 		Sets up 

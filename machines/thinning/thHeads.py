@@ -52,7 +52,7 @@ v		Changes position for planting device, and records monitors associated with th
 		return traveltime+self.m.times['crane const']
 	def getNextTree(self, road=None):
 		"""returns the tree that is closest to the machine, i.e lowest y-value in road cart.coord.sys.
-			also does analysis if a tree has the desired proportions to be choped. """
+			also does analysis if a tree has the desired proportions to be chopped. """
 		if not road:
 			if not self.road: raise Exception('getNextTree can only be called when a road is assigned')
 			road=self.road
@@ -295,7 +295,7 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 						stop=True
 					else:
 						for c in cmd: yield c
-					#return to machine efter each tree.. trees have been gathered. return.
+						#return to machine efter each tree.. trees have been gathered. return.
 					time=self.setPos(sPoint)
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c
@@ -379,13 +379,12 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmOut']): yield c
 				stop=False
 				while not stop:
-					while self.trees<=self.maxNoTrees:
+					while len(self.trees)<self.maxNoTrees and stop!=True:
 						cmd=self.chopNext()
-						if len(cmd)==0:
-							stop=True
-						else:
-							for c in cmd: yield c
-					time=self.setPos(sPoint) # trees have been gathered. return to machine after each tree.
+						if len(cmd)==0: stop=True
+						for c in cmd: yield c
+						print len(self.trees),self.maxNoTrees
+					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #
 					for c in self.dumpTrees(): yield c #dumps the trees
