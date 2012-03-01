@@ -51,7 +51,7 @@ class PlotWorld(Process):
 			if not self.sim.anim:
 				self.update()
 				plt.draw()
-				raw_input("Press any key to continue...")
+				raw_input("Press return key to continue...")
 			else:
 				self.update()
 	def update_world(self,ax1, lim=None):
