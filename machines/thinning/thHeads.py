@@ -28,6 +28,8 @@ class ThinningCraneHead(Process):
 		Process.__init__(self,name, sim)
 		self.corrPerSide=3 #default valu
 		self.treeWeight=3
+		self.gripArea=0
+		self.maxGripArea=1e10 #default, inf. Change in subclass if required
 		self.trees=[]
 		self.maxTreeWeight=1e10 #default, inf. Change in subclass if required
 	def treeChopable(self, t):
@@ -52,7 +54,7 @@ v		Changes position for planting device, and records monitors associated with th
 		return traveltime+self.m.times['crane const']
 	def getNextTree(self, road=None):
 		"""returns the tree that is closest to the machine, i.e lowest y-value in road cart.coord.sys.
-			also does analysis if a tree has the desired proportions to be choped. """
+			also does analysis if a tree has the desired proportions to be chopped. """
 		if not road:
 			if not self.road: raise Exception('getNextTree can only be called when a road is assigned')
 			road=self.road
@@ -88,6 +90,7 @@ v		Changes position for planting device, and records monitors associated with th
 			self.trees.remove(tree)
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
+		self.gripArea=0
 		return self.cmnd([], time=self.m.times['dumpTrees'], auto=self.m.automatic['dumpTrees'])
 	def getStartPos(self):
 		if self.side=='left':
@@ -111,12 +114,13 @@ v		Changes position for planting device, and records monitors associated with th
 			self.road.color='r'
 			self.road.color=col
 			return c
-		elif t.weight+self.treeWeight>self.maxTreeWeight: #go back and dump trees
-			print "GOES BACK to DUMP TREEES", self.treeWeight
+		elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees
+			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
 			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
 			else: time=self.setPos(self.road.startPoint)
 			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])
 			c.extend(self.dumpTrees()) #dumps them down.
+		
 		elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 			time=self.setPos(self.harvestPos(t))
 			self.cmnd(c, time, auto=self.m.automatic['moveArmOut'])
@@ -131,6 +135,7 @@ v		Changes position for planting device, and records monitors associated with th
 			self.road.harvestTrees-=1
 			self.trees.append(t)
 			self.treeWeight+=t.weight
+			self.gripArea+=t.dbh**2
 			self.m.trees.append(t)
 			self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
 		return c
@@ -295,7 +300,7 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 						stop=True
 					else:
 						for c in cmd: yield c
-					#return to machine efter each tree.. trees have been gathered. return.
+						#return to machine efter each tree.. trees have been gathered. return.
 					time=self.setPos(sPoint)
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c
@@ -350,8 +355,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.reset()
 		self.direction=pi/2.
 		self.maxTreeWeight=350 #set it to same as BC...
-		self.maxNoTrees=5
-		self.maxGripArea=0.5 #m2
+		self.maxGripArea=0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
 
 	def run(self):
 		while True:
@@ -377,15 +381,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmOut']): yield c
-				stop=False
-				while not stop:
-					while self.trees<=self.maxNoTrees:
-						cmd=self.chopNext()
-						if len(cmd)==0:
-							stop=True
-						else:
-							for c in cmd: yield c
-					time=self.setPos(sPoint) # trees have been gathered. return to machine after each tree.
+				while True:
+					cmd=self.chopNext()
+					if len(cmd)==0: break
+					for c in cmd: yield c
+					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #
 					for c in self.dumpTrees(): yield c #dumps the trees
