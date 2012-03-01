@@ -60,7 +60,8 @@ class ThinningMachine(Machine, UsesDriver):
 			for i in range(nCranes):
 				h=ConventionalHead(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
 		elif head=='convAcc':
-			h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
+			for i in range(nCranes):
+				h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
 		else:
 			raise Exception('ThinningMachine did not recognize head %s'%str(head))
 		for h in self.heads.values():
@@ -99,6 +100,7 @@ class ThinningMachine(Machine, UsesDriver):
 				if len(r[h.side])>0: h.road=r[h.side][0]
 			for c in self.releaseDriver(): yield c
 			yield waituntil, self, self.headsDoneAtSite
+			
 	def headsDoneAtSite(self):
 		"""are the heads done?"""
 		for h in self.heads.values():
