@@ -4,7 +4,9 @@ import numpy as np
 from math import *
 import random
 import sys
+
 import costFunc as cf
+import graph_operations as go
 if __name__=='__main__':
 	import os, sys #insert /dev to path so we can import these modules.
 	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
@@ -94,6 +96,7 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, ar
 	G.graph['Ainv']=1./G.graph['A']
 	G.graph['density']=elements/G.graph['A']
 	G.graph['overlap']={} #will later be filled.
+	G.graph['w']=4 #width of road
 	return G
 
 def getArea(R):
@@ -111,19 +114,14 @@ def sRCov(e, R):
 	"""
 	l=cf.edgeLength(e)
 	w=R.graph['L']
-	rA=l*w
-	a=w**2*0.5 #overlap area for 90 degree edges.
-	for neigh in e[0], e[1]:
-		d=R.degree(neigh)
-		if d==2: continue #d=2 most of the time, saves time.
-		elif d==3:
-			rA-=a*0.333333 #compensates for overlaps
-		elif d==4:
-			#rA-=2*a*0.33333 #same here.
-			rA-=2*a*0.25
-		elif d>4:
-			print "intersection with more than four roads. this is not fully supported."
-			rA-=2*a*0.25  #so long
+	rA=l*w #base area, but we should subtract overlaps.
+	print "overlap algorithm has not been tested..."
+	for node, other in [(e[0], e[1]), (e[1], e[0])]:
+		for neigh in R.neighbors(node):
+			if neigh==other: continue #this is edge e..
+			a=go.overLapA(e, (node, neigh), R) #the overlapping area.
+			rA-=a/2. #divide by two since counted twice.
+			#we get a problem if more than two road segments are  sharing this overlap..			
 	return rA
 def inside(pos,areaPoly):
 	"""

@@ -106,13 +106,17 @@ def overLapA(e1,e2, R):
 			a=overlap[key]
 			return a
 		except KeyError:
-			pass
+			pass #try the next one in keylist
 	#we did not find it... calculate instead. Only done once.
 	angle=get_angle(e1,e2) 	#get angle between the road segments..
 	eps=1e-8
-	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaphs
+	if angle<eps:
+		print e1
+		print e2
+		raise Exception('angle=0 between roads... incident?')
+	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaps
 	alpha=pi-angle #this is the angle that matters here...
-	#the following variables look like "mumbo-jumbo", see documentation for derivation. It's all trigonometry
+	#the following variables look like "mumbo-jumbo" It's all trigonometry but should be documented somewhere...
 	d=0.5*R.graph['w']
 	x=2*d*sin(alpha*0.5)
 	y=d*cos(alpha*0.5)
@@ -128,7 +132,7 @@ if __name__=='__main__':
 		G.add_node(node)
 	G.add_edge((0,0), (1,0), weight=1)
 	G.add_edge((1,0), (1,1), weight=1)
-	G.graph['width']=1
+	G.graph['w']=1
 	angle=get_angle(G.edges()[0], G.edges()[1]) #just test of the angle..
 	if angle-np.pi/2.>0.0001: raise Exception('either get_angle doesnt work or we are creating graph in the wrong way')
 	print overLapA(G.edges()[0], G.edges()[1], G)

@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib
+from matplotlib.patches import Circle
+from matplotlib.lines import Line2D  
 
 
 def draw_custom(G=None, ax=None, edge_visits=False, cost=False):
@@ -12,16 +14,17 @@ def draw_custom(G=None, ax=None, edge_visits=False, cost=False):
 		ax.set_xlabel('x')
 		ax.set_ylabel('y')
 	for n in G.nodes():
-		ax.plot(n[0], n[1], '.k')
+		ax.add_patch(Circle(n, radius=1, facecolor='k', alpha=1))
 	for e in G.edges(data=True):
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
 		if edge_visits:
-			ax.plot(x,y,'k', linewidth=1+np.log(e[2]['visits'])/(np.log(len(G))*0.2))
+			l = Line2D(x,y, color='k', linewidth=1+np.log(e[2]['visits'])/(np.log(len(G))*0.2))
 			pos=middle([x[0],y[0]], [x[1],y[1]])
 			if cost: ax.text(pos[0],pos[1],' '+'%.0f'%e[2]['c'])
 		else:
-			ax.plot(x,y, 'k')
+			l = Line2D(x,y, color='k', linewidth=1)
+		ax.add_line(l)
 	ax.set_xlim(*tuple(G.graph['lim'][0:2]))
 	ax.set_ylim(*tuple(G.graph['lim'][2:4]))
 	return ax
@@ -37,10 +40,10 @@ def plot_coverage(G=None, ax=None):
 		p1=np.array(e[0])
 		p2=np.array(e[1])
 		d=p1-p2
-		circles=int(np.sqrt(np.dot(d,d))/4.)#one every 4m
+		circles=int(np.sqrt(np.dot(d,d))/6.)#one every 6m
 		for i in range(circles):
 			p=p2+d*(i+1)/(circles+1)
-			c=matplotlib.patches.Circle(p, radius=G.graph['C'], alpha=470, color='#666677')
+			c=Circle(p, radius=G.graph['C'], alpha=470, color='#666677')
 			ax.add_patch(c)
 	return ax
 def draw_road(p, ax, color='c'):

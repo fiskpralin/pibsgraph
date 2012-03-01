@@ -23,7 +23,7 @@ def makeRoadGraph(L=24, origin=(0,0), grid='square', ulim=(0,0),areaPoly=None,an
 		G=gr.sqGridGraph(L, umin=ulim[0], umax=ulim[1], xyRatio=1, origin=origin,angle=angle, diagonals=diagonals, areaPoly=areaPoly)
 	elif grid =='tri' or grid=='triangular':
 		G=gr.triGridGraph(L, umin=ulim[0], umax=ulim[1],origin=origin, xyRatio=1, angle=angle, areaPoly=areaPoly)
-	elif grid=='spider' or grid =='Spider': #oh yes, the "superb" one
+	elif grid=='spider' or grid =='Spider': 
 		G=sg.SpiderGrid(L, umin=ulim[0], origin=origin,umax=ulim[1], angle=angle, areaPoly=areaPoly)
 	else:
 		raise Exception('grid is not supported', grid)

@@ -4,9 +4,10 @@ if __name__=='__main__':
 	if not cmd_folder in sys.path:
 		sys.path.insert(0, cmd_folder)
 		
-import collision as col
 import copy
+import random
 
+import collision as col
 from grid import *
 from draw import *
 from functions import *
@@ -44,8 +45,19 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 		if not origin: raise Exception('origin has to be defined for the SpiderGrid if area polygon is given')
 		if not col.pointInPolygon(origin,areaPoly):
 			raise Exception('so far, SpiderGrid only supports origins on one of the border points')
-	lines, baseL, baseR=makeLines(areaPoly, origin, L, C, thMin)
+	#so, look if origin is on the lines... if it is, swift it just a bit.
+	if pointOnPolygonBorder(origin, areaPoly):
+		while True: #we should never be stuck in this loop. 
+			xnew=round(random.uniform(-0.1,0.1),2)
+			ynew=round(random.uniform(-0.1, 0.1),2)
+			pnew=(origin[0]+xnew, origin[1]+ynew)
+			if col.pointInPolygon(pnew, areaPoly):
+				if not pointOnPolygonBorder(pnew, areaPoly):
+					origin=pnew #we found our new one.
+					break
+	lines, baseL, baseR, orderMax=makeLines(areaPoly, origin, L, C, thMin)
 	#make grid of lines.
+	print "lines done, now make grid"
 	G=nx.Graph( L=L, type='sqGridGraph', C=C)
 
 	el=0 #will later be filled.
@@ -54,8 +66,8 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 	#make a road segments to the ones "to the left". If road that ist drawn to is of higher order, that is the last one from this line.
 	for index, line in enumerate(lines): #make line to the ones on the "left"
 		if line==baseL: break
-		occured=[] #a list of difference orders that have occured.. pretty complex.
-		#an order 1 line should no e.g. have lines to all order 4 lines to the left, only one.
+		occured=[] #a list of different orders that have occured.. pretty complex.
+		#an order 1 line should not e.g. have lines to all order 4 lines to the left, only one.
 		for left in lines[index+1:]: # the one to the left of "line"
 			#identify the point, p2. line between should be orthogonal to "line" or "left", depending on order.
 			cont=False #continue...
@@ -93,6 +105,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 				el+=1
 			G.add_edge(p1,p2, weight=getDistance(p1,p2), visits=0, visited_from_node=[], c=0)
 			if left.order <= line.order: break
+	print "add neighbors"
 	#we have the pattern. Add edges to neighbors in not that dens regions
 	for index,line in enumerate(lines): 	#end points. Usually between two endpoints but not always.
 		if line.no==baseL.no: break #this is the end
@@ -110,18 +123,30 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 	for line in lOrdered:
 		#if line.no==baseL.no: continue
 		#now, identify the potential neighbors first.
-		candidatesL=[l for l in lines if l.angle>line.angle]
-		candidatesL=sorted(candidatesL, key=lambda line: line.order)
-		candidatesR=[l for l in lines if l.angle<line.angle]
-		candidatesR=sorted(candidatesR, key=lambda line: line.order)
-		lst=candidatesL+candidatesR
-		for l in lst: #find the real neighbors
-			for l2 in lst:
-				if l2.order==l.order:
-					if l in candidatesL and l2.angle>line.angle and l2.angle<l.angle:
-						candidatesL.remove(l) #never neighbor.
-					elif l in candidatesR and l2.angle<line.angle and l2.angle>l.angle:
-						candidatesR.remove(l) #never neighbor.
+		candidatesL=[]
+		candidatesR=[]
+		for cand, left in [(candidatesL, True), (candidatesR, False)]: #left=True if left.. faster
+			for o in range(orderMax+1):
+				if o==0: continue
+				lst=[]
+				if left:
+					lst=[l for l in lines if l.order==o and l.angle>line.angle]
+					nearest=None
+					minAng=1e10
+					for l in lst:
+						if l.angle<minAng:
+							nearest=l
+							minAng=nearest.angle
+					if nearest: cand.append(nearest) #we have our candidate of this order.
+				else:
+					lst=[l for l in lines if l.order==o and l.angle<line.angle]
+					nearest=None
+					maxAng=-1e10
+					for l in lst:
+						if l.angle>maxAng:
+							nearest=l
+							maxAng=nearest.angle
+					if nearest: cand.append(nearest) #we have our candidate of this order.
 		line.gridPoints=sorted(line.gridPoints, key=lambda point: -getDistance(point, origin)) #closest first
 		last=line.gridPoints[0]
 		for pTmp in copy.copy(line.gridPoints[1:]):
@@ -172,16 +197,16 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 					line.gridPoints.append(tuple(p))
 						
 			last=pTmp
-				
 
-	
 	for line in lines: #add edges on the line
 		if len(line.gridPoints)<=1: continue
 		line.gridPoints=sorted(line.gridPoints, key=lambda point: -getDistance(point, origin))
 		last=line.gridPoints[0]
+		print line.gridPoints
 		for node in line.gridPoints[1:]:
 			G.add_edge(last, node,weight=getDistance(last, node), visits=0, visited_from_node=[], c=0)
 			last=node
+	G.graph['w']=4
 	A=getArea(G)
 	G.graph['elements']=el
 	G.graph['A']=A
@@ -197,42 +222,14 @@ def findIntersection(origin, th, areaPoly):
 	returns the intersection between the ray from origin with angle th and areaPoly. Assumes convex polygon.
 	"""
 	inf=1e4
-	#first, find out if we are on line. if we are, we need to use a origin a little more to the inside.
-	"""
-	last=areaPoly[-1]
-	for p in areaPoly:
-		ray=[last, p]
-		print ray,origin
-		if col.pointOnLine(ray, origin): #return last or p
-			p1=getCartesian([0, inf], origin=origin, direction=th, fromLocalCart=True)
-			p2=list(origin)#getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
-			ray2=np.array([p1,p2])
-			closest=None
-			closDist=inf
-			for point in [p,last]:
-				pTmp=col.closestLinePoint(point, ray2)
-				d=getDistance(pTmp,point)
-				if d<closDist:
-					closest=point
-					closDist=d
-			print closest, th
-			raw_input('sdf')
-			return closest
-		last=p
-	"""
 	#find intersection with areaPoly
 	p1=getCartesian([0, inf], origin=origin, direction=th, fromLocalCart=True)
 	p2=list(origin)#getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
 	ray=np.array([p1,p2])
 	last=areaPoly[-1]
 	point=None
-	print "areaPoly:", areaPoly
 	for p in areaPoly:
 		borderRay=np.array([last,p])
-		print "border:", [last, p]
-		print "ray:", ray
-		print "th:", th
-		print col.linesIntersect(borderRay, ray, getPoint=True)
 		int, pInt=col.linesIntersect(borderRay, ray, getPoint=True) 
 		if int:
 			point=pInt
@@ -243,21 +240,40 @@ def findIntersection(origin, th, areaPoly):
 		raise Exception('line has no intersection with polygon area')
 	return tuple(point)
 
+def angleToXAxis(ray):
+	"""
+	returns the angle in relation to the xaxis.
+	vector from p1 to p2
+	"""
+	r,th=getCylindrical(ray[1], origin=ray[0], direction=0)
+	return th
+def pointOnPolygonBorder(point, poly):
+	"""
+	determines if point is on border of polygon
+	"""
+	last=poly[-1]
+	for node in poly:
+		ray=[last, node]
+		if col.pointOnLine(ray, point):
+			return True
+		last=node
+	return False
 def makeLines(areaPoly, origin, L, C, thMin):
 	"""
 	given an origin and an areaPolygon, this function creates lines from a specific spidernet pattern.
 	"""
 	#first, determine if origin is on border lines.
-	if not col.pointInPolygon(origin, areaPoly): raise Exception('origin has to be inside polygon or on borders')
+	if pointOnPolygonBorder(origin,areaPoly) or not col.pointInPolygon(origin, areaPoly): raise Exception('origin has to be inside polygon')
 	xnorm=[origin, (origin[0]+1, origin[1])] #xaxis, used for angle calc.
 	baseL=None #standard value until determined
-	baseR=None 
+	baseR=None
 	if origin in areaPoly: #origin is on intersection
 		for i in range(len(areaPoly)): #find origin
 			if areaPoly[i]==origin:
 				origInd=i
 		ray1=[areaPoly[origInd], areaPoly[origInd-1]]
 		ray2=[areaPoly[origInd], areaPoly[origInd+1]]
+		
 		baseL=Line(ray1[0], ray1[1], getAngle(ray1, xnorm), order=1)
 		baseR=Line(ray2[0], ray2[1], getAngle(ray2, xnorm), order=1)
 	else: #see if it is on border lines
@@ -267,12 +283,11 @@ def makeLines(areaPoly, origin, L, C, thMin):
 			if col.pointOnLine(ray, origin):
 				"""
 				something is wrong with the angles below. Change to vectors so we get different angles.
-
 				"""
 				ray1=[origin, ray[0]]
 				ray2=[origin, ray[1]]
-				baseL=Line(ray1[0], ray1[1], getAngle(ray1, xnorm), order=1)
-				baseR=Line(ray2[0], ray2[1], getAngle(ray2, xnorm), order=1)
+				baseL=Line(ray1[0], ray1[1],  angleToXAxis(ray1), order=1)
+				baseR=Line(ray2[0], ray2[1], angleToXAxis(ray2), order=1)
 				break
 			last=node
 
@@ -301,7 +316,6 @@ def makeLines(areaPoly, origin, L, C, thMin):
 	print "base lines are done..."
 	lines=[baseR, baseL]
 	th=baseL.angle-baseR.angle
-	print th
 	dth=th
 	order=1
 	while True: #create lines, base roads
@@ -355,11 +369,11 @@ def makeLines(areaPoly, origin, L, C, thMin):
 								newList.insert(ind+1, lnew)
 		if not added: break #no more lines to add.
 		lines=newList
-	return lines, baseL, baseR
+	return lines, baseL, baseR, order
 if __name__=='__main__':
-	areaPoly=[(0.0,0.0), (100.0, 0.0), (100.0,100.0), (180, 180), (100, 170),(-100,100.0)]
-	G=SpiderGrid(areaPoly=areaPoly, origin=(0.0, 0.0))
-	areaPoly=G.graph['areaPoly']
+	areaPoly=[(0.0,0.0), (500.0, 0.0), (1200.0,1000.0), (1000, 1300),(-100,1000.0)]
+	#areaPoly=[(0.0,0.0), (100.0, 0.0), (120.0,100.0), (100, 130),(-100,100.0)]
+	G=SpiderGrid(areaPoly=areaPoly, origin=(50.0, 0.0))
 	import matplotlib as mpl
 	import matplotlib.pyplot as plt
 	from matplotlib.patches import Polygon
@@ -373,9 +387,16 @@ if __name__=='__main__':
 	lim=polygonLim(areaPoly)
 	ax.set_xlim(lim[0]-10, lim[1]+10)
 	ax.set_ylim(lim[2]-10, lim[3]+10)
-
-
-	#plot lines
+	"""
+	lines, baseL, baseR=makeLines(areaPoly, origin=(50,0.1), L=24, C=12, thMin=pi/7.)
+	for line in lines:
+		ray=line.ray
+		ax.plot([ray[0][0], ray[1][0]], [ray[0][1], ray[1][1]], color='k')
+	for line, color in [(baseL, 'r'), (baseR,'g')]:
+		ray=line.ray
+		ax.plot([ray[0][0], ray[1][0]], [ray[0][1], ray[1][1]], color=color, lw=2)
+    
+	#plot lines"""
 	lim=polygonLim(areaPoly)
 
 
