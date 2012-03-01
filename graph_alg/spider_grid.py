@@ -27,99 +27,24 @@ class Line():
 
 def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None, origin=None, thMin=pi/7.):
 	"""
-	A grid that looks like a spider's net
+	A grid that looks like a spider's net. Can also be described by the song:
+
+	"spider grid, spider grid, does whatever a spider grid does..."
+	
 	"""
 	C=L/2.
 	longest=L*1.4 #longest allowed distance between two nodes on a line.
 	eqL=L/6. #length where two points should be merged to one,m which is done in some cases
 	if not areaPoly: #use default
 		areaPoly=[(0,0), (300,0), (200,300), (-100, 200)]
-		if origin: raise Exception('if origin is given, so must areaPoly...')
+		if origin: raise Exception('if origin is given, so must areaPoly be...')
 		origin=(0,0)
 		if not origin in areaPoly: raise Exception('only origin at borderpoints supported right now ')
 	else:
 		if not origin: raise Exception('origin has to be defined for the SpiderGrid if area polygon is given')
-		if not origin in areaPoly:
+		if not col.pointInPolygon(origin,areaPoly):
 			raise Exception('so far, SpiderGrid only supports origins on one of the border points')
-	for i in range(len(areaPoly)): #find origin
-		if areaPoly[i]==origin:
-			origInd=i
-	xnorm=[origin, (origin[0]+1, origin[1])] #xaxis, used for angle calc.
-	ray1=[areaPoly[origInd], areaPoly[origInd-1]]
-	ray2=[areaPoly[origInd], areaPoly[origInd+1]]
-	baseL=Line(ray1[0], ray1[1], getAngle(ray1, xnorm), order=1)
-	baseR=Line(ray2[0], ray2[1], getAngle(ray2, xnorm), order=1)
-	#so, we have the bases.. check if left and right is correct
-	if baseL.angle<baseR.angle:
-		tmp=baseL
-		baseL=baseR
-		baseR=tmp
-	angle=baseL.angle-asin(L*0.5/getDistance(baseL.ray[0], baseL.ray[1]))
-	p2=findIntersection(list(baseL.p1), angle, areaPoly)
-	cyl=getCylindrical(p2, origin=origin) #take it further away from the border
-	p2=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
-	baseL=Line(p1=baseL.p1, p2=p2, angle=angle, order=baseL.order)
-	
-	angle=baseR.angle+asin(L*0.5/getDistance(baseR.ray[0], baseR.ray[1]))
-	p2=findIntersection(list(baseR.p1), angle, areaPoly)
-	cyl=getCylindrical(p2, origin=origin) #take it further away from the border
-	p2=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
-	baseR=Line(p1=baseR.p1, p2=p2, angle=angle, order=baseL.order)
-	lines=[baseR, baseL]
-	th=getAngle(baseL.ray, baseR.ray)
-	dth=th
-	order=1
-	while True: #create lines, base roads
-		dth=dth/2.
-		if dth<thMin: break
-		newList=copy.deepcopy(lines)
-		#order+=1
-		for i in range(len(lines)): #iterate through, from right to left
-			line=lines[i]
-			if line.no != baseL.no:
-				th=line.angle+(lines[i+1].angle-line.angle)/2.
-				point=findIntersection(origin, th, areaPoly)
-				cyl=getCylindrical(point, origin=origin) #take it further away from the border
-				point=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
-				lnew=Line(origin, point, th, order=order)
-				for ind,ltmp in enumerate(newList):
-					if ltmp.no==line.no:
-						newList.insert(ind+1, lnew)
-						break
-		lines=newList
-	#the base roads are done.. now let's find the smaller lines.
-	#strategy: insert a line between two lines as long as asin(0.5L/length(line))>L
-	while True:
-		added=False
-		newList=copy.deepcopy(lines)
-		order+=1
-		for i in range(len(lines)): #iterate through, from right to left
-			line=lines[i]
-			if line.no != baseL.no:
-				leftBuddy=lines[i+1] #the one "to the left"
-				rightBuddy=line
-				#in the future, taking terrain into consideration, the angles to left and right buddy wont be the same. But now they are.
-				dth=(leftBuddy.angle-rightBuddy.angle)/2. #the angle between..
-				th=rightBuddy.angle+dth #angle in rel. to xaxis
-				point=findIntersection(origin, th, areaPoly) #point at other side of areaPoly
-				#now, make it C distance away from border.
-				cyl=getCylindrical(point, origin=origin)
-				point=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
-				d=getDistance(origin, point)
-				if d/tan(dth)>L:
-					#this means that it will be reasonable to place a grid point on line. Create line!
-					y=0.5*L*(1+1/sin(dth))#/(sin(dth)**2)
-					p1=getCartesian([0, y], fromLocalCart=True, origin=origin, direction=th) #where it all starts..
-					if getDistance(p1, origin)>=d or getDistance(p1,point)<C:
-						continue #don't make line, it has a "negative length" or is too short..
-					if col.pointInPolygon(p1, areaPoly):
-						lnew=Line(p1, point, th, order=order)
-						for ind,ltmp in enumerate(newList):
-							if ltmp.no==line.no:
-								added=True
-								newList.insert(ind+1, lnew)
-		if not added: break #no more lines to add.
-		lines=newList
+	lines, baseL, baseR=makeLines(areaPoly, origin, L, C, thMin)
 	#make grid of lines.
 	G=nx.Graph( L=L, type='sqGridGraph', C=C)
 
@@ -243,7 +168,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 					if pR:
 						G.add_edge(pR,p, weight=getDistance(pR,p), visits=0, visited_from_node=[], c=0)
 					if not pL and not pR:
-						G.add_node(p, visit)
+						G.add_node(p)
 					line.gridPoints.append(tuple(p))
 						
 			last=pTmp
@@ -271,25 +196,166 @@ def findIntersection(origin, th, areaPoly):
 	"""
 	returns the intersection between the ray from origin with angle th and areaPoly. Assumes convex polygon.
 	"""
-	
 	inf=1e4
+	#first, find out if we are on line. if we are, we need to use a origin a little more to the inside.
+	"""
+	last=areaPoly[-1]
+	for p in areaPoly:
+		ray=[last, p]
+		print ray,origin
+		if col.pointOnLine(ray, origin): #return last or p
+			p1=getCartesian([0, inf], origin=origin, direction=th, fromLocalCart=True)
+			p2=list(origin)#getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
+			ray2=np.array([p1,p2])
+			closest=None
+			closDist=inf
+			for point in [p,last]:
+				pTmp=col.closestLinePoint(point, ray2)
+				d=getDistance(pTmp,point)
+				if d<closDist:
+					closest=point
+					closDist=d
+			print closest, th
+			raw_input('sdf')
+			return closest
+		last=p
+	"""
 	#find intersection with areaPoly
 	p1=getCartesian([0, inf], origin=origin, direction=th, fromLocalCart=True)
-	p2=getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
+	p2=list(origin)#getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
 	ray=np.array([p1,p2])
 	last=areaPoly[-1]
 	point=None
+	print "areaPoly:", areaPoly
 	for p in areaPoly:
 		borderRay=np.array([last,p])
+		print "border:", [last, p]
+		print "ray:", ray
+		print "th:", th
+		print col.linesIntersect(borderRay, ray, getPoint=True)
 		int, pInt=col.linesIntersect(borderRay, ray, getPoint=True) 
 		if int:
 			point=pInt
 			break #we have found intersection point
 		last=p
 	if point==None:
-		print col.linesIntersect(np.array([[0,200],[200,200]]), ray), ray
+		print "areaPoly:", areaPoly
 		raise Exception('line has no intersection with polygon area')
 	return tuple(point)
+
+def makeLines(areaPoly, origin, L, C, thMin):
+	"""
+	given an origin and an areaPolygon, this function creates lines from a specific spidernet pattern.
+	"""
+	#first, determine if origin is on border lines.
+	if not col.pointInPolygon(origin, areaPoly): raise Exception('origin has to be inside polygon or on borders')
+	xnorm=[origin, (origin[0]+1, origin[1])] #xaxis, used for angle calc.
+	baseL=None #standard value until determined
+	baseR=None 
+	if origin in areaPoly: #origin is on intersection
+		for i in range(len(areaPoly)): #find origin
+			if areaPoly[i]==origin:
+				origInd=i
+		ray1=[areaPoly[origInd], areaPoly[origInd-1]]
+		ray2=[areaPoly[origInd], areaPoly[origInd+1]]
+		baseL=Line(ray1[0], ray1[1], getAngle(ray1, xnorm), order=1)
+		baseR=Line(ray2[0], ray2[1], getAngle(ray2, xnorm), order=1)
+	else: #see if it is on border lines
+		last=areaPoly[-1]
+		for node in areaPoly:
+			ray=[last, node]
+			if col.pointOnLine(ray, origin):
+				"""
+				something is wrong with the angles below. Change to vectors so we get different angles.
+
+				"""
+				ray1=[origin, ray[0]]
+				ray2=[origin, ray[1]]
+				baseL=Line(ray1[0], ray1[1], getAngle(ray1, xnorm), order=1)
+				baseR=Line(ray2[0], ray2[1], getAngle(ray2, xnorm), order=1)
+				break
+			last=node
+
+
+	if baseL==None: #origin is inside areaPoly. Make x-axis baseL and baseR
+		
+		p2=findIntersection(list(origin), th=0, areaPoly=areaPoly)
+		baseL=Line(origin, p2, angle=2*pi, order=1)
+		baseR=Line(origin, p2, angle=0, order=1)  #smart, huh? :)
+	else:	#so, we have the bases.. check if left and right is correct
+		if baseL.angle<baseR.angle:
+			tmp=baseL
+			baseL=baseR
+			baseR=tmp
+		angle=baseL.angle-asin(L*0.5/getDistance(baseL.ray[0], baseL.ray[1]))
+		p2=findIntersection(list(baseL.p1), angle, areaPoly)
+		cyl=getCylindrical(p2, origin=origin) #take it further away from the border
+		p2=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
+		baseL=Line(p1=baseL.p1, p2=p2, angle=angle, order=baseL.order)
+	
+		angle=baseR.angle+asin(L*0.5/getDistance(baseR.ray[0], baseR.ray[1]))
+		p2=findIntersection(list(baseR.p1), angle, areaPoly)
+		cyl=getCylindrical(p2, origin=origin) #take it further away from the border
+		p2=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
+		baseR=Line(p1=baseR.p1, p2=p2, angle=angle, order=baseL.order)
+	print "base lines are done..."
+	lines=[baseR, baseL]
+	th=baseL.angle-baseR.angle
+	print th
+	dth=th
+	order=1
+	while True: #create lines, base roads
+		dth=dth/2.
+		if dth<thMin: break
+		newList=copy.deepcopy(lines)
+		#order+=1
+		for i in range(len(lines)): #iterate through, from right to left
+			line=lines[i]
+			if line.no != baseL.no:
+				th=line.angle+(lines[i+1].angle-line.angle)/2.
+				point=findIntersection(origin, th, areaPoly)
+				cyl=getCylindrical(point, origin=origin) #take it further away from the border
+				point=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
+				lnew=Line(origin, point, th, order=order)
+				for ind,ltmp in enumerate(newList):
+					if ltmp.no==line.no:
+						newList.insert(ind+1, lnew)
+						break
+		lines=newList
+	#the base roads are done.. now let's find the smaller lines.
+	#strategy: insert a line between two lines as long as asin(0.5L/length(line))>L
+	while True:
+		added=False
+		newList=copy.deepcopy(lines)
+		order+=1
+		for i in range(len(lines)): #iterate through, from right to left
+			line=lines[i]
+			if line.no != baseL.no:
+				leftBuddy=lines[i+1] #the one "to the left"
+				rightBuddy=line
+				#in the future, taking terrain into consideration, the angles to left and right buddy wont be the same. But now they are.
+				dth=(leftBuddy.angle-rightBuddy.angle)/2. #the angle between..
+				th=rightBuddy.angle+dth #angle in rel. to xaxis
+				point=findIntersection(origin, th, areaPoly) #point at other side of areaPoly
+				#now, make it C distance away from border.
+				cyl=getCylindrical(point, origin=origin)
+				point=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
+				d=getDistance(origin, point)
+				if d/tan(dth)>L:
+					#this means that it will be reasonable to place a grid point on line. Create line!
+					y=0.5*L*(1+1/sin(dth))#/(sin(dth)**2)
+					p1=getCartesian([0, y], fromLocalCart=True, origin=origin, direction=th) #where it all starts..
+					if getDistance(p1, origin)>=d or getDistance(p1,point)<C:
+						continue #don't make line, it has a "negative length" or is too short..
+					if col.pointInPolygon(p1, areaPoly):
+						lnew=Line(p1, point, th, order=order)
+						for ind,ltmp in enumerate(newList):
+							if ltmp.no==line.no:
+								added=True
+								newList.insert(ind+1, lnew)
+		if not added: break #no more lines to add.
+		lines=newList
+	return lines, baseL, baseR
 if __name__=='__main__':
 	areaPoly=[(0.0,0.0), (100.0, 0.0), (100.0,100.0), (180, 180), (100, 170),(-100,100.0)]
 	G=SpiderGrid(areaPoly=areaPoly, origin=(0.0, 0.0))
