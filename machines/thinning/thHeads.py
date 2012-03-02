@@ -29,6 +29,7 @@ class ThinningCraneHead(Process):
 		self.corrPerSide=3 #default valu
 		self.treeWeight=3
 		self.gripArea=0
+		self.testVar=self.m.G.paramInput['BCfd2']['testVar']
 		self.maxGripArea=1e10 #default, inf. Change in subclass if required
 		self.trees=[]
 		self.maxTreeWeight=1e10 #default, inf. Change in subclass if required
@@ -388,6 +389,8 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #
+
+					
 					for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos

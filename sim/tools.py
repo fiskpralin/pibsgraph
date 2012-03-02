@@ -42,6 +42,19 @@ class globalVar():
 		self.seed=None
 		self.simParam={} #stuff that cannot be fit anywhere else.
 
+
+def defaultThinningParameters():
+	c={}
+	c{'machines_speed'}=3
+	
+
+
+
+
+	return c
+
+
+
 ############################
 # simSeries
 ###########################
