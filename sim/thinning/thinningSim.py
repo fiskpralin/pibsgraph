@@ -219,13 +219,16 @@ class corridorStatistics(SimSeries):
 def setDefaultThinningParams(simParam={}):
 	"""
 	sets default values for all the relevant keys.
-	A means:
-	B means:
-	C means:
-	D means:
-	J means:
+	A means: A machine with one crane
+	B means: A machine with two cranes
+	C means: Continuous head (Riackard och Julia)
+	D means: Continuous head with twig cracking and logging
+	E means: Conventional head which can accumulate trees
+	F means: Conventional head which can accumulate trees and twig crack and log
+	J means: Bundler module in front of the machine which can make bundles of the trees and log them
 	"""
 	s=simParam
+	
 	#OVERALL
 	s['maxCraneLength']=11 #[m]
 	s['corridorWidth_BC']=1 #[m]
@@ -236,35 +239,63 @@ def setDefaultThinningParams(simParam={}):
 	s['levelOfThinning']=50#[%]
 	#what treesets to run for is omitted in this section
 
-	#MACHINE
+	#MACHINES A,B
 	s['startMoveConst']=2#[s]
 	s['velocityOfMachine']=5#[m/s]
 	s['radialVelocityOfCrane']=1#[m/s]
 	s['startRadialMoveCraneConst']=1#[s]
 	s['angularVelocityMachine']=0.1#[deg/s]
 	s['startAngularMoveCraneConst']=0.1#
-	s['maxPower']=5000 #[W] Maximum powerthe machine can operate at
+	s['maxPower']=500 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
+	s['powToMove']=100 [kW]#The power it takes to have the machine moving
 	
 	#AUTOMATION
 	s['chooseCorridor']=False#
-	s['moveArmOut']=False#
-	s['fellTrees']=True#
-	s['moveArmIn']=False#
-	s['dropTrees']=False#
-
-	#HEADS
+	s['moveArmOutCD']=False#
+	s['fellTreesCD']=True#
+	s['moveArmInCD']=False#
+	s['dropTreesD']=False#
+	s['loggingD']=False#
+	s['twigCrackD']=False#
+	s['moveArmOutEF']=False#
+	s['fellTreesEF']=True#
+	s['moveArmInEF']=False#
+	s['dropTreesF']=False#
+	s['loggingF']=False#
+	s['twigCrackF']=False#
+	s['dropbundle']=True# The bundler J drops the trees at the side
+	
+	#HEADS C,D,E,F
 	s['velocityFellTreeCD']=0.1 #[m/s] Velocity of the cutting
-	s['velocityFellTreeEF']=0.1 #
+	s['velocityFellTreeEF']=0.1 #[m/s] Velocity of the cutting
 	s['timeDropTreesCD']=2#[s] Time it takes to drop the trees for the continuous head
 	s['timeDropTreesEF']=2#[s] Time it takes to drop the trees for the conventional head
-	s['velDecreaseWhenFellingCD']=30#[%] The decrease in velocity when cutting 
+	s['timeTwigCrack']=5#[s] Time it takes to twig crack a bunch of trees
+	s['timeLog']=5#[s] Time it takes to log the treas at the head
+	s['velDecreaseFellingCD']=30#[%] The decrease in velocity when cutting 
 	s['maxWeightCD']=350#[kg] Maximum weight load. Note that this possibly should differ for C and D
 	s['maxWeightEF']=350#[kg] Maximum weight load. Note that this possibly should differ for E and F
 	s['maxGripAreaCD']=0.3#[m2] Maximum grip area for the head. This controls how much it can accumulate C and D
 	s['maxGripAreaEF']=0.3#[m2]-----------"---------------------------- E and F
+	s['powMoveCraneCD']=20#[kW] The power it takes to move the crane, note larger than for EF due to moving cutting blade
+	s['powMoveCraneEF']=15#[kW] The power it takes to move the crane
+	s['powHoldLoadCD']=1#[kW/kg] The power it takes for the crane to hold a load of 1 kg
+	s['powHoldLoadAtDistCD']=1#[kW/m] the power it takes for the crane to hold a load per meter from machine
+	s['powHoldLoadEF']=1#
+	s['powHoldLoadAtDistEF']=1#
+	s['powTwigCrack']=5#[kW] power demanded to twig crack the trees at the head
+	s['powLog']=1# [kW] power demanded to log trees at the head
+
+	#BUNDLER J
+	s['dropPos']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
+	s['timeWrap']=10# Time it takes to wrap and finish ONE bundle
+	s['timeLog']=5#[s] Time it takes to log a bundle. Applicable when head does not log (c,e)
+	s['powLogJ']=1#[kW] Power it takes to log a wrapped bundle at the bundler J
+	s['powWrap']=0.5#[kW] Power it takes to wrap the bundle
 	
-	
+	#PRIORITIES
+	#--
 
 
 	
