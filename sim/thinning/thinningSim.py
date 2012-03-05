@@ -248,7 +248,7 @@ def setDefaultThinningParams(simParam={}):
 	s['startAngularMoveCraneConst']=0.1#
 	s['maxPower']=500 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
-	s['powToMove']=100 [kW]#The power it takes to have the machine moving
+	s['powToMove']=100 #[kW]The power it takes to have the machine moving
 	
 	#AUTOMATION
 	s['chooseCorridor']=False#
@@ -312,9 +312,8 @@ class ThinningSim(SimExtend):
 	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
 
-		#if not 'Aic' in self.G.simParam.keys():
-		setDefaultThinningParams(self.G.simParam) #sets the parameters
-			
+		#if no file to read the simulationsparameters from:
+		setDefaultThinningParams(self.G.simParam) #sets the parameters to default values
 			
 		if not self.G.terrain:
 			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
