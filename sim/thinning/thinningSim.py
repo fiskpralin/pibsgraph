@@ -216,6 +216,17 @@ class corridorStatistics(SimSeries):
 		s=ThinningSim(G,vis=False,nCranes=nCranes, head=head)
 		return s
 
+def setDefaultThinningParams(simParam={}):
+	"""
+	sets default values for all the keys, e.g. "Aic" etc.
+	"""
+	pass
+
+
+	
+	
+
+
 ###############################
 # Thinning sim
 ###############################
@@ -225,6 +236,10 @@ class ThinningSim(SimExtend):
 	"""
 	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
+		if not 'Aic' in self.G.simParam.keys():
+			setDefaultThinningParams(self.G.simParam) #sets the parameters
+			
+			
 		if not self.G.terrain:
 			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
 			self.G.terrain=Terrain(G=self.G)

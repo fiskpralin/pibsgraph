@@ -42,9 +42,6 @@ class globalVar():
 		self.seed=None
 		self.simParam={} #stuff that cannot be fit anywhere else.
 
-
-
-
 ############################
 # simSeries
 ###########################
