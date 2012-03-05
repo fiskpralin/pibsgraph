@@ -221,7 +221,7 @@ def setDefaultThinningParams(simParam={}):
 	sets default values for all the relevant keys.
 	A means: A machine with one crane
 	B means: A machine with two cranes
-	C means: Continuous head (Riackard och Julia)
+	C means: Continuous head (Riakard och Julia)
 	D means: Continuous head with twig cracking and logging
 	E means: Conventional head which can accumulate trees
 	F means: Conventional head which can accumulate trees and twig crack and log
@@ -231,8 +231,8 @@ def setDefaultThinningParams(simParam={}):
 	
 	#OVERALL
 	s['maxCraneLength']=11 #[m]
-	s['corridorWidth_BC']=1 #[m]
-	s['corridorWidth_cont']=2 #[m]
+	s['corridorWidthCont']=1 #[m]
+	s['corridorWidthConv']=2 #[m]
 	s['noCorridorsPerSide']=5 #Number of corridors per side
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
 	s['switchFocusTime']=100#number of iterations per configuration
