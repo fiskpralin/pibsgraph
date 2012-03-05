@@ -220,7 +220,32 @@ def setDefaultThinningParams(simParam={}):
 	"""
 	sets default values for all the keys, e.g. "Aic" etc.
 	"""
-	pass
+	s=simParam
+	s['maxCraneLength']=11 #[m]
+	s['corridorWidth_BC']=1 #[m]
+	s['corridorWidth_cont']=2 #[m]
+	s['noCorridorsPerSide']=5 #Number of corridors per side
+	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
+	s['switchFocusTime']=100#number of iterations per configuration
+	s['levelOfThinning']=50#[%]
+	#what treesets to run for is omitted in this section
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	s['']=#
+	
 
 
 	
@@ -236,8 +261,9 @@ class ThinningSim(SimExtend):
 	"""
 	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
-		if not 'Aic' in self.G.simParam.keys():
-			setDefaultThinningParams(self.G.simParam) #sets the parameters
+
+		#if not 'Aic' in self.G.simParam.keys():
+		setDefaultThinningParams(self.G.simParam) #sets the parameters
 			
 			
 		if not self.G.terrain:
