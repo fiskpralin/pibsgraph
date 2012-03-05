@@ -29,7 +29,7 @@ class ThinningCraneHead(Process):
 		self.corrPerSide=3 #default valu
 		self.treeWeight=3
 		self.gripArea=0
-		self.testVar=self.m.G.paramInput['BCfd2']['testVar']
+		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
 		self.maxGripArea=1e10 #default, inf. Change in subclass if required
 		self.trees=[]
 		self.maxTreeWeight=1e10 #default, inf. Change in subclass if required

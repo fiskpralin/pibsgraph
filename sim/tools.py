@@ -43,16 +43,6 @@ class globalVar():
 		self.simParam={} #stuff that cannot be fit anywhere else.
 
 
-def defaultThinningParameters():
-	c={}
-	c{'machines_speed'}=3
-	
-
-
-
-
-	return c
-
 
 
 ############################
