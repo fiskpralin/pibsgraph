@@ -218,9 +218,15 @@ class corridorStatistics(SimSeries):
 
 def setDefaultThinningParams(simParam={}):
 	"""
-	sets default values for all the keys, e.g. "Aic" etc.
+	sets default values for all the relevant keys.
+	A means:
+	B means:
+	C means:
+	D means:
+	J means:
 	"""
 	s=simParam
+	#OVERALL
 	s['maxCraneLength']=11 #[m]
 	s['corridorWidth_BC']=1 #[m]
 	s['corridorWidth_cont']=2 #[m]
@@ -229,22 +235,35 @@ def setDefaultThinningParams(simParam={}):
 	s['switchFocusTime']=100#number of iterations per configuration
 	s['levelOfThinning']=50#[%]
 	#what treesets to run for is omitted in this section
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
-	s['']=#
+
+	#MACHINE
+	s['startMoveConst']=2#[s]
+	s['velocityOfMachine']=5#[m/s]
+	s['radialVelocityOfCrane']=1#[m/s]
+	s['startRadialMoveCraneConst']=1#[s]
+	s['angularVelocityMachine']=0.1#[deg/s]
+	s['startAngularMoveCraneConst']=0.1#
+	s['maxPower']=5000 #[W] Maximum powerthe machine can operate at
+	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
+	
+	#AUTOMATION
+	s['chooseCorridor']=False#
+	s['moveArmOut']=False#
+	s['fellTrees']=True#
+	s['moveArmIn']=False#
+	s['dropTrees']=False#
+
+	#HEADS
+	s['velocityFellTreeCD']=0.1 #[m/s] Velocity of the cutting
+	s['velocityFellTreeEF']=0.1 #
+	s['timeDropTreesCD']=2#[s] Time it takes to drop the trees for the continuous head
+	s['timeDropTreesEF']=2#[s] Time it takes to drop the trees for the conventional head
+	s['velDecreaseWhenFellingCD']=30#[%] The decrease in velocity when cutting 
+	s['maxWeightCD']=350#[kg] Maximum weight load. Note that this possibly should differ for C and D
+	s['maxWeightEF']=350#[kg] Maximum weight load. Note that this possibly should differ for E and F
+	s['maxGripAreaCD']=0.3#[m2] Maximum grip area for the head. This controls how much it can accumulate C and D
+	s['maxGripAreaEF']=0.3#[m2]-----------"---------------------------- E and F
+	
 	
 
 
