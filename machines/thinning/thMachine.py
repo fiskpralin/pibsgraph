@@ -28,24 +28,44 @@ class ThinningMachine(Machine, UsesDriver):
 		self.driver=Operator(sim) #add driver
 		sim.activate(self.driver, self.driver.work())
 		Machine.__init__(self, name, sim, G=G, driver=self.driver, mass=21000)
+		s=self.G.simParam
 		self.velocities={'machine': 1, 'crane angular':0.35, 'crane radial': 2.5, 'fell':0.08} #radians/sec,m/s and m2/s
 		self.color='#CD0000'
 		self.moveEvent=SimEvent(name='machine moves', sim=self.sim) #signals BEFORE movement
 		self.movedEvent=SimEvent(name='machine moves', sim=self.sim) #signals AFTER movement
 		if self.G.automatic != 'undefined':
 			self.automatic=self.G.automatic
-		else: #give default automation
+		else: #give default automation. MAYBE we should not just give the automatic parameters here but all of them for each head?
 			if head=='BC':
-				self.automatic={'move': False, 'moveArmIn': True, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop':True} #default, override before activating machine
+				self.automatic={'move': False,
+								'moveArmIn': True,
+								'moveArmOut': False,
+								'dumpTrees': False,
+								'switchFocus': False,
+								'chop':True} #default, override before activating machine
 			elif head=='conv':
-				self.automatic={'move': False, 'moveArmIn': False, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop':False} #default, override before activating machine
+				self.automatic={'move': False,
+								'moveArmIn': False,
+								'moveArmOut': False,
+								'dumpTrees': False,
+								'switchFocus': False,
+								'chop':False} #default, override before activating machine
 			elif head=='convAcc':
-				self.automatic={'move': False,'moveArmIn': False, 'moveArmOut': False, 'dumpTrees': False, 'switchFocus': False, 'chop': False}
+				self.automatic={'move': False,
+								'moveArmIn': False,
+								'moveArmOut': False,
+								'dumpTrees': False,
+								'switchFocus': False,
+								'chop': False}
 			else: raise Exception('head type could not be identified', head)
 			
-		self.times={'crane const':1.5, 'chop const':3, 'move const':5, 'dumpTrees': 10, 'switchFocus': 3} #same as above, change before activating. may be changed from cranHead constructor
-		self.craneMaxL=11
-		self.craneMinL=3
+		self.times={'crane const':1.5,
+					'chop const':3,
+					'move const':5,
+					'dumpTrees': 10,#is this the droptrees time in initfile? then different for different heads..
+					'switchFocus': s['switchFocusTime']}#3 #same as above, change before activating. May be changed from craneHead constructor
+		self.craneMaxL=s['maxCraneLength']#11
+		self.craneMinL=s['minCraneLength']#3
 		self.length=6.939
 		self.width=2.720
 		self.pos=startPos
@@ -118,7 +138,7 @@ class ThinningMachine(Machine, UsesDriver):
 		print "sets up roads"
 		startX=self.pos[0]
 		tic=time.clock()
-		W=4.0 #standard..
+		W=4.0 #Standard width of the strip road
 		cart=self.getCartesian
 		h1=self.heads['left']
 		origin=[startX, 0]

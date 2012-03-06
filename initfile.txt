@@ -12,11 +12,14 @@ J means: Bundler module in front of the machine which can make bundles of the tr
 
 			#OVERALL
 maxCraneLength	11	[m]
-corridorWidthCont	1	[m]
-corridorWidthConv	2	[m]
-noCorridorsPerSide	5	[-]	Number of corridors per side
+minCraneLength	3	[m]
+corridorWidthEF	1	[m]
+corridorWidthCD	2	[m]
+noCorridorsPerSideCD	3	[-]	Number of corridors per side
+noCorridorsPerSideEF	5	[-]	Number of corridors per side
 maxCorridorAngle	45	[deg]	angle of the corridor in relation to the strip road
-switchFocusTime	100	[-]	number of iterations per configuration
+switchFocusTime	3	[s]	time to switch focus
+noIter	100	[-]	number of iterations per configuration
 levelOfThinning	50	[%]
 			#what treesets to run for is omitted in this section
 
@@ -32,6 +35,8 @@ minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machi
 powToMove	100	[kW]	The power it takes to have the machine moving
 
 			#AUTOMATION
+switchFocusCD	False
+swtcihFocusEF	False
 chooseCorridor	False
 moveArmOutCD	False
 fellTreesCD	True
@@ -45,9 +50,11 @@ moveArmInEF	False
 dropTreesF	False
 loggingF	False
 twigCrackF	False
-dropbundle	True		The bundler J drops the trees at the side
+dropBundle	True		The bundler J drops the trees at the side
 
 			#HEADS C,D,E,F
+headWidthCD	1	   [m]	Width of the conventional head
+headWidthEF	1	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
 timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head

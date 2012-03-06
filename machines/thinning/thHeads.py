@@ -20,13 +20,14 @@ class ThinningCraneHead(Process):
 	def __init__(self, sim, name=None, machine=None):
 		if not name: name='cranehead'
 		self.m=machine
+		
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
 		elif len(self.m.heads)==1:
 			self.side='right'
 		else: raise Exception('BCHead only supports one or two arms on machine.')
 		Process.__init__(self,name, sim)
-		self.corrPerSide=3 #default valu
+		self.corrPerSide=3 #default value
 		self.treeWeight=3
 		self.gripArea=0
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
