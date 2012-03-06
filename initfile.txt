@@ -53,7 +53,7 @@ twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
 
 			#HEADS C,D,E,F
-headWidthCD	1	   [m]	Width of the conventional head
+headWidthCD	0.5	   [m]	Width of the conventional head
 headWidthEF	1	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting

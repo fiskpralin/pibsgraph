@@ -20,7 +20,7 @@ class ThinningCraneHead(Process):
 	def __init__(self, sim, name=None, machine=None):
 		if not name: name='cranehead'
 		self.m=machine
-		
+		self.s=self.m.G.simParam
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
 		elif len(self.m.heads)==1:
@@ -345,9 +345,9 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine)
 		self.road=None #the currect road will be stored here
-		self.width=0.5
-		self.corridorWidth=2
-		self.corrPerSide=3
+		self.width=self.s['headWidthCD']#0.5
+		self.corridorWidth=self.s['corridorWidthCD']#2
+		self.corrPerSide=self.s['noCorridorsPerSideCD']#3
 		self.length=0.5
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
@@ -356,8 +356,8 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.trees=[]
 		self.reset()
 		self.direction=pi/2.
-		self.maxTreeWeight=350 #set it to same as BC...
-		self.maxGripArea=0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
+		self.maxTreeWeight=self.s['maxWeightCD']#350 #set it to same as BC...
+		self.maxGripArea=self.s['maxGripAreaCD']#0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
 
 	def run(self):
 		while True:

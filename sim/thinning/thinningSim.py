@@ -272,7 +272,7 @@ def setDefaultThinningParams(simParam={}):
 	s['dropBundle']=True# The bundler J drops the trees at the side
 	
 	#HEADS C,D,E,F
-	s['headWidthCD']=1
+	s['headWidthCD']=0.5
 	s['headWidthEF']=1
 	s['velocityFellTreeCD']=0.1 #[m/s] Velocity of the cutting
 	s['velocityFellTreeEF']=0.1 #[m/s] Velocity of the cutting
