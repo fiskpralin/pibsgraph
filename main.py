@@ -107,10 +107,17 @@ if __name__=='__main__':
 		G=tools.globalVar()
 		G.noMonitors=True
 		G.seed=seed
+<<<<<<< HEAD
 		G.terrain=PlantMTerrain(G, ttype='0')
 		#G.plotDelay=20
 	   	s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a2h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2)
+=======
+		#G.terrain=PlantMTerrain(G, ttype='5')
+		G.plotDelay=20
+	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
+		TH.ThinningSim(vis=True,anim=anim,G=G, head='conv', nCranes=2)
+>>>>>>> 0eed6878b20ee46d3987c91df9c236e629b65835
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)
 		#cProfile.run('FW.ForwarderSim(vis=True, anim=anim, G=G)')

@@ -221,7 +221,7 @@ def setDefaultThinningParams(simParam={}):
 	sets default values for all the relevant keys.
 	A means: A machine with one crane
 	B means: A machine with two cranes
-	C means: Continuous head (Riackard och Julia)
+	C means: Continuous head (Riakard och Julia)
 	D means: Continuous head with twig cracking and logging
 	E means: Conventional head which can accumulate trees
 	F means: Conventional head which can accumulate trees and twig crack and log
@@ -231,11 +231,14 @@ def setDefaultThinningParams(simParam={}):
 	
 	#OVERALL
 	s['maxCraneLength']=11 #[m]
-	s['corridorWidth_BC']=1 #[m]
-	s['corridorWidth_cont']=2 #[m]
-	s['noCorridorsPerSide']=5 #Number of corridors per side
+	s['minCraneLength']=3 #[m]
+	s['corridorWidthEF']=1 #[m]
+	s['corridorWidthCD']=2 #[m]
+	s['noCorridorsPerSideCD']=3 #Number of corridors per side
+	s['noCorridorsPerSideEF']=3 #Number of corridors per side
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
-	s['switchFocusTime']=100#number of iterations per configuration
+	s['switchFocusTime']=3#Time to switch focus from one thing to another
+	s['noIter']=100#number of iterations per configuration
 	s['levelOfThinning']=50#[%]
 	#what treesets to run for is omitted in this section
 
@@ -251,6 +254,8 @@ def setDefaultThinningParams(simParam={}):
 	s['powToMove']=100 #[kW]The power it takes to have the machine moving
 	
 	#AUTOMATION
+	s['switchFocusCD']=False#
+	s['switchFocusEF']=False#
 	s['chooseCorridor']=False#
 	s['moveArmOutCD']=False#
 	s['fellTreesCD']=True#
@@ -264,9 +269,11 @@ def setDefaultThinningParams(simParam={}):
 	s['dropTreesF']=False#
 	s['loggingF']=False#
 	s['twigCrackF']=False#
-	s['dropbundle']=True# The bundler J drops the trees at the side
+	s['dropBundle']=True# The bundler J drops the trees at the side
 	
 	#HEADS C,D,E,F
+	s['headWidthCD']=0.5
+	s['headWidthEF']=1
 	s['velocityFellTreeCD']=0.1 #[m/s] Velocity of the cutting
 	s['velocityFellTreeEF']=0.1 #[m/s] Velocity of the cutting
 	s['timeDropTreesCD']=2#[s] Time it takes to drop the trees for the continuous head

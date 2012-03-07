@@ -20,27 +20,31 @@ class ThinningCraneHead(Process):
 	def __init__(self, sim, name=None, machine=None):
 		if not name: name='cranehead'
 		self.m=machine
+		self.s=self.m.G.simParam
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
 		elif len(self.m.heads)==1:
 			self.side='right'
 		else: raise Exception('BCHead only supports one or two arms on machine.')
 		Process.__init__(self,name, sim)
-		self.corrPerSide=3 #default valu
-		self.treeWeight=3
-		self.gripArea=0
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
-		self.maxGripArea=1e10 #default, inf. Change in subclass if required
+		self.treeWeight=0
+		self.gripArea=0
 		self.trees=[]
-		self.maxTreeWeight=1e10 #default, inf. Change in subclass if required
+		self.corrPerSide=self.s['noCorridorsPerSideCD'] #default value
+		self.maxGripArea=self.s['maxGripAreaEF'] #default, inf. Change in subclass if required
+		self.maxTreeWeight=self.s['maxWeightEF'] #default, inf. Change in subclass if required
+
 	def treeChopable(self, t):
 		"""determines if the cranehead can handle the tree in question"""
 		raise Exception('ThinningCraneHead should implement treeChopable method.')
+
 	def harvestPos(self,t):
 		"""
 		function for the harvest position of a tree. Default is the trees position, but the BC head follows the road.
 		"""
 		return t.pos 
+
 	def setPos(self,pos):
 		"""
 v		Changes position for planting device, and records monitors associated with this.
@@ -53,6 +57,7 @@ v		Changes position for planting device, and records monitors associated with th
 		traveltime=max(dTh/self.m.velocities['crane angular'], dr/self.m.velocities['crane radial'])
 		self.pos=pos
 		return traveltime+self.m.times['crane const']
+
 	def getNextTree(self, road=None):
 		"""returns the tree that is closest to the machine, i.e lowest y-value in road cart.coord.sys.
 			also does analysis if a tree has the desired proportions to be chopped. """
@@ -69,6 +74,7 @@ v		Changes position for planting device, and records monitors associated with th
 				t=tree
 		if not t: print road.pos, "did not find any trees"
 		return t
+
 	def dumpTrees(self, direction=None):
 		"""releases the trees at the current position."""
 		if direction is None: direction=self.road.direction
@@ -93,19 +99,23 @@ v		Changes position for planting device, and records monitors associated with th
 		self.treeWeight=0
 		self.gripArea=0
 		return self.cmnd([], time=self.m.times['dumpTrees'], auto=self.m.automatic['dumpTrees'])
+
 	def getStartPos(self):
 		if self.side=='left':
 			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.])
 		else:
 			return self.m.getCartesian([self.m.craneMinL, pi/3.])
+
 	def roadAssigned(self):
 		"""may later be used to wait for an assignment"""
 		if self.road: return True
 		else: return False
+
 	def reset(self):
 		self.road=None #indicates that head is passive
 		self.treeWeight=0
 		self.trees=[]
+
 	def chopNext(self):
 		c=[]
 		CC=self.m.times['chop const'] #constant for felling
@@ -140,6 +150,7 @@ v		Changes position for planting device, and records monitors associated with th
 			self.m.trees.append(t)
 			self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
 		return c
+
 	def getCraneMountPoint(self):
 		"""returns the point where the crane meets the head"""
 		cart=self.m.getCartesian
@@ -155,18 +166,17 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine)
 		self.road=None #the currect road will be stored here
-		self.width=1.
-		self.corridorWidth=self.width
-		self.corrPerSide=5
-		self.length=1.5
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
 		#self.velocity=self.m.times['moveArmIn']
 		self.color=self.m.color
 		self.reset()
 		self.direction=pi/2.
-		self.maxTreeWeight=350 #kg
-		
+		self.maxTreeWeight=self.s['maxWeightEF']#350 #kg
+		self.width=self.s['headWidthEF']#1.
+		self.corridorWidth=self.width
+		self.corrPerSide=self.s['noCorridorsPerSideEF']
+		self.length=self.s['headWidthEF']+0.5
 		
 	def run(self):
 		while True:
@@ -190,7 +200,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				if self.road != self.m.roads['main']:
 					mainRoad=False
 					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmOut']): yield c
+					for c in self.cmnd([], time, auto=self.s['moveArmOutEF']): yield c
 				while True:
 					cmd=self.chopNext()
 					if len(cmd)==0: break
@@ -198,7 +208,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				#trees have been gathered. return.
 				time=self.setPos(sPoint)
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-				for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c
+				for c in self.cmnd([], time, auto=self.s['moveArmInEF']): yield c
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
@@ -211,17 +221,20 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		[r,th]=self.m.getCylindrical(t.pos, origin=s, direction=self.road.direction)
 		yloc=sin(th)*r #0<th<pi
 		return self.m.getCartesian([0, yloc], origin=s, direction=self.road.direction, fromLocalCart=True)
+
 	def treeChopable(self, t):
 		"""determines if a tree is chopable."""
 		if t.dbh>0.10 or t.specie=='spruce' or t.h>10:
 			return False
 		else: return True
+
 	def setPos(self, pos):
 		#determine direction.. from current pos to next pos. If going backwards, use the default..
 		if pos==self.road.startPoint or pos==self.m.getTreeDumpSpot(self.side): #going back..
 			[r, self.direction]=self.m.getCylindrical(pos)
 		else: [r,self.direction]=getCylindrical(pos,origin=self.pos, direction=pi/2.)
 		return super(BCHead, self).setPos(pos)
+
    	def draw(self, ax):
 		cart=self.m.getCartesian
 		#crane:
@@ -248,6 +261,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		c3=c([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		c4=c([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
+
 		
 class ConventionalHead(ThinningCraneHead, UsesDriver):
 	"""
@@ -257,10 +271,6 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="ConvHead", machine=machine)
 		self.road=None #the currect road will be stored here
-		self.width=0.5
-		self.corridorWidth=2
-		self.corrPerSide=3
-		self.length=0.5
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
 		#self.velocity=self.m.times['moveArmIn']
@@ -268,7 +278,11 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 		self.trees=[]
 		self.reset()
 		self.direction=pi/2.
-		self.maxTreeWeight=350 #set it to same as BC...
+		self.width=self.s['headWidthCD']
+		self.corridorWidth=self.s['corridorWidthCD']
+		self.corrPerSide=self.s['noCorridorsPerSideCD']
+		self.length=self.s['headWidthCD']# NOTE THAT THIS MAKES HEAD SQUARE
+		self.maxTreeWeight=self.s['maxWeightCD'] #
 
 	def run(self):
 		while True:
@@ -293,7 +307,7 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 					mainRoad=False
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmOut']): yield c
+					for c in self.cmnd([], time, auto=self.s['moveArmOutCD']): yield c
 				stop=False
 				while not stop:
 					cmd=self.chopNext()
@@ -304,7 +318,7 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 						#return to machine efter each tree.. trees have been gathered. return.
 					time=self.setPos(sPoint)
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c
+					for c in self.cmnd([], time, auto=self.s['moveArmInCD']): yield c
 					for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
@@ -315,6 +329,7 @@ class ConventionalHead(ThinningCraneHead, UsesDriver):
 		if t.dbh>0.10 or t.h>10:
 			return False
 		else: return True
+		
    	def draw(self, ax):
 		cart=self.m.getCartesian
 		#crane:
@@ -344,10 +359,6 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine)
 		self.road=None #the currect road will be stored here
-		self.width=0.5
-		self.corridorWidth=2
-		self.corrPerSide=3
-		self.length=0.5
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
 		#self.velocity=self.m.times['moveArmIn']
@@ -355,8 +366,12 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.trees=[]
 		self.reset()
 		self.direction=pi/2.
-		self.maxTreeWeight=350 #set it to same as BC...
-		self.maxGripArea=0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
+		self.length=self.s['headWidthCD']#0.5 OBSERVE THAT THIS IS HEAD IS SET TO BE SQUARE
+		self.width=self.s['headWidthCD']#0.5
+		self.corridorWidth=self.s['corridorWidthCD']#2
+		self.corrPerSide=self.s['noCorridorsPerSideCD']#3
+		self.maxTreeWeight=self.s['maxWeightCD']#350 #set it to same as BC...
+		self.maxGripArea=self.s['maxGripAreaCD']#0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
 
 	def run(self):
 		while True:
@@ -381,16 +396,14 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					mainRoad=False
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmOut']): yield c
+					for c in self.cmnd([], time, auto=self.s['moveArmOutCD']): yield c
 				while True:
 					cmd=self.chopNext()
 					if len(cmd)==0: break
 					for c in cmd: yield c
 					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-					for c in self.cmnd([], time, auto=self.m.automatic['moveArmIn']): yield c #
-
-					
+					for c in self.cmnd([], time, auto=self.s['moveArmInCD']): yield c #
 					for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
