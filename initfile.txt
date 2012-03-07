@@ -53,8 +53,8 @@ twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
 
 			#HEADS C,D,E,F
-headWidthCD	0.5	   [m]	Width of the conventional head
-headWidthEF	1	   [m]	Width of the continuous head
+headWidthCD	1	   [m]	Width of the conventional head
+headWidthEF	0.5	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
 timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head
@@ -65,7 +65,7 @@ velDecreaseFellingCD	30	[%]	The decrease in velocity when cutting
 maxWeightCD	350	[kg]	Maximum weight load. Note that this possibly should differ for C and D
 maxWeightEF	350	[kg]	Maximum weight load. Note that this possibly should differ for E and F
 maxGripAreaCD	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate C and D
-maxGripAreaEF	0.3	[m2]	-----------"---------------------------- E and F
+maxGripAreaEF	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate E and F
 powMoveCraneCD	20	[kW]	The power it takes to move the crane, note larger than for EF due to moving cutting blade
 powMoveCraneEF	15	[kW]	The power it takes to move the crane
 powHoldLoadCD	1	[kW/kg]	The power it takes for the crane to hold a load of 1 kg
@@ -74,14 +74,15 @@ powHoldLoadEF	1	[kW/kg]
 powHoldLoadAtDistEF	1	[kW/m]
 powTwigCrack	5	[kW]	power demanded to twig crack the trees at the head
 powLog	1	[kW]	power demanded to log trees at the head
+twigCrackCoeffDF	30	  [%]	   How much can the twigcracking decrease the cross section of the tree(s)
 
 			#BUNDLER J
-dropPos	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
-timeWrap	10	[s]	Time it takes to wrap and finish ONE bundle
-timeLog	5	[s]	Time it takes to log a bundle. Applicable when head does not log (c,e)
-powLog	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
-powWrap	0.5	[kW]	Power it takes to wrap the bundle
-			
-
+dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
+timeBundleCEJ	10	[s]	Time it takes to finish bundling of trees in the bundler, when no twig cracking at head
+timeBundleDFJ	7	[s]	Time it takes to finish bundling of trees in the bundler, when twig cracking at head
+powBundleJ	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
+maxXSectionJ	1	[m2]	Maximum cross section of "stored" trees in bundler
+xSectionThreshJ	0.8	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+compressCoeffCEJ	30	[%]	  How much can the compression of the bundler compress the cross section of the trees?	
 			#PRIORITIES
 			#--
