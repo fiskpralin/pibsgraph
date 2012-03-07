@@ -221,7 +221,7 @@ def setDefaultThinningParams(simParam={}):
 	sets default values for all the relevant keys.
 	A means: A machine with one crane
 	B means: A machine with two cranes
-	C means: Continuous head (Riakard och Julia)
+	C means: Continuous head (Rickard och Julia)
 	D means: Continuous head with twig cracking and logging
 	E means: Conventional head which can accumulate trees
 	F means: Conventional head which can accumulate trees and twig crack and log
@@ -234,7 +234,7 @@ def setDefaultThinningParams(simParam={}):
 	s['minCraneLength']=3 #[m]
 	s['corridorWidthEF']=1 #[m]
 	s['corridorWidthCD']=2 #[m]
-	s['noCorridorsPerSideCD']=3 #Number of corridors per side
+	s['noCorridorsPerSideCD']=5 #Number of corridors per side
 	s['noCorridorsPerSideEF']=3 #Number of corridors per side
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
 	s['switchFocusTime']=3#Time to switch focus from one thing to another
@@ -272,8 +272,8 @@ def setDefaultThinningParams(simParam={}):
 	s['dropBundle']=True# The bundler J drops the trees at the side
 	
 	#HEADS C,D,E,F
-	s['headWidthCD']=0.5
-	s['headWidthEF']=1
+	s['headWidthCD']=1
+	s['headWidthEF']=0.5
 	s['velocityFellTreeCD']=0.1 #[m/s] Velocity of the cutting
 	s['velocityFellTreeEF']=0.1 #[m/s] Velocity of the cutting
 	s['timeDropTreesCD']=2#[s] Time it takes to drop the trees for the continuous head

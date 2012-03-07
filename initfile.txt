@@ -53,8 +53,8 @@ twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
 
 			#HEADS C,D,E,F
-headWidthCD	0.5	   [m]	Width of the conventional head
-headWidthEF	1	   [m]	Width of the continuous head
+headWidthCD	1	   [m]	Width of the conventional head
+headWidthEF	0.5	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
 timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head
@@ -65,7 +65,7 @@ velDecreaseFellingCD	30	[%]	The decrease in velocity when cutting
 maxWeightCD	350	[kg]	Maximum weight load. Note that this possibly should differ for C and D
 maxWeightEF	350	[kg]	Maximum weight load. Note that this possibly should differ for E and F
 maxGripAreaCD	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate C and D
-maxGripAreaEF	0.3	[m2]	-----------"---------------------------- E and F
+maxGripAreaEF	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate E and F
 powMoveCraneCD	20	[kW]	The power it takes to move the crane, note larger than for EF due to moving cutting blade
 powMoveCraneEF	15	[kW]	The power it takes to move the crane
 powHoldLoadCD	1	[kW/kg]	The power it takes for the crane to hold a load of 1 kg
