@@ -81,8 +81,8 @@ dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is dista
 timeBundleCEJ	10	[s]	Time it takes to finish bundling of trees in the bundler, when no twig cracking at head
 timeBundleDFJ	7	[s]	Time it takes to finish bundling of trees in the bundler, when twig cracking at head
 powBundleJ	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
-maxXSectionJ 1	[m2]	Maximum cross section of "stored" trees in bundler
-xSectionThreshJ	0.8		[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
-compressCoeffCEJ		30		[%]	  How much can the compression of the bundler compress the cross section of the trees?	
+maxXSectionJ	1	[m2]	Maximum cross section of "stored" trees in bundler
+xSectionThreshJ	0.8	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+compressCoeffCEJ	30	[%]	  How much can the compression of the bundler compress the cross section of the trees?	
 			#PRIORITIES
 			#--
