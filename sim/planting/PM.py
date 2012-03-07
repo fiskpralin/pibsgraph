@@ -71,7 +71,7 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['immobile vol sum']*1000) #change to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
 		t.append(s.stats['dibble distr stone vol cum']*1000) #change to dm3		
-		t.append(s.now()) #total time at stationary point
+		t.append(s.now()-s.m.timeConsumption['machineMovement']) #total time at stationary point
 		t.append(s.now()/max(1,float(len(s.m.treesPlanted))))
 		t.append(s.m.timeConsumption['machineMovement'])
 		if reloaded:
@@ -580,11 +580,6 @@ class PlantmSim(SimExtend):
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(G=self.G, ttype=ttype)
-		try:
-			tmp=self.G.simParam['planted']
-		except KeyError:
-			self.G.simParam['planted']=0 #not initialized
-			self.G.simParam['areaCovered']=0
 		tic=time.clock()
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
@@ -598,8 +593,6 @@ class PlantmSim(SimExtend):
 		self.productivity=len(self.m.treesPlanted)/(self.now()/3600.) #trees/hour
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
 		self.setQueuePerc()
-		self.G.simParam['planted']+=len(self.m.treesPlanted)
-		self.G.simParam['areaCovered']+=self.m.workingArea
 		print "stumps in WA sum diameter:", self.stats['stumps in WA sum diamater']
 		print "number of remounds", self.stats['remound attempts']
 		if self.p: #if we have a plotter instance

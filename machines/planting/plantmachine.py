@@ -65,7 +65,7 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		self.trees=0 	#trees in trunk
 		#self.direction=random.uniform(0,2*pi)
 		self.direction=0
-		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 2, 'haltTime': 3, 'searchTime': 2, 'switchFocus':0}
+		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 3, 'searchTime': 2, 'switchFocus':0}
 		#if self.G.PMfocusSwitch: self.times['switchFocus']= self.G.PMfocusSwitch
 		if self.headType=='Bracke':
 			self.times['searchTime']=0 #specifics for this head..
@@ -220,13 +220,13 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 			return True #angles exceed..
 		#assume that p1 is left and p2 right.
 	def stopControl(self):
-		"""Checks if simulations should be stopped"""
+		"""
+		Checks if simulations should be stopped
+		"""
 		reason=None
-		print "trees:", self.G.simParam['planted'], "area:", self.G.simParam['areaCovered']
-		print (len(self.treesPlanted)+self.G.simParam['planted'])/(self.G.simParam['areaCovered']+self.workingArea), self.stockingRate/10000.0
 		if self.driver.resting:
 			return False #wait until he's not at rest, should not result in an infinite loop.
-		elif (len(self.treesPlanted)+self.G.simParam['planted'])/(self.G.simParam['areaCovered']+self.workingArea)>=self.stockingRate/10000.0:
+		elif len(self.treesPlanted)>=floor(self.stockingRate/10000.0*self.workingArea):
 			#last is to ensure that machine is above productivity maximum
 			reason="the desired no. of trees are planted"
 		elif len(self.pDevs)==1 and self.pDevs[0].noMoreSpots:
@@ -378,7 +378,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		self.m=belongToMachine
 		self.G=G
 		#cylindrical coordinates in relation to machine:
-		#crane starts in it minimum position to the left of the driver.
+		#crane starts in its minimum position to the left of the driver.
 		#algorithms for planting:
 		self.noMoreSpots=False #used to cancel the search for new spots
 		self.idealSpots=[]
@@ -566,7 +566,9 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			inew=[]
 			c=self.m.getCartesian
 			w=2.01/2.
-			lastPos=self.pos
+			cyl=self.m.getCylindrical(self.pos)
+			direction=self.m.direction+cyl[1]-pi/2.
+			lastPos=c([-w, 0], origin=self.pos, direction=direction, fromLocalCart=True)
 			for p in self.optNodes:
 				#p1 on the left, p2 on the right
 				cyl=self.m.getCylindrical(p)

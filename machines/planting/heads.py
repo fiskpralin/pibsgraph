@@ -207,11 +207,12 @@ class Mplanter(PlantHead):
 									if dist2<o.radius**2 and o.z>=depth and o.volume>0.001:
 										print "failed dibble"
 										done=False
-										for c in self.cmnd([], t['dibbleDownTime'], auto['plant']):
+										time=t['dibbleDownTime']+t['dibbleUpTime']
+										for c in self.cmnd([], time, auto['plant']):
 											yield c
 											for cm in self.checkIfInterupted(): yield cm
 										self.sim.stats['plant attempts']+=1
-										self.timeConsumption['planting']+=t['dibbleDownTime']
+										self.timeConsumption['planting']+=time
 										break
 								if done: 
 									debugPrint("dibble succeded, plants")
@@ -240,7 +241,7 @@ class Mplanter(PlantHead):
 						self.debugPrint("plants...")
 						self.sim.stats['plant attempts']+=1
 						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain)
-						plantTime=t['dibbleDownTime']+t['relSeedlingTime']
+						plantTime=t['dibbleDownTime']+t['relSeedlingTime']+t['dibbleUpTime']
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
 							for cm in self.checkIfInterupted(): yield cm
@@ -248,6 +249,7 @@ class Mplanter(PlantHead):
 						debugPrint("done with yielding")
 						p.m.treesPlanted.append(tree)
 						p.m.treeMoni.observe(len(p.m.treesPlanted), self.sim.now())
+						p.m.stopControl()
 					debugPrint("signals!")
 					p.plantSignals+=1
 					for c in self.releaseDriver(): yield c
@@ -327,10 +329,11 @@ class Bracke(PlantHead):
 									depth=self.depth-p.m.dibbleDepth #positive
 									if dist2<o.radius**2 and o.z>=depth:
 										done=False
-										for c in self.cmnd([], t['dibbleDownTime'], auto['plant']):
+										time=t['dibbleDownTime']+t['dibbleUpTime']
+										for c in self.cmnd([], time, auto['plant']):
 											yield c
 											for cm in self.checkIfInterupted(): yield cm
-										self.timeConsumption['planting']+=t['dibbleDownTime']
+										self.timeConsumption['planting']+=time
 										self.sim.stats['plant attempts']+=1
 										break
 								if done: 
@@ -355,7 +358,7 @@ class Bracke(PlantHead):
 						self.debugPrint("plants...")
 						self.sim.stats['plant attempts']+=1
 						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain)
-						plantTime=t['dibbleDownTime']+t['relSeedlingTime']
+						plantTime=t['dibbleDownTime']+t['relSeedlingTime']+t['dibbleUpTime']
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
 							for cm in self.checkIfInterupted(): yield cm
@@ -363,6 +366,7 @@ class Bracke(PlantHead):
 						self.debugPrint("done with yielding")
 						p.m.treesPlanted.append(tree)
 						p.m.treeMoni.observe(len(p.m.treesPlanted), self.sim.now())
+						p.m.stopControl()
 					self.debugPrint("signals!")
 					p.plantSignals+=1
 					for c in self.releaseDriver(): yield c
