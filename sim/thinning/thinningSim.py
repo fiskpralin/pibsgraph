@@ -293,14 +293,17 @@ def setDefaultThinningParams(simParam={}):
 	s['powHoldLoadAtDistEF']=1#
 	s['powTwigCrack']=5#[kW] power demanded to twig crack the trees at the head
 	s['powLog']=1# [kW] power demanded to log trees at the head
+	s['twigCrackCoeffDF']=30#[%] How much can the twigcracking decrease the cross section of the tree(s)
 
 	#BUNDLER J
-	s['dropPos']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
-	s['timeWrap']=10# Time it takes to wrap and finish ONE bundle
-	s['timeLog']=5#[s] Time it takes to log a bundle. Applicable when head does not log (c,e)
-	s['powLogJ']=1#[kW] Power it takes to log a wrapped bundle at the bundler J
-	s['powWrap']=0.5#[kW] Power it takes to wrap the bundle
-	
+	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
+	s['timeBundleCEJ']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
+	s['timeBundleDFJ']=7#[s] Time it takes to finish bundling of trees in the bundler, when twig cracking at head
+	s['powBundleJ']=1#[kW] Power it takes to log a wrapped bundle at the bundler J
+	s['maxXSectionJ']=1#[m2] Maximum cross section of "stored" trees in bundler
+	s['xSectionThreshJ']=0.8#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+	s['dropPos']=3#[m]
+	s['compressCoeffCEJ']=30# [%] How much can the compression of the bundler compress the cross section of the trees
 	#PRIORITIES
 	#--
 

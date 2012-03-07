@@ -74,14 +74,15 @@ powHoldLoadEF	1	[kW/kg]
 powHoldLoadAtDistEF	1	[kW/m]
 powTwigCrack	5	[kW]	power demanded to twig crack the trees at the head
 powLog	1	[kW]	power demanded to log trees at the head
+twigCrackCoeffDF	30	  [%]	   How much can the twigcracking decrease the cross section of the tree(s)
 
 			#BUNDLER J
-dropPos	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
-timeWrap	10	[s]	Time it takes to wrap and finish ONE bundle
-timeLog	5	[s]	Time it takes to log a bundle. Applicable when head does not log (c,e)
-powLog	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
-powWrap	0.5	[kW]	Power it takes to wrap the bundle
-			
-
+dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
+timeBundleCEJ	10	[s]	Time it takes to finish bundling of trees in the bundler, when no twig cracking at head
+timeBundleDFJ	7	[s]	Time it takes to finish bundling of trees in the bundler, when twig cracking at head
+powBundleJ	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
+maxXSectionJ 1	[m2]	Maximum cross section of "stored" trees in bundler
+xSectionThreshJ	0.8		[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+compressCoeffCEJ		30		[%]	  How much can the compression of the bundler compress the cross section of the trees?	
 			#PRIORITIES
 			#--
