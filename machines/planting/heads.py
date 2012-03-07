@@ -201,7 +201,6 @@ class Mplanter(PlantHead):
 								pos[0]+=posDiff[0]
 								pos[1]+=posDiff[1]
 								done=True
-								self.sim.stats['plant attempts']+=1
 								for o in boulList:
 									dist2=pow(o.pos[0]-pos[0],2)+pow(o.pos[1]-pos[1],2)
 									depth=self.depth-p.m.dibbleDepth #positive
@@ -211,6 +210,7 @@ class Mplanter(PlantHead):
 										for c in self.cmnd([], t['dibbleDownTime'], auto['plant']):
 											yield c
 											for cm in self.checkIfInterupted(): yield cm
+										self.sim.stats['plant attempts']+=1
 										self.timeConsumption['planting']+=t['dibbleDownTime']
 										break
 								if done: 
@@ -244,7 +244,7 @@ class Mplanter(PlantHead):
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
 							for cm in self.checkIfInterupted(): yield cm
-						self.timeConsumption['planting']+=t['dibbleDownTime']
+						self.timeConsumption['planting']+=plantTime
 						debugPrint("done with yielding")
 						p.m.treesPlanted.append(tree)
 						p.m.treeMoni.observe(len(p.m.treesPlanted), self.sim.now())
@@ -322,7 +322,6 @@ class Bracke(PlantHead):
 								pos[0]+=posDiff[0]
 								pos[1]+=posDiff[1]
 								done=True
-								self.sim.stats['plant attempts']+=1
 								for o in boulList:
 									dist2=pow(o.pos[0]-pos[0],2)+pow(o.pos[1]-pos[1],2)
 									depth=self.depth-p.m.dibbleDepth #positive
@@ -331,7 +330,8 @@ class Bracke(PlantHead):
 										for c in self.cmnd([], t['dibbleDownTime'], auto['plant']):
 											yield c
 											for cm in self.checkIfInterupted(): yield cm
-										self.timeConsumption['planting']+=t['dibbleDownTime']	
+										self.timeConsumption['planting']+=t['dibbleDownTime']
+										self.sim.stats['plant attempts']+=1
 										break
 								if done: 
 									self.debugPrint("dibble succeded, plants")
@@ -359,7 +359,7 @@ class Bracke(PlantHead):
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
 							for cm in self.checkIfInterupted(): yield cm
-						self.timeConsumption['planting']+=t['dibbleDownTime']
+						self.timeConsumption['planting']+=plantTime
 						self.debugPrint("done with yielding")
 						p.m.treesPlanted.append(tree)
 						p.m.treeMoni.observe(len(p.m.treesPlanted), self.sim.now())

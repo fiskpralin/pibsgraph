@@ -63,7 +63,8 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		self.nSeedlingsPWArea=floor(self.stockingRate/10000.*self.workingArea)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
 		self.trees=0 	#trees in trunk
-		self.direction=random.uniform(0,2*pi)
+		#self.direction=random.uniform(0,2*pi)
+		self.direction=0
 		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 2, 'haltTime': 3, 'searchTime': 2, 'switchFocus':0}
 		#if self.G.PMfocusSwitch: self.times['switchFocus']= self.G.PMfocusSwitch
 		if self.headType=='Bracke':
@@ -774,8 +775,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					self.cmnd(commands, t['haltTime'],auto['haltMound'])
 					for head in pHeads: head.timeConsumption['halting']+=t['haltTime']
 			if not (pH.abort or pH.strikedImmobile):
-				"""dibbleDistr=[b for b in boul if b.volume>0.001]
-				self.stats['number of dibble disr stones in mound']+=sum()"""
 				for b in boul:
 					#get local xy-coordinates
 					cylPos=self.m.getCylindrical(b.pos,origin=orig, direction=direct)
@@ -805,10 +804,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
 		for pH in pHeads:
 			pH.timeConsumption['mounding']+=t['moundAndHeapTime']
-			if not pH.abort:
-				dibDist=[b for b in pH.moundObst if b.volume>dibbleDisturb]
-				self.sim.stats['number of dibble disr stones in mound']+=len(dibDist)
-				self.sim.stats['dibble distr stone vol cum']+=sum([b.volume for b in dibDist])
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]
