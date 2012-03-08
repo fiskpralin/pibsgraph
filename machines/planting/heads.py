@@ -170,6 +170,7 @@ class Mplanter(PlantHead):
 					"""When this is invoked, the pDev is assumed to be waiting for this event."""
 					auto=p.m.automatic
 					t=p.m.times
+					p.m.stopControl()
 					if self.moundSumA < 0.08: #sumA smaller than 8dm2
 						lim=sqrt((0.10**2)/pi)#model has rectangular stones. 10cm side
 						if self.biggestBlock < lim:
@@ -294,6 +295,7 @@ class Bracke(PlantHead):
 			if self.interrupted():
 				cause=self.cause
 				self.pos=self.getPos()
+				p.m.stopControl()
 				if cause=='Plant' or cause=='plant':
 					"""When this is invoked, the pDev is assumed to be waiting for this event."""
 					auto=p.m.automatic

@@ -62,19 +62,10 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		self.dibbleDepth=0.1
 		self.nSeedlingsPWArea=floor(self.stockingRate/10000.*self.workingArea)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
-		self.trees=0 	#trees in trunk
 		#self.direction=random.uniform(0,2*pi)
 		self.direction=0
-		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 3, 'searchTime': 2, 'switchFocus':0}
-		#if self.G.PMfocusSwitch: self.times['switchFocus']= self.G.PMfocusSwitch
-		if self.headType=='Bracke':
-			self.times['searchTime']=0 #specifics for this head..
+		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 3, 'searchTime': 0, 'switchFocus':0}
 		self.timeConsumption={'diggTime': 0, 'heapTime': 0,'moundAndHeapTime': 0, 'dibbleDownTime': 0, 'relSeedlingTime': 0, 'haltTime': 0, 'searchTime': 0, 'switchFocus':0, 'machineMovement':0}
-		"""
-		updated:
-		-searchTime
-		-switchFocus
-		"""
 		self.type=mtype
 		self.pDevs=[]
 		self.treesPlanted=[]
@@ -108,8 +99,13 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 						raise Exception('exceeds initially and cannot adjust.', it, newcyl)
 					self.pDevs[0].setPos(newpos)				
 			self.mass+=4000. #the other planting head has a mass of 4 tons.
-		self.inPlaceEvent=SimEvent('machine has moved in place', sim=self.sim) #fired when machine has moved
+		self.inPlaceEvent=SimEvent('machine has moved in place', sim=self.sim) #event fired when machine has moved
 		self.calcStumpsInWA() #updates some statistics
+		if self.headType=='Mplanter':
+			self.times['searchTime']=0.1*self.sim.stats['stumps in WA'] #specifics for this head..0 otherwise
+		elif self.headType=='Bracke': pass
+		else:
+			raise Exception('could not identify head type') #safety first..
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
 		distance=self.craneMaxL #not exact, half circle may overlap more or less than this.
@@ -240,6 +236,7 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 					for pH in p.plantHeads:
 						if pH.cause is not None: return False #machine is waiting for
 			print "Stop Reason:", reason
+		print self.sim.stats['mound attempts'],len( self.treesPlanted)
 		self.sim.stopSimulation()
 	def isWithinPlantingBorders(self, pos, c='cartesian'):
 		#plantingarea is approximated as circle.
@@ -763,6 +760,8 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			sumA=0
 			immobile=0.008 #as of 29th January 2012 this is the number to use.
 			dibbleDisturb=0.001
+			print self.sim.stats['mound attempts'],len( self.m.treesPlanted)
+			self.m.stopControl()
 			self.sim.stats['mound attempts']+=1
 			#the old one: immobile=sqrt((0.20**2)/pi) #20cm rectangle side <=> tihs radius for sphere
 			for r in roots: #determine if a root is hit in the critical area.
