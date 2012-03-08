@@ -32,8 +32,8 @@ class ThinningCraneHead(Process):
 		self.gripArea=0
 		self.trees=[]
 		self.corrPerSide=self.s['noCorridorsPerSideCD'] #default value
-		self.maxGripArea=self.s['maxGripAreaCD'] #default, inf. Change in subclass if required
-		self.maxTreeWeight=self.s['maxWeightCD'] #default, inf. Change in subclass if required
+		self.maxGripArea=self.s['maxGripAreaCD'] #default, Change in subclass if required
+		self.maxTreeWeight=self.s['maxWeightCD'] #default, Change in subclass if required
 
 	def treeChopable(self, t):
 		"""determines if the cranehead can handle the tree in question"""
@@ -54,9 +54,9 @@ class ThinningCraneHead(Process):
 		oldCyl = getCylindrical(self.pos, origin=self.m.pos, direction=self.m.direction)
 		dTh=abs(oldCyl[1]-cyl[1])
 		dr=abs(oldCyl[0]-cyl[0])
-		traveltime=max(dTh/self.s['angularVelocityOfCrane'], dr/self.m.velocities['crane radial']) # THESE TIMES SHOULD BE ADAPTED TO SIMPARAM
+		traveltime=max(dTh/self.angVel, dr/self.radVel)
 		self.pos=pos
-		return traveltime+self.m.times['crane const']
+		return traveltime+self.moveCraneConst
 
 	def getNextTree(self, road=None):
 		"""returns the tree that is closest to the machine, i.e lowest y-value in road cart.coord.sys.
@@ -98,13 +98,13 @@ class ThinningCraneHead(Process):
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
 		self.gripArea=0
-		return self.cmnd([], time=self.m.times['dumpTrees'], auto=self.m.automatic['dumpTrees']) # THIS TIME AND AUTOMATION FROM SIMPARAM
+		return self.cmnd([], time=self.timeDropTrees, auto=self.m.automatic['dumpTrees']) # THIS AUTOMATION FROM SIMPARAM
 
 	def getStartPos(self):
 		if self.side=='left':
-			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.]) #SIMPARAM
+			return self.m.getCartesian([self.s['minCraneLength'], 2*pi/3.])
 		else:
-			return self.m.getCartesian([self.m.craneMinL, pi/3.]) #SIMPARAM
+			return self.m.getCartesian([self.s['minCraneLength'], pi/3.])
 
 	def roadAssigned(self):
 		"""may later be used to wait for an assignment"""
@@ -118,7 +118,7 @@ class ThinningCraneHead(Process):
 
 	def chopNext(self):
 		c=[]
-		CC=self.m.times['chop const'] #constant for felling #SIMPARAM
+		CC=self.chopConst#constant for felling,zero for BC head
 		t=self.getNextTree(self.road)
 		if not t:
 			col=self.road.color
@@ -129,7 +129,7 @@ class ThinningCraneHead(Process):
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
 			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
 			else: time=self.setPos(self.road.startPoint)
-			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])#SIMPARAM
+			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])#SIMPARAM?
 			c.extend(self.dumpTrees()) #dumps them down.
 		
 		elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
@@ -137,7 +137,7 @@ class ThinningCraneHead(Process):
 			self.cmnd(c, time, auto=self.m.automatic['moveArmOut']) #SIMPARAM
 			#determine choptime
 			cross_sec_area=t.dbh**2*pi
-			choptime=CC+cross_sec_area/self.m.velocities['fell'] #SIMPARAM
+			choptime=CC+cross_sec_area/self.velFell
 			self.cmnd(c, choptime, auto=self.m.automatic['chop']) #SIMPARAM
 			t.pos=[5000, 5000] #far away, for visual reasons.
 			t.h-=0.5 #harvester is at least half a meter above ground
@@ -168,7 +168,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.road=None #the currect road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
-		#self.velocity=self.m.times['moveArmIn']
 		self.color=self.m.color
 		self.reset()
 		self.direction=pi/2.
@@ -177,6 +176,12 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.corridorWidth=self.width
 		self.corrPerSide=self.s['noCorridorsPerSideCD']
 		self.length=self.s['headWidthCD']+0.5
+		self.angVel=self.s['angularVelocityOfCrane']
+		self.radVel=self.s['radialVelocityOfCrane']
+		self.moveCraneConst=self.s['moveCraneConst']
+		self.timeDropTrees=self.s['timeDropTreesCD']
+		self.chopConst=self.s['constFellTreeCD']
+		self.velFell=self.s['velocityFellTreeCD']
 		
 	def run(self):
 		while True:
@@ -271,7 +276,6 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.road=None #the currect road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
-		#self.velocity=self.m.times['moveArmIn']
 		self.color=self.m.color
 		self.trees=[]
 		self.reset()
@@ -282,6 +286,12 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.corrPerSide=self.s['noCorridorsPerSideEF']#3
 		self.maxTreeWeight=self.s['maxWeightEF']#350 #set it to same as BC...
 		self.maxGripArea=self.s['maxGripAreaEF']#0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
+		self.angVel=self.s['angularVelocityOfCrane']
+		self.radVel=self.s['radialVelocityOfCrane']
+		self.moveCraneConst=self.s['moveCraneConst']
+		self.timeDropTrees=self.s['timeDropTreesEF']
+		self.chopConst=self.s['constFellTreeEF']
+		self.velFell=self.s['velocityFellTreeEF']
 
 	def run(self):
 		while True:

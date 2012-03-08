@@ -40,13 +40,13 @@ chooseCorridor	False
 moveArmOutCD	False
 fellTreesCD	True
 moveArmInCD	False
-dropTreesD	False
+dropTreesCD	False
 loggingD	False
 twigCrackD	False
 moveArmOutEF	False
 fellTreesEF	True
 moveArmInEF	False
-dropTreesF	False
+dropTreesEF	False
 loggingF	False
 twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
@@ -56,6 +56,8 @@ headWidthCD	1	   [m]	Width of the conventional head
 headWidthEF	0.5	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
+constFellTreeCD		0
+constFellTreeEF		1
 timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head
 timeDropTreesEF	2	[s]	Time it takes to drop the trees for the conventional head
 timeTwigCrack	5	[s]	Time it takes to twig crack a bunch of trees

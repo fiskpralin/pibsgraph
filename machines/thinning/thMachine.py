@@ -43,13 +43,6 @@ class ThinningMachine(Machine, UsesDriver):
 								'dumpTrees': False,
 								'switchFocus': False,
 								'chop':True} #default, override before activating machine
-			elif head=='conv':
-				self.automatic={'move': False,
-								'moveArmIn': False,
-								'moveArmOut': False,
-								'dumpTrees': False,
-								'switchFocus': False,
-								'chop':False} #default, override before activating machine
 			elif head=='convAcc':
 				self.automatic={'move': False,
 								'moveArmIn': False,
