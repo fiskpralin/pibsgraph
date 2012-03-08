@@ -1,7 +1,7 @@
 from SimPy.Simulation  import *
 
 from machines.basics import UsesDriver, Machine, Operator
-from thHeads import ThinningCraneHead, BCHead, ConventionalHead, ConventionalHeadAcc
+from thHeads import ThinningCraneHead, BCHead, ConventionalHeadAcc
 from thRoad import ThinningRoad
 from terrain.obstacle import Obstacle
 from terrain.tree import Tree
@@ -43,13 +43,6 @@ class ThinningMachine(Machine, UsesDriver):
 								'dumpTrees': False,
 								'switchFocus': False,
 								'chop':True} #default, override before activating machine
-			elif head=='conv':
-				self.automatic={'move': False,
-								'moveArmIn': False,
-								'moveArmOut': False,
-								'dumpTrees': False,
-								'switchFocus': False,
-								'chop':False} #default, override before activating machine
 			elif head=='convAcc':
 				self.automatic={'move': False,
 								'moveArmIn': False,
@@ -76,9 +69,6 @@ class ThinningMachine(Machine, UsesDriver):
 		if head=='BC':
 			for i in range(nCranes):
 				h=BCHead(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
-		elif head=='conv':
-			for i in range(nCranes):
-				h=ConventionalHead(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
 		elif head=='convAcc':
 			for i in range(nCranes):
 				h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self) #adds to above list.

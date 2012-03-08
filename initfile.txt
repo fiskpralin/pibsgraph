@@ -24,30 +24,29 @@ levelOfThinning	50	[%]
 			#what treesets to run for is omitted in this section
 
 			#MACHINES A,B
-startMoveConst	2	[s]
+moveConst	2	[s]
 velocityOfMachine	5	[m/s]
 radialVelocityOfCrane	1	[m/s]
-startRadialMoveCraneConst	1	[s]
-angularVelocityMachine	0.1	[deg/s]
-startAngularMoveCraneConst	0.1	[s]
+moveCraneConst	1	[s]
+angularVelocityOfCrane	0.1	[deg/s]
 maxPower	500	[kW]	Maximum powerthe machine can operate at
 minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping... Necessary?
 powToMove	100	[kW]	The power it takes to have the machine moving
 
 			#AUTOMATION
 switchFocusCD	False
-swtcihFocusEF	False
+switchFocusEF	False
 chooseCorridor	False
 moveArmOutCD	False
 fellTreesCD	True
 moveArmInCD	False
-dropTreesD	False
+dropTreesCD	False
 loggingD	False
 twigCrackD	False
 moveArmOutEF	False
 fellTreesEF	True
 moveArmInEF	False
-dropTreesF	False
+dropTreesEF	False
 loggingF	False
 twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
@@ -57,6 +56,8 @@ headWidthCD	1	   [m]	Width of the conventional head
 headWidthEF	0.5	   [m]	Width of the continuous head
 velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
+constFellTreeCD		0
+constFellTreeEF		1
 timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head
 timeDropTreesEF	2	[s]	Time it takes to drop the trees for the conventional head
 timeTwigCrack	5	[s]	Time it takes to twig crack a bunch of trees
