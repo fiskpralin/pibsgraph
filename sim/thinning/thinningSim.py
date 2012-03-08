@@ -243,12 +243,11 @@ def setDefaultThinningParams(simParam={}):
 	#what treesets to run for is omitted in this section
 
 	#MACHINES A,B
-	s['startMoveConst']=2#[s]
+	s['moveConst']=2#[s]
 	s['velocityOfMachine']=5#[m/s]
 	s['radialVelocityOfCrane']=1#[m/s]
-	s['startRadialMoveCraneConst']=1#[s]
-	s['angularVelocityMachine']=0.1#[deg/s]
-	s['startAngularMoveCraneConst']=0.1#
+	s['moveCraneConst']=1#[s]
+	s['angularVelocityOfCrane']=0.1#[deg/s]
 	s['maxPower']=500 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
 	s['powToMove']=100 #[kW]The power it takes to have the machine moving

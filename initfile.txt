@@ -24,19 +24,18 @@ levelOfThinning	50	[%]
 			#what treesets to run for is omitted in this section
 
 			#MACHINES A,B
-startMoveConst	2	[s]
+moveConst	2	[s]
 velocityOfMachine	5	[m/s]
 radialVelocityOfCrane	1	[m/s]
-startRadialMoveCraneConst	1	[s]
-angularVelocityMachine	0.1	[deg/s]
-startAngularMoveCraneConst	0.1	[s]
+moveCraneConst	1	[s]
+angularVelocityOfCrane	0.1	[deg/s]
 maxPower	500	[kW]	Maximum powerthe machine can operate at
 minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping... Necessary?
 powToMove	100	[kW]	The power it takes to have the machine moving
 
 			#AUTOMATION
 switchFocusCD	False
-swtcihFocusEF	False
+switchFocusEF	False
 chooseCorridor	False
 moveArmOutCD	False
 fellTreesCD	True

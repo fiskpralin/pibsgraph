@@ -47,14 +47,14 @@ class ThinningCraneHead(Process):
 
 	def setPos(self,pos):
 		"""
-v		Changes position for planting device, and records monitors associated with this.
+		Changes position for thinning crane, and records monitors associated with this.
 		"""
 		#record angles:
 		cyl = getCylindrical(pos, origin=self.m.pos, direction=self.m.direction)
 		oldCyl = getCylindrical(self.pos, origin=self.m.pos, direction=self.m.direction)
 		dTh=abs(oldCyl[1]-cyl[1])
 		dr=abs(oldCyl[0]-cyl[0])
-		traveltime=max(dTh/self.m.velocities['crane angular'], dr/self.m.velocities['crane radial'])
+		traveltime=max(dTh/self.s['angularVelocityOfCrane'], dr/self.m.velocities['crane radial']) # THESE TIMES SHOULD BE ADAPTED TO SIMPARAM
 		self.pos=pos
 		return traveltime+self.m.times['crane const']
 
@@ -98,13 +98,13 @@ v		Changes position for planting device, and records monitors associated with th
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
 		self.gripArea=0
-		return self.cmnd([], time=self.m.times['dumpTrees'], auto=self.m.automatic['dumpTrees'])
+		return self.cmnd([], time=self.m.times['dumpTrees'], auto=self.m.automatic['dumpTrees']) # THIS TIME AND AUTOMATION FROM SIMPARAM
 
 	def getStartPos(self):
 		if self.side=='left':
-			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.])
+			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.]) #SIMPARAM
 		else:
-			return self.m.getCartesian([self.m.craneMinL, pi/3.])
+			return self.m.getCartesian([self.m.craneMinL, pi/3.]) #SIMPARAM
 
 	def roadAssigned(self):
 		"""may later be used to wait for an assignment"""
@@ -118,7 +118,7 @@ v		Changes position for planting device, and records monitors associated with th
 
 	def chopNext(self):
 		c=[]
-		CC=self.m.times['chop const'] #constant for felling
+		CC=self.m.times['chop const'] #constant for felling #SIMPARAM
 		t=self.getNextTree(self.road)
 		if not t:
 			col=self.road.color
@@ -129,16 +129,16 @@ v		Changes position for planting device, and records monitors associated with th
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
 			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
 			else: time=self.setPos(self.road.startPoint)
-			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])
+			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])#SIMPARAM
 			c.extend(self.dumpTrees()) #dumps them down.
 		
 		elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 			time=self.setPos(self.harvestPos(t))
-			self.cmnd(c, time, auto=self.m.automatic['moveArmOut'])
+			self.cmnd(c, time, auto=self.m.automatic['moveArmOut']) #SIMPARAM
 			#determine choptime
 			cross_sec_area=t.dbh**2*pi
-			choptime=CC+cross_sec_area/self.m.velocities['fell']
-			self.cmnd(c, choptime, auto=self.m.automatic['chop'])
+			choptime=CC+cross_sec_area/self.m.velocities['fell'] #SIMPARAM
+			self.cmnd(c, choptime, auto=self.m.automatic['chop']) #SIMPARAM
 			t.pos=[5000, 5000] #far away, for visual reasons.
 			t.h-=0.5 #harvester is at least half a meter above ground
 			t.harvested=True
@@ -260,96 +260,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		c3=c([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		c4=c([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
-
-		
-class ConventionalHead(ThinningCraneHead, UsesDriver):
-	"""
-	This is a conventional cranehead for thinning.
-	"""
-	def __init__(self, sim, driver, machine):
-		UsesDriver.__init__(self,driver)
-		ThinningCraneHead.__init__(self, sim, name="ConvHead", machine=machine)
-		self.road=None #the currect road will be stored here
-		self.pos=self.getStartPos()
-		self.m.heads[self.side]=self
-		#self.velocity=self.m.times['moveArmIn']
-		self.color=self.m.color
-		self.trees=[]
-		self.reset()
-		self.direction=pi/2.
-		self.width=self.s['headWidthEF']
-		self.corridorWidth=self.s['corridorWidthEF']
-		self.corrPerSide=self.s['noCorridorsPerSideEF']
-		self.length=self.s['headWidthEF']# NOTE THAT THIS MAKES HEAD SQUARE
-		self.maxTreeWeight=self.s['maxWeightEF'] #
-
-	def run(self):
-		while True:
-			yield waituntil, self, self.roadAssigned
-			if self.road==self.m.roads['main']: 
-				#clear the mainroad.
-				roadList=[self.road]
-				sPoint=self.pos
-			else:
-				#road is a thinning corridor.
-				if len(self.m.heads)==2:
-					roadList=self.m.roads[self.m.pos[1]][self.side]
-					if roadList[0] is not self.road: raise Exception('road system does not work as expected.%s, %s, %s'%(self.side, self.road, roadList[0]))
-				else:
-					a=self.m.roads[self.m.pos[1]].values() #two list with 3 roads in each
-					roadList=a[0]+a[1]
-			for road in roadList:
-				self.road=road
-				mainRoad=True
-				print "starts harvesting"
-				if self.road != self.m.roads['main']:
-					mainRoad=False
-					sPoint=road.startPoint
-					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.s['moveArmOutEF']): yield c
-				stop=False
-				while not stop:
-					cmd=self.chopNext()
-					if len(cmd)==0:
-						stop=True
-					else:
-						for c in cmd: yield c
-						#return to machine efter each tree.. trees have been gathered. return.
-					time=self.setPos(sPoint)
-					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-					for c in self.cmnd([], time, auto=self.s['moveArmInEF']): yield c
-					for c in self.dumpTrees(): yield c #dumps them down.
-			for c in self.releaseDriver(): yield c
-			print "done at site", self.pos
-			self.reset()
-
-	def treeChopable(self, t):
-		"""determines if a tree is chopable."""
-		if t.dbh>0.10 or t.h>10:
-			return False
-		else: return True
-		
-   	def draw(self, ax):
-		cart=self.m.getCartesian
-		#crane:
-		wC=0.2
-		[r,th]=self.m.getCylindrical(self.getCraneMountPoint())
-		direct=self.m.direction-pi/2.+th
-		h1=cart([wC/2., 0],direction=direct, fromLocalCart=True)
-		h2=cart([wC/2., r],direction=direct, fromLocalCart=True)
-		h3=cart([-wC/2., r], direction=direct, fromLocalCart=True)
-		h4=cart([-wC/2., 0], direction=direct, fromLocalCart=True)
-		ax.add_patch(mpl.patches.Polygon(np.array([h1,h2,h3,h4]), closed=True, facecolor='k'))
-		#head
-		c=self.m.getCartesian
-		W=self.width
-		L=self.length
-		direction=self.m.direction-pi/2.+self.m.getCylindrical(self.pos)[1]
-		c1=c([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=c([-W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=c([W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
 
 

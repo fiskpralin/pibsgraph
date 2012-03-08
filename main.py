@@ -29,7 +29,7 @@ if __name__=='__main__':
 		elif sys.argv[1] == 'tryItAll': #tests for all simulations so far. See if they throw exception
 			for i in range(3):
 				s=PM.PlantmSim(vis=False,anim=anim,mtype=random.choice(['1a1h', '1a2h', '2a2h', '2a4h']))
-				TH.ThinningSim(vis=False,anim=anim, head=random.choice(['conv', 'BC']), nCranes=random.choice([1,2]))
+				TH.ThinningSim(vis=False,anim=anim, head=random.choice(['convAcc', 'BC']), nCranes=random.choice([1,2]))
 				FW.ForwarderSim(vis=False, anim=anim)
 			print "--------------"
 			print "you passed the test. Feel free to commit."
@@ -110,7 +110,7 @@ if __name__=='__main__':
 		#G.terrain=PlantMTerrain(G, ttype='5')
 		G.plotDelay=20
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
-		TH.ThinningSim(vis=True,anim=anim,G=G, head='conv', nCranes=2)
+		TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)
 		#cProfile.run('FW.ForwarderSim(vis=True, anim=anim, G=G)')
