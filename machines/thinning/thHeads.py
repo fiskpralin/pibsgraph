@@ -31,10 +31,7 @@ class ThinningCraneHead(Process):
 		self.treeWeight=0
 		self.gripArea=0
 		self.trees=[]
-		self.corrPerSide=self.s['noCorridorsPerSideCD'] #default value
-		self.maxGripArea=self.s['maxGripAreaCD'] #default, Change in subclass if required
-		self.maxTreeWeight=self.s['maxWeightCD'] #default, Change in subclass if required
-
+		
 	def treeChopable(self, t):
 		"""determines if the cranehead can handle the tree in question"""
 		raise Exception('ThinningCraneHead should implement treeChopable method.')
@@ -56,7 +53,7 @@ class ThinningCraneHead(Process):
 		dr=abs(oldCyl[0]-cyl[0])
 		traveltime=max(dTh/self.angVel, dr/self.radVel)
 		self.pos=pos
-		return traveltime+self.moveCraneConst
+		return traveltime+self.m.times['crane const']
 
 	def getNextTree(self, road=None):
 		"""returns the tree that is closest to the machine, i.e lowest y-value in road cart.coord.sys.
@@ -98,13 +95,13 @@ class ThinningCraneHead(Process):
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
 		self.gripArea=0
-		return self.cmnd([], time=self.timeDropTrees, auto=self.m.automatic['dumpTrees']) # THIS AUTOMATION FROM SIMPARAM
+		return self.cmnd([], time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 
 	def getStartPos(self):
 		if self.side=='left':
-			return self.m.getCartesian([self.s['minCraneLength'], 2*pi/3.])
+			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.])
 		else:
-			return self.m.getCartesian([self.s['minCraneLength'], pi/3.])
+			return self.m.getCartesian([self.m.craneMinL, pi/3.])
 
 	def roadAssigned(self):
 		"""may later be used to wait for an assignment"""
@@ -129,16 +126,16 @@ class ThinningCraneHead(Process):
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
 			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
 			else: time=self.setPos(self.road.startPoint)
-			self.cmnd(c, time, auto=self.m.automatic['moveArmIn'])#SIMPARAM?
+			self.cmnd(c, time, auto=self.automatic['moveArmIn'])
 			c.extend(self.dumpTrees()) #dumps them down.
 		
 		elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 			time=self.setPos(self.harvestPos(t))
-			self.cmnd(c, time, auto=self.m.automatic['moveArmOut']) #SIMPARAM
+			self.cmnd(c, time, auto=self.automatic['moveArmOut'])
 			#determine choptime
 			cross_sec_area=t.dbh**2*pi
 			choptime=CC+cross_sec_area/self.velFell
-			self.cmnd(c, choptime, auto=self.m.automatic['chop']) #SIMPARAM
+			self.cmnd(c, choptime, auto=self.automatic['chop'])
 			t.pos=[5000, 5000] #far away, for visual reasons.
 			t.h-=0.5 #harvester is at least half a meter above ground
 			t.harvested=True
@@ -161,7 +158,7 @@ class ThinningCraneHead(Process):
 
 			
 class BCHead(ThinningCraneHead, UsesDriver):
-	"""This is the cranehead of Rikard and julia"""
+	"""This is the cranehead of Rickard and julia"""
 	def __init__(self, sim, driver, machine):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine)
@@ -178,10 +175,15 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.length=self.s['headWidthCD']+0.5
 		self.angVel=self.s['angularVelocityOfCrane']
 		self.radVel=self.s['radialVelocityOfCrane']
-		self.moveCraneConst=self.s['moveCraneConst']
 		self.timeDropTrees=self.s['timeDropTreesCD']
 		self.chopConst=self.s['constFellTreeCD']
 		self.velFell=self.s['velocityFellTreeCD']
+		self.maxGripArea=self.s['maxGripAreaCD']
+		self.automatic={'moveArmIn': self.s['moveArmInCD'],
+						'moveArmOut': self.s['moveArmOutCD'],
+						'dumpTrees': self.s['dropTreesCD'],
+						'chop': self.s['fellTreesCD']}
+		
 		
 	def run(self):
 		while True:
@@ -205,7 +207,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				if self.road != self.m.roads['main']:
 					mainRoad=False
 					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.s['moveArmOutCD']): yield c
+					for c in self.cmnd([], time, auto=self.automatic['moveArmOut']): yield c
 				while True:
 					cmd=self.chopNext()
 					if len(cmd)==0: break
@@ -213,7 +215,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				#trees have been gathered. return.
 				time=self.setPos(sPoint)
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-				for c in self.cmnd([], time, auto=self.s['moveArmInCD']): yield c
+				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
@@ -269,7 +271,9 @@ class BCHead(ThinningCraneHead, UsesDriver):
 
 
 class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
-	"""This is a conventional cranehead for thinning with a possibility to accumulate some trees."""
+	"""
+	This is a conventional cranehead for thinning with a possibility to accumulate some trees.
+	"""
 	def __init__(self, sim, driver, machine):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine)
@@ -288,10 +292,14 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.maxGripArea=self.s['maxGripAreaEF']#0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
 		self.angVel=self.s['angularVelocityOfCrane']
 		self.radVel=self.s['radialVelocityOfCrane']
-		self.moveCraneConst=self.s['moveCraneConst']
 		self.timeDropTrees=self.s['timeDropTreesEF']
 		self.chopConst=self.s['constFellTreeEF']
 		self.velFell=self.s['velocityFellTreeEF']
+		self.maxGripArea=self.s['maxGripAreaEF']
+		self.automatic={'moveArmIn': self.s['moveArmInEF'],
+						'moveArmOut': self.s['moveArmOutEF'],
+						'dumpTrees': self.s['dropTreesEF'],
+						'chop': self.s['fellTreesEF']}
 
 	def run(self):
 		while True:
@@ -316,14 +324,14 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					mainRoad=False
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
-					for c in self.cmnd([], time, auto=self.s['moveArmOutEF']): yield c
+					for c in self.cmnd([], time, auto=self.automatic['moveArmOut']): yield c
 				while True:
 					cmd=self.chopNext()
 					if len(cmd)==0: break
 					for c in cmd: yield c
 				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-				for c in self.cmnd([], time, auto=self.s['moveArmInEF']): yield c #
+				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos

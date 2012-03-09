@@ -24,10 +24,10 @@ levelOfThinning	50	[%]
 			#what treesets to run for is omitted in this section
 
 			#MACHINES A,B
-moveConst	2	[s]
-velocityOfMachine	5	[m/s]
+moveConst	5	[s]
+velocityOfMachine	1	[m/s]
 radialVelocityOfCrane	1	[m/s]
-moveCraneConst	1	[s]
+moveCraneConst	1.5	[s]
 angularVelocityOfCrane	0.1	[deg/s]
 maxPower	500	[kW]	Maximum powerthe machine can operate at
 minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping... Necessary?
@@ -58,8 +58,8 @@ velocityFellTreeCD	0.1	[m/s]	Velocity of the cutting
 velocityFellTreeEF	0.1	[m/s]	Velocity of the cutting
 constFellTreeCD		0
 constFellTreeEF		1
-timeDropTreesCD	2	[s]	Time it takes to drop the trees for the continuous head
-timeDropTreesEF	2	[s]	Time it takes to drop the trees for the conventional head
+timeDropTreesCD	10	[s]	Time it takes to drop the trees for the continuous head
+timeDropTreesEF	10	[s]	Time it takes to drop the trees for the conventional head
 timeTwigCrack	5	[s]	Time it takes to twig crack a bunch of trees
 timeLog	5	[s]	Time it takes to log the treas at the head
 velDecreaseFellingCD	30	[%]	The decrease in velocity when cutting 

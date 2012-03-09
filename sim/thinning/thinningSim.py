@@ -243,10 +243,10 @@ def setDefaultThinningParams(simParam={}):
 	#what treesets to run for is omitted in this section
 
 	#MACHINES A,B
-	s['moveConst']=2#[s]
-	s['velocityOfMachine']=5#[m/s]
+	s['moveConst']=5#[s]
+	s['velocityOfMachine']=1#[m/s]
 	s['radialVelocityOfCrane']=1#[m/s]
-	s['moveCraneConst']=1#[s]
+	s['moveCraneConst']=1.5#[s]
 	s['angularVelocityOfCrane']=0.1#[deg/s]
 	s['maxPower']=500 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
@@ -277,8 +277,8 @@ def setDefaultThinningParams(simParam={}):
 	s['velocityFellTreeEF']=0.1 #[m/s] Velocity of the cutting
 	s['constFellTreeCD']=0
 	s['constFellTreeEF']=1
-	s['timeDropTreesCD']=2#[s] Time it takes to drop the trees for the continuous head
-	s['timeDropTreesEF']=2#[s] Time it takes to drop the trees for the conventional head
+	s['timeDropTreesCD']=10#[s] Time it takes to drop the trees for the continuous head
+	s['timeDropTreesEF']=10#[s] Time it takes to drop the trees for the conventional head
 	s['timeTwigCrack']=5#[s] Time it takes to twig crack a bunch of trees
 	s['timeLog']=5#[s] Time it takes to log the treas at the head
 	s['velDecreaseFellingCD']=30#[%] The decrease in velocity when cutting 
