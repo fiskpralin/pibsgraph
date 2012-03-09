@@ -69,8 +69,10 @@ class Terrain():
 		self.maybeThinning=[102, 103, 403, 105, 304]
 		self.thinningFiles=self.exceptionalThinning+self.maybeThinning
 	def generateTrees(self,dens, dbh_mean, dbh_std):
-		"""Generates trees. Can only handle square areas right now.
-		This is only done once, so code is not optimized."""
+		"""
+		Generates trees. Can only handle square areas right now.
+		This is only done once, so code is not optimized.
+		"""
 		self.dbh_mean=dbh_mean
 		self.dens=dens
 		self.dbh_std=dbh_std

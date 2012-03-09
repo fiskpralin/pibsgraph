@@ -36,7 +36,9 @@ class ThinningCraneHead(Process):
 		self.maxTreeWeight=self.s['maxWeightCD'] #default, Change in subclass if required
 
 	def treeChopable(self, t):
-		"""determines if the cranehead can handle the tree in question"""
+		"""
+		Determines if the cranehead can handle the tree in question.
+		"""
 		raise Exception('ThinningCraneHead should implement treeChopable method.')
 
 	def harvestPos(self,t):
