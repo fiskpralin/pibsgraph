@@ -29,17 +29,19 @@ class ThinningMachine(Machine, UsesDriver):
 		sim.activate(self.driver, self.driver.work())
 		Machine.__init__(self, name, sim, G=G, driver=self.driver, mass=21000)
 		s=self.G.simParam
-		self.velocities={'machine': 1, 'crane angular':0.35, 'crane radial': 2.5, 'fell':0.08} #radians/sec,m/s and m2/s
+		self.velocities={'machine': s['velocityOfMachine'],#1
+						 'crane angular': s['angularVelocityOfCrane'],#0.35
+						 'crane radial': s['radialVelocityOfCrane']}#2.5 #radians/sec,m/s
 		self.color='#CD0000'
 		self.moveEvent=SimEvent(name='machine moves', sim=self.sim) #signals BEFORE movement
 		self.movedEvent=SimEvent(name='machine moves', sim=self.sim) #signals AFTER movement
 		
 		self.times={'crane const':s['moveCraneConst'],#1.5,
 					'move const':s['moveConst'],#5,
-					'switchFocus': s['switchFocusTime']}#3 #same as above, change before activating. May be changed from craneHead constructor
+					'switchFocus': s['switchFocusTime']}#3 #change before activating. May be changed from craneHead constructor
 		self.craneMaxL=s['maxCraneLength']#11
 		self.craneMinL=s['minCraneLength']#3
-		self.automaticMove=False
+		self.automaticMove=s['moveMachine']#False
 		self.length=6.939
 		self.width=2.720
 		self.pos=startPos

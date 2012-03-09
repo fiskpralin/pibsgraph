@@ -51,7 +51,7 @@ class ThinningCraneHead(Process):
 		oldCyl = getCylindrical(self.pos, origin=self.m.pos, direction=self.m.direction)
 		dTh=abs(oldCyl[1]-cyl[1])
 		dr=abs(oldCyl[0]-cyl[0])
-		traveltime=max(dTh/self.angVel, dr/self.radVel)
+		traveltime=max(dTh/self.m.velocities['crane angular'], dr/self.m.velocities['crane radial'])
 		self.pos=pos
 		return traveltime+self.m.times['crane const']
 
@@ -173,8 +173,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.corridorWidth=self.width
 		self.corrPerSide=self.s['noCorridorsPerSideCD']
 		self.length=self.s['headWidthCD']+0.5
-		self.angVel=self.s['angularVelocityOfCrane']
-		self.radVel=self.s['radialVelocityOfCrane']
 		self.timeDropTrees=self.s['timeDropTreesCD']
 		self.chopConst=self.s['constFellTreeCD']
 		self.velFell=self.s['velocityFellTreeCD']
@@ -290,8 +288,6 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.corrPerSide=self.s['noCorridorsPerSideEF']#3
 		self.maxTreeWeight=self.s['maxWeightEF']#350 #set it to same as BC...
 		self.maxGripArea=self.s['maxGripAreaEF']#0.03#0.28 #[m2]is reasonable: comes from max grip radius of 0.3m
-		self.angVel=self.s['angularVelocityOfCrane']
-		self.radVel=self.s['radialVelocityOfCrane']
 		self.timeDropTrees=self.s['timeDropTreesEF']
 		self.chopConst=self.s['constFellTreeEF']
 		self.velFell=self.s['velocityFellTreeEF']
