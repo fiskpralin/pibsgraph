@@ -320,7 +320,6 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				while True:
 					cmd=self.chopNext()
 					if len(cmd)==0: break
-					print len(self.trees)
 					for c in cmd: yield c
 				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
