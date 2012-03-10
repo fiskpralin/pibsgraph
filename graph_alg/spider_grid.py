@@ -58,7 +58,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 	lines, baseL, baseR, orderMax=makeLines(areaPoly, origin, L, C, thMin)
 	#make grid of lines.
 	print "lines done, now make grid"
-	G=nx.Graph( L=L, type='sqGridGraph', C=C)
+	G=nx.Graph( L=L, type='spiderGrid', C=C)
 
 	el=0 #will later be filled.
 	G.graph['L']=L
@@ -69,6 +69,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 		occured=[] #a list of different orders that have occured.. pretty complex.
 		#an order 1 line should not e.g. have lines to all order 4 lines to the left, only one.
 		for left in lines[index+1:]: # the one to the left of "line"
+			if line.order==1 and left.order==1: break
 			#identify the point, p2. line between should be orthogonal to "line" or "left", depending on order.
 			cont=False #continue...
 			for o in occured:
@@ -76,6 +77,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 			if cont: continue #we jump over some lines..think about it and you'll udnerstand
 			occured.append(left.order)
 			if left.order>line.order: #make ray orthogonal to line
+
 				p1=left.p1
 				th2=line.angle-pi/2.
 				pTmp=tuple(getCartesian([0, 10000], origin=p1, direction=th2, fromLocalCart=True))
@@ -110,6 +112,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 	for index,line in enumerate(lines): 	#end points. Usually between two endpoints but not always.
 		if line.no==baseL.no: break #this is the end
 		leftBuddy=lines[index+1]
+		if leftBuddy.angle<line.angle: raise Exception('ordering wrong..')
 		closest=leftBuddy.gridPoints[0]
 		closDist=getDistance(closest, line.p2)
 		for pTmp in leftBuddy.gridPoints[1:]:
@@ -202,7 +205,6 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 		if len(line.gridPoints)<=1: continue
 		line.gridPoints=sorted(line.gridPoints, key=lambda point: -getDistance(point, origin))
 		last=line.gridPoints[0]
-		print line.gridPoints
 		for node in line.gridPoints[1:]:
 			G.add_edge(last, node,weight=getDistance(last, node), visits=0, visited_from_node=[], c=0)
 			last=node
@@ -321,14 +323,15 @@ def makeLines(areaPoly, origin, L, C, thMin):
 	while True: #create lines, base roads
 		dth=dth/2.
 		if dth<thMin: break
-		newList=copy.deepcopy(lines)
 		#order+=1
+		newList=copy.deepcopy(lines)
 		for i in range(len(lines)): #iterate through, from right to left
 			line=lines[i]
 			if line.no != baseL.no:
 				th=line.angle+(lines[i+1].angle-line.angle)/2.
 				point=findIntersection(origin, th, areaPoly)
 				cyl=getCylindrical(point, origin=origin) #take it further away from the border
+				if cyl[0]<=C: continue #line is very short, not worth it.
 				point=getCartesian([cyl[0]-C, cyl[1]], origin=origin)
 				lnew=Line(origin, point, th, order=order)
 				for ind,ltmp in enumerate(newList):
@@ -337,6 +340,8 @@ def makeLines(areaPoly, origin, L, C, thMin):
 						break
 		lines=newList
 	#the base roads are done.. now let's find the smaller lines.
+	lines.remove(lines[-1]) #this is baseL..same as baseR, remember?
+	baseL=lines[-1] #the one most to the left
 	#strategy: insert a line between two lines as long as asin(0.5L/length(line))>L
 	while True:
 		added=False

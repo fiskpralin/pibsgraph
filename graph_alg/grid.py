@@ -88,6 +88,9 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, ar
 				rem=True
 				G.remove_node(n)
 				break
+
+	G.graph['overlap']={} #will later be filled.
+	G.graph['w']=4 #width of road
 	A=getArea(G)
 	elements=el
 	G.graph['elements']=el
@@ -95,8 +98,7 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, ar
 	G.graph['L']=L
 	G.graph['Ainv']=1./G.graph['A']
 	G.graph['density']=elements/G.graph['A']
-	G.graph['overlap']={} #will later be filled.
-	G.graph['w']=4 #width of road
+
 	return G
 
 def getArea(R):
@@ -192,6 +194,8 @@ def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, angle=None, areaPoly=None):
 				rem=True
 				G.remove_node(n)
 				break
+	G.graph['overlap']={} #will later be filled.
+	G.graph['w']=4
 	A=getArea(G)
 	elements=el
 	G.graph['elements']=el
@@ -199,6 +203,5 @@ def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, angle=None, areaPoly=None):
 	G.graph['L']=L
 	G.graph['Ainv']=1./G.graph['A']
 	G.graph['density']=elements/G.graph['A']
-	G.graph['overlap']={} #will later be filled.
 	return G
 

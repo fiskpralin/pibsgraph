@@ -94,7 +94,11 @@ def overLapA(e1,e2, R):
 	e1=e1[0:2]
 	e2=e2[0:2]
 	#first, find out if this calculation has been performed before.
-	overlap=R.graph['overlap']
+	try:
+		overlap=R.graph['overlap']
+	except: #create dictionary
+		R.graph['overlap']={} 
+		overlap=R.graph['overlap']
 	#The key structure ((from1, to1), (from2, to2)) gives us four alternatives. Simply try them all.
 	#room for optimization...
 	keylist=[((e1[0], e1[1]), (e2[0], e2[1])),
@@ -111,9 +115,11 @@ def overLapA(e1,e2, R):
 	angle=get_angle(e1,e2) 	#get angle between the road segments..
 	eps=1e-8
 	if angle<eps:
+		print "this is wrong, but we let it be just to get a result"
+		return 1
 		print e1
 		print e2
-		raise Exception('angle=0 between roads... incident?')
+		raise Exception('angle=0 between roads... incident? something must be wrong')
 	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaps
 	alpha=pi-angle #this is the angle that matters here...
 	#the following variables look like "mumbo-jumbo" It's all trigonometry but should be documented somewhere...

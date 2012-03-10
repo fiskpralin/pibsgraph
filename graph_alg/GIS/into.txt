@@ -1,0 +1,1 @@
+this is example GIS_files for a specific area. Taken from lantmäteriet.
