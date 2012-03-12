@@ -1,6 +1,8 @@
 #This new file will hopefully be better 
 #Less double work and correct naming of the 
 #parameters.
+
+#It is nontrivial to decide what should be inparameters to calculate total used power. E.g. for a static crane with load we cannot immediately say what the used power is. Therefore it should be looked in to, should we use torque instead?
 ---------------------------------------------------------------------------
 A means: A machine with one crane
 B means: A machine with two cranes
@@ -11,76 +13,72 @@ F means: Conventional head which can accumulate trees and twig crack and log
 J means: Bundler module in front of the machine which can make bundles of the trees and log them
 
 			#OVERALL
-maxCraneLength	11	[m]
-minCraneLength	3	[m]
-corridorWidthEF	1	[m]
-corridorWidthCD	2	[m]
-noCorridorsPerSideCD	3	[-]	Number of corridors per side
-noCorridorsPerSideEF	5	[-]	Number of corridors per side
+maxCraneLength	11	[m]	How far the crane can reach
+minCraneLength	3	[m]	How close to the fasteningpoint the head on the crane can come
+corridorWidthEF	2	[m]	Width of the corridors for the conventional head 
+corridorWidthCD	1	[m]	Width of the corridors for the continuous head
+noCorridorsPerSideCD	3	[-]	Number of corridors per side for continuous head
+noCorridorsPerSideEF	5	[-]	Number of corridors per side for conventional head
 maxCorridorAngle	45	[deg]	angle of the corridor in relation to the strip road
 switchFocusTime	3	[s]	time to switch focus
 noIter	100	[-]	number of iterations per configuration
 levelOfThinning	50	[%]
-			#what treesets to run for is omitted in this section
 
 			#MACHINES A,B
-moveConst	5	[s]
+moveConst	5	[s]	  The time it takes to start to move the machine
 velocityOfMachine	1	[m/s]
 radialVelocityOfCrane	2.5	[m/s]
-moveCraneConst	1.5	[s]
+moveCraneConst	1.5	[s]	The time it takes to start to move the crane
 angularVelocityOfCrane	0.35	[rad/s]
-maxPower	500	[kW]	Maximum powerthe machine can operate at
-minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping... Necessary?
+maxPower	500	[kW]	Maximum power the machine can operate at (Power of the engine)
+minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping over.
 powToMove	100	[kW]	The power it takes to have the machine moving
 
-			#AUTOMATION
+			#AUTOMATION (True below means that it is automatic and does not require drivers attention)
 moveMachine	False
-switchFocusCD	False
-switchFocusEF	False
 chooseCorridor	False
 moveArmOutCD	False
 fellTreesCD	True
 moveArmInCD	False
 dropTreesCD	False
-loggingD	False
+cuttingD	False
 twigCrackD	False
 moveArmOutEF	False
-fellTreesEF	True
+fellTreesEF	False
 moveArmInEF	False
 dropTreesEF	False
-loggingF	False
+cuttingF	False
 twigCrackF	False
 dropBundle	True		The bundler J drops the trees at the side
 
 			#HEADS C,D,E,F
-headWidthCD	1	   [m]	Width of the conventional head
-headWidthEF	0.5	   [m]	Width of the continuous head
+headWidthCD	1	   [m]	Width of the continuous head
+headWidthEF	0.5	   [m]	Width of the conventional head
 velocityFellTreeCD	0.08	[m2/s]	Velocity of the cutting
 velocityFellTreeEF	0.08	[m2/s]	Velocity of the cutting
-constFellTreeCD		0
-constFellTreeEF		1
+constFellTreeCD		0		The time it takes to start felling a tree (should be zero for the CDhead)
+constFellTreeEF		1		The time it takes to start felling a tree
 timeDropTreesCD	10	[s]	Time it takes to drop the trees for the continuous head
 timeDropTreesEF	10	[s]	Time it takes to drop the trees for the conventional head
 timeTwigCrack	5	[s]	Time it takes to twig crack a bunch of trees
-timeLog	5	[s]	Time it takes to log the treas at the head
-maxWeightCD	350	[kg]	Maximum weight load. Note that this possibly should differ for C and D
-maxWeightEF	350	[kg]	Maximum weight load. Note that this possibly should differ for E and F
-maxGripAreaCD	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate C and D
-maxGripAreaEF	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate E and F
-powMoveCraneCD	20	[kW]	The power it takes to move the crane, note larger than for EF due to moving cutting blade
+timeCut	5	[s]	Time it takes to log the treas at the head
+maxWeightCD	350	[kg]	Maximum weight load.
+maxWeightEF	350	[kg]	Maximum weight load.
+maxGripAreaCD	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate
+maxGripAreaEF	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate
+powMoveCraneCD	20	[kW]	The power it takes to move the crane, N.B. larger than for EF due to moving cutting blade
 powMoveCraneEF	15	[kW]	The power it takes to move the crane
 powHoldLoadCD	1	[kW/kg]	The power it takes for the crane to hold a load of 1 kg
 powHoldLoadAtDistCD	1	[kW/m]	the power it takes for the crane to hold a load per meter from machine
 powHoldLoadEF	1	[kW/kg]
 powHoldLoadAtDistEF	1	[kW/m]
 powTwigCrack	5	[kW]	power demanded to twig crack the trees at the head
-powLog	1	[kW]	power demanded to log trees at the head
-twigCrackCoeffDF	30	  [%]	   How much can the twigcracking decrease the cross section of the tree(s)
+powCut	1	[kW]	power demanded to cut trees at the head
 
 			#BUNDLER J
 dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
 timeBundle	10	[s]	Time it takes to finish bundling of trees in the bundler, when no twig cracking at head
-powBundleJ	1	[kW]	Power it takes to log a wrapped bundle at the bundler J
+powBundleJ	1	[kW]	Power it takes to make a bundle at the bundler J
 maxXSectionJ	1	[m2]	Maximum cross section of "stored" trees in bundler
 xSectionThreshJ	0.8	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 			#PRIORITIES

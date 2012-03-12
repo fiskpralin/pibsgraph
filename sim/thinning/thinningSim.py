@@ -240,7 +240,6 @@ def setDefaultThinningParams(simParam={}):
 	s['switchFocusTime']=3#Time to switch focus from one thing to another
 	s['noIter']=100#number of iterations per configuration
 	s['levelOfThinning']=50#[%]
-	#what treesets to run for is omitted in this section
 
 	#MACHINES A,B
 	s['moveConst']=5#[s]
@@ -254,20 +253,18 @@ def setDefaultThinningParams(simParam={}):
 	
 	#AUTOMATION
 	s['moveMachine']=False#
-	s['switchFocusCD']=False#
-	s['switchFocusEF']=False#
 	s['chooseCorridor']=False#
 	s['moveArmOutCD']=False#
 	s['fellTreesCD']=True#
 	s['moveArmInCD']=True#
 	s['dropTreesCD']=False#
-	s['loggingD']=False#
+	s['cuttingD']=False#
 	s['twigCrackD']=False#
 	s['moveArmOutEF']=False#
-	s['fellTreesEF']=True#
+	s['fellTreesEF']=False#
 	s['moveArmInEF']=False#
 	s['dropTreesEF']=False#
-	s['loggingF']=False#
+	s['cuttingF']=False#
 	s['twigCrackF']=False#
 	s['dropBundle']=True# The bundler J drops the trees at the side
 	
@@ -281,25 +278,24 @@ def setDefaultThinningParams(simParam={}):
 	s['timeDropTreesCD']=10#[s] Time it takes to drop the trees for the continuous head
 	s['timeDropTreesEF']=10#[s] Time it takes to drop the trees for the conventional head
 	s['timeTwigCrack']=5#[s] Time it takes to twig crack a bunch of trees
-	s['timeLog']=5#[s] Time it takes to log the treas at the head
-	s['maxWeightCD']=350#[kg] Maximum weight load. Note that this possibly should differ for C and D
-	s['maxWeightEF']=350#[kg] Maximum weight load. Note that this possibly should differ for E and F
+	s['timeCut']=5#[s] Time it takes to log the treas at the head
+	s['maxWeightCD']=350#[kg] Maximum weight load.
+	s['maxWeightEF']=350#[kg] Maximum weight load.
 	s['maxGripAreaCD']=0.3#[m2] Maximum grip area for the head. This controls how much it can accumulate C and D
 	s['maxGripAreaEF']=0.3#[m2]-----------"---------------------------- E and F
-	s['powMoveCraneCD']=20#[kW] The power it takes to move the crane, note larger than for EF due to moving cutting blade
+	s['powMoveCraneCD']=20#[kW] The power it takes to move the crane, N.B. larger than for EF due to moving cutting blade
 	s['powMoveCraneEF']=15#[kW] The power it takes to move the crane
 	s['powHoldLoadCD']=1#[kW/kg] The power it takes for the crane to hold a load of 1 kg
 	s['powHoldLoadAtDistCD']=1#[kW/m] the power it takes for the crane to hold a load per meter from machine
 	s['powHoldLoadEF']=1#
 	s['powHoldLoadAtDistEF']=1#
 	s['powTwigCrack']=5#[kW] power demanded to twig crack the trees at the head
-	s['powLog']=1# [kW] power demanded to log trees at the head
-	s['twigCrackCoeffDF']=30#[%] How much can the twigcracking decrease the cross section of the tree(s)
+	s['powCut']=1# [kW] power demanded to cut trees at the head
 
 	#BUNDLER J
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
 	s['timeBundle']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
-	s['powBundleJ']=1#[kW] Power it takes to log a wrapped bundle at the bundler J
+	s['powBundleJ']=1#[kW] Power it takes to make a bundle at the bundler J
 	s['maxXSectionJ']=1#[m2] Maximum cross section of "stored" trees in bundler
 	s['xSectionThreshJ']=0.8#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 	#PRIORITIES
