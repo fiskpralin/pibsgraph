@@ -259,7 +259,7 @@ def setDefaultThinningParams(simParam={}):
 	s['chooseCorridor']=False#
 	s['moveArmOutCD']=False#
 	s['fellTreesCD']=True#
-	s['moveArmInCD']=False#
+	s['moveArmInCD']=True#
 	s['dropTreesCD']=False#
 	s['loggingD']=False#
 	s['twigCrackD']=False#
@@ -298,13 +298,10 @@ def setDefaultThinningParams(simParam={}):
 
 	#BUNDLER J
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
-	s['timeBundleCEJ']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
-	s['timeBundleDFJ']=7#[s] Time it takes to finish bundling of trees in the bundler, when twig cracking at head
+	s['timeBundle']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
 	s['powBundleJ']=1#[kW] Power it takes to log a wrapped bundle at the bundler J
 	s['maxXSectionJ']=1#[m2] Maximum cross section of "stored" trees in bundler
 	s['xSectionThreshJ']=0.8#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
-	s['dropPos']=3#[m]
-	s['compressCoeffCEJ']=30# [%] How much can the compression of the bundler compress the cross section of the trees
 	#PRIORITIES
 	#--
 
