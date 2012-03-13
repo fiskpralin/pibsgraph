@@ -171,7 +171,6 @@ class Polygon():
 		self.nodes=nodes
 		self.isSpherical=False
 	def getNodes(self, pos=None):
-		if pos and pos != self.pos: raise Exception('wrong pos for rectangle')
 		return self.nodes
 def polygon_area(path):
 	"""
@@ -207,6 +206,24 @@ def polygonLim(poly):
 		if p[1]>ylim[1]:
 			ylim[1]=p[1]
 	return tuple(xlim+ylim)
+def getPolygonInnerCircle(areaPoly):
+	"""
+	returns the middle of a polygon, and a radius that is always inside it from this point.
+	see reference http://en.wikipedia.org/wiki/Centroid
+	"""
+	#first, find the point. we have a finite set of points.
+	C=np.array([0,0]) #will add stuff to this one..
+	for corner in areaPoly: 
+		C+=np.array(corner)
+	C/=(len(areaPoly))
+	C=list(C)
+	minDist=1e10
+	for corner in areaPoly:
+		print corner, C
+		d=getDistance(corner, C)
+		if d<minDist:
+			minDist=d
+	return C, minDist #middle, radius
 def ListTupleEquals(p1,p2):
 	"""
 	An ugly and bad way around the fact that we mix tuples and lists, and want to compare their elements.
