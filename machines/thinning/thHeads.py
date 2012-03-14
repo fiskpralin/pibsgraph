@@ -35,6 +35,7 @@ class ThinningCraneHead(Process):
 		self.gripArea=0
 		self.trees=[]
 		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
+		self.currentPile=None
 		
 	def treeChopable(self, t):
 		"""
@@ -79,15 +80,19 @@ class ThinningCraneHead(Process):
 		return t
 
 	def dumpTrees(self, direction=None):
-		"""releases the trees at the current position."""
+		"""releases the trees at the current position. (And dumps the trees in piles)"""
 		if direction is None: direction=self.road.direction
 		cart=self.m.getCartesian
+		t=self.getNextTree(self.road)#
 		if len(self.trees)==0: return []
-		if self.road==self.m.roads['main']:
-			currentPile=Pile(pos=self.m.getTreeDumpSpot(self.side),terrain=self.m.G.terrain)
-		else:
-			currentPile=Pile(pos=self.road.startPoint,terrain=self.m.G.terrain)
-			
+		if not t or self.currentPile==None:
+			if self.road==self.m.roads['main']:
+				self.currentPile=Pile(pos=self.m.getTreeDumpSpot(self.side),terrain=self.m.G.terrain)
+				print 'Created main Pile'
+			else:
+				self.currentPile=Pile(pos=self.road.startPoint,terrain=self.m.G.terrain)
+				print 'Created corridor Pile'
+		i=0
 		for tree in copy.copy(self.trees):
 			tree.isSpherical=False
 			tree.color='#5C3317' #brown, same as stumps
@@ -102,14 +107,22 @@ class ThinningCraneHead(Process):
 			c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
 			tree.nodes=[c1,c2,c3,c4]
 			tree.radius=sqrt(r**2+l**2)
-			currentPile.trees.append(tree)#adds the tree to the current pile
+			self.currentPile.trees.append(tree)#adds the tree to the current pile
+			i=i+1
 			self.trees.remove(tree)
+			print 'added the',i,'th tree' 
 
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
 		self.gripArea=0
-		currentPile.updatePile(direction)#sets pile parameters in a nice way
-		self.m.G.terrain.piles.append(currentPile)#adds the pile to the list of piles in terrain
+		self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+
+		if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
+			self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
+			print '*Saved the current pile in the terrain:',len(self.currentPile.trees),'trees in pile'
+			self.currentPile=None
+
+
 		return self.cmnd([], time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 		
 	def getStartPos(self):
@@ -137,7 +150,7 @@ class ThinningCraneHead(Process):
 			self.road.color='r'
 			self.road.color=col
 			return c
-		elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees
+		elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
 			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
 			else: time=self.setPos(self.road.startPoint)
@@ -190,7 +203,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 	def __init__(self, sim, driver, machine):
 		UsesDriver.__init__(self,driver)
 		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine)
-		self.road=None #the currect road will be stored here
+		self.road=None #the correct road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
 		self.color=self.m.color

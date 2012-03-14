@@ -33,10 +33,11 @@ class Pile(Obstacle):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
 
 		#here the nodes of the pile are set
-		c1=getCartesian([-self.diameter/2,self.length/2], origin=self.pos, direction=direction, fromLocalCart=True)
+		a=2 #set a to one to get correct. This is from linus' model of the trees. Fix it,. because it does not only affect the plotting, also the distances for e.g. pick-up by forwarder will be changed. 
+		c1=getCartesian([-self.diameter/2,self.length/a], origin=self.pos, direction=direction, fromLocalCart=True)
 		c2=getCartesian([-self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
 		c3=getCartesian([self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=getCartesian([self.diameter/2,self.length/2], origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=getCartesian([self.diameter/2,self.length/a], origin=self.pos, direction=direction, fromLocalCart=True)
 		self.nodes=[c1,c2,c3,c4]
 		
 	def getNodes(self, pos=None):
