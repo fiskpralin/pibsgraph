@@ -27,11 +27,13 @@ class Obstacle():
 			if not (self.__class__.__name__ == 'Boulder' or isinstance(self, Process)):
 				terrain.obstacles.append(self)
 				terrain._insertToGrid(self)
+
 	def getNodes(self, pos=None):
 		"""this method must be overrun and implemented if not spherical."""
 		if not isSpherical: raise Exception('ERROR: function getNodes is not implemented for %s. This is required.'%self.name)
 		if pos and pos != self.pos: raise Exception('nodes and pos not correlated for tree.')
 		return []
+
 	def draw(self,ax):
 		if self.visible:
 			cir = Circle(tuple(self.pos), radius=self.radius, facecolor=self.color, alpha=self.alpha)

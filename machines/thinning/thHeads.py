@@ -8,6 +8,7 @@ import matplotlib as mpl
 import numpy as np
 import copy
 
+from terrain.pile import Pile
 
 
 ###################################################
@@ -25,12 +26,15 @@ class ThinningCraneHead(Process):
 			self.side='left' #default
 		elif len(self.m.heads)==1:
 			self.side='right'
-		else: raise Exception('BCHead only supports one or two arms on machine.')
+		else: raise Exception('Heads only support one or two arms on machine.')
 		Process.__init__(self,name, sim)
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
+		self.timeTwigCrack=self.s['timeTwigCrack']
+		self.timeCutAtHead=self.s['timeCut']
 		self.treeWeight=0
 		self.gripArea=0
 		self.trees=[]
+		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		
 	def treeChopable(self, t):
 		"""
@@ -79,6 +83,11 @@ class ThinningCraneHead(Process):
 		if direction is None: direction=self.road.direction
 		cart=self.m.getCartesian
 		if len(self.trees)==0: return []
+		if self.road==self.m.roads['main']:
+			currentPile=Pile(pos=self.m.getTreeDumpSpot(self.side),terrain=self.m.G.terrain)
+		else:
+			currentPile=Pile(pos=self.road.startPoint,terrain=self.m.G.terrain)
+			
 		for tree in copy.copy(self.trees):
 			tree.isSpherical=False
 			tree.color='#5C3317' #brown, same as stumps
@@ -93,12 +102,16 @@ class ThinningCraneHead(Process):
 			c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
 			tree.nodes=[c1,c2,c3,c4]
 			tree.radius=sqrt(r**2+l**2)
+			currentPile.trees.append(tree)#adds the tree to the current pile
 			self.trees.remove(tree)
+
 		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 		self.treeWeight=0
 		self.gripArea=0
+		currentPile.updatePile(direction)#sets pile parameters in a nice way
+		self.m.G.terrain.piles.append(currentPile)#adds the pile to the list of piles in terrain
 		return self.cmnd([], time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
-
+		
 	def getStartPos(self):
 		if self.side=='left':
 			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.])
@@ -150,6 +163,19 @@ class ThinningCraneHead(Process):
 			self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
 		return c
 
+	def twigCrack(self):
+		if self.twigCracker:
+			#trees should be be twigcracked and cut!
+			#not yet implemented
+			#HERE: change volume of pile and its length acc to model by Ola and Dan
+			#How get to work on the pile in the list terrain.piles?
+			time=self.timeTwigCrack+self.timeCutAtHead
+			print 'Trees have been twigcracked, it took', time, 'seconds'
+			return self.cmnd([], time, auto=self.automatic['twigCrack'])
+		else:
+			print 'Trees not twig cracked'
+			return []
+
 	def getCraneMountPoint(self):
 		"""returns the point where the crane meets the head"""
 		cart=self.m.getCartesian
@@ -182,7 +208,8 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.automatic={'moveArmIn': self.s['moveArmInCD'],
 						'moveArmOut': self.s['moveArmOutCD'],
 						'dumpTrees': self.s['dropTreesCD'],
-						'chop': self.s['fellTreesCD']}
+						'chop': self.s['fellTreesCD'],
+						'twigCrack': self.s['twigCrackD']}
 		
 		
 	def run(self):
@@ -216,6 +243,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				time=self.setPos(sPoint)
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c
+				for c in self.twigCrack(): yield c #twigcrack before the dump
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
@@ -297,7 +325,8 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.automatic={'moveArmIn': self.s['moveArmInEF'],
 						'moveArmOut': self.s['moveArmOutEF'],
 						'dumpTrees': self.s['dropTreesEF'],
-						'chop': self.s['fellTreesEF']}
+						'chop': self.s['fellTreesEF'],
+						'twigCrack': self.s['twigCrackF']}
 
 	def run(self):
 		while True:
@@ -330,6 +359,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
+				for c in self.twigCrack(): yield c #twigcrack before the dump ORDER HERE IS IMPORTANT!tC and dumpTrees
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos

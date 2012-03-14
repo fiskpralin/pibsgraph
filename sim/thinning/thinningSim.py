@@ -247,7 +247,7 @@ def setDefaultThinningParams(simParam={}):
 	s['radialVelocityOfCrane']=2.5#[m/s]
 	s['moveCraneConst']=1.5#[s]
 	s['angularVelocityOfCrane']=0.35#[rad/s]
-	s['maxPower']=500 #[kW] Maximum powerthe machine can operate at
+	s['maxPower']=150 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
 	s['powToMove']=100 #[kW]The power it takes to have the machine moving
 	

@@ -21,6 +21,8 @@ from stump import Stump
 from tree import Tree
 from root import Root
 from boulder import Boulder
+from pile import Pile
+
 class Terrain():
 	"""The main terrain class.
 	If global variable object G is given, it is assumed to have the variables:'
@@ -35,6 +37,7 @@ class Terrain():
 		self.stumps=[]
 		self.roots=[]
 		self.holes=[]
+		self.piles=[]
 		self.obstacles=[] #should hold all the above, except boulders.
 		self.stumpFile='undefined'
 		self.treeFile='undefined'

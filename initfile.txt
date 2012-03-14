@@ -30,7 +30,7 @@ velocityOfMachine	1	[m/s]
 radialVelocityOfCrane	2.5	[m/s]
 moveCraneConst	1.5	[s]	The time it takes to start to move the crane
 angularVelocityOfCrane	0.35	[rad/s]
-maxPower	500	[kW]	Maximum power the machine can operate at (Power of the engine)
+maxPower	150	[kW]	Maximum power the machine can operate at (Power of the engine)
 minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping over.
 powToMove	100	[kW]	The power it takes to have the machine moving
 
