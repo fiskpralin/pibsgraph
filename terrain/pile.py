@@ -24,22 +24,30 @@ class Pile(Obstacle):
 		self.nodes=None
 
 	def updatePile(self, direction=None):
-		self.biomass = sum([t.weight for t in self.trees])
-		self.length = max([t.h for t in self.trees])
+		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
+		
+		if not self.length:
+			self.length = max([t.h for t in self.trees])
+		else: self.length=5 #cut!
+		
 		self.maxDiam = max([t.dbh for t in self.trees])
-		self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
+		if not self.diameter:
+			self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
+		else: self.diameter = self.diameter*(1-((self.diameter*61.364-0.3318)/100)) #twigcrack!
+		
+		if not self.biomass:
+			self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
+		else: self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
+		
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
 
-		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
-
 		#here the nodes of the pile are set
-		a=2 #set a to one to get correct. This is from linus' model of the trees. Fix it,. because it does not only affect the plotting, also the distances for e.g. pick-up by forwarder will be changed. 
-		c1=getCartesian([-self.diameter/2,self.length/a], origin=self.pos, direction=direction, fromLocalCart=True)
+		c1=getCartesian([-self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
 		c2=getCartesian([-self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
 		c3=getCartesian([self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=getCartesian([self.diameter/2,self.length/a], origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=getCartesian([self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
 		self.nodes=[c1,c2,c3,c4]
-		
+	
 	def getNodes(self, pos=None):
 		if not self.nodes:
 			return False

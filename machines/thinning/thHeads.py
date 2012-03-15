@@ -84,29 +84,34 @@ class ThinningCraneHead(Process):
 		if direction is None: direction=self.road.direction
 		cart=self.m.getCartesian
 		t=self.getNextTree(self.road)#
+		c=[]
 		if len(self.trees)==0: return []
 		if not t or self.currentPile==None:
 			if self.road==self.m.roads['main']:
 				self.currentPile=Pile(pos=self.m.getTreeDumpSpot(self.side),terrain=self.m.G.terrain)
-				print 'Created main Pile'
+				print '*Created main Pile'
 			else:
 				self.currentPile=Pile(pos=self.road.startPoint,terrain=self.m.G.terrain)
-				print 'Created corridor Pile'
+				print '*Created corridor Pile'
 		i=0
 		for tree in copy.copy(self.trees):
 			tree.isSpherical=False
+			tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
+			tree.pos=[5000,5000]
+			""" #Here the trees arechanged, but we dont need it since all is saved in the piles. I HOPE ;)! 
 			tree.color='#5C3317' #brown, same as stumps
 			dth=pi/30.
 			direct=random.uniform(direction-dth, direction+dth)
 			r=tree.radius
 			l=tree.h
-			a=2.0 #change to 1 to get the correct value
+			a=1.0 #change to 1 to get the correct value
 			c1=cart([-r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
 			c2=cart([-r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
 			c3=cart([r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
 			c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
 			tree.nodes=[c1,c2,c3,c4]
 			tree.radius=sqrt(r**2+l**2)
+			"""
 			self.currentPile.trees.append(tree)#adds the tree to the current pile
 			i=i+1
 			self.trees.remove(tree)
@@ -116,14 +121,13 @@ class ThinningCraneHead(Process):
 		self.treeWeight=0
 		self.gripArea=0
 		self.currentPile.updatePile(direction)#sets pile parameters in a nice way
-
+		c.extend(self.twigCrack())
 		if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
 			self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
 			print '*Saved the current pile in the terrain:',len(self.currentPile.trees),'trees in pile'
 			self.currentPile=None
-
-
-		return self.cmnd([], time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
+		self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
+		return c
 		
 	def getStartPos(self):
 		if self.side=='left':
@@ -177,11 +181,13 @@ class ThinningCraneHead(Process):
 		return c
 
 	def twigCrack(self):
-		if self.twigCracker:
-			#trees should be be twigcracked and cut!
-			#not yet implemented
-			#HERE: change volume of pile and its length acc to model by Ola and Dan
-			#How get to work on the pile in the list terrain.piles?
+		"""
+		Changes the volume of the pile and its length according
+		to models by Ola and Dan (see doc/models.txt). Also the properties of the pile is
+		updated.
+		"""
+		if self.twigCracker and self.currentPile:
+			self.currentPile.updatePile(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
 			print 'Trees have been twigcracked, it took', time, 'seconds'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
@@ -255,8 +261,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				#trees have been gathered. return.
 				time=self.setPos(sPoint)
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
-				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c
-				for c in self.twigCrack(): yield c #twigcrack before the dump
+				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
@@ -372,7 +377,6 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
 				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
-				for c in self.twigCrack(): yield c #twigcrack before the dump ORDER HERE IS IMPORTANT!tC and dumpTrees
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
