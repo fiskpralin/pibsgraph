@@ -19,6 +19,7 @@ class ThinningRoad(Road):
 				self.trees.append(tree)
 		self.startPoint=None #the startpoint of a corridor is where it intersects the mainRoad.This is where the crane is supposed to begin.
 		self.main=main
+
 	def _checkIfTaken(self,tree):
 		"""
 		checks all the roads... very ineffective
@@ -29,6 +30,7 @@ class ThinningRoad(Road):
 				if t is tree:
 					return True
 		return False
+	
 	def add(self):
 		"""
 		adds road into roadlist.. pretty ugly routine..

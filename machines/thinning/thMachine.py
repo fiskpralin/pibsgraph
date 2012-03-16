@@ -3,6 +3,7 @@ from SimPy.Simulation  import *
 from machines.basics import UsesDriver, Machine, Operator
 from thHeads import ThinningCraneHead, BCHead, ConventionalHeadAcc
 from thRoad import ThinningRoad
+from thBundler import Bundler
 from terrain.obstacle import Obstacle
 from terrain.tree import Tree
 import collision as col
@@ -59,6 +60,12 @@ class ThinningMachine(Machine, UsesDriver):
 			raise Exception('ThinningMachine did not recognize head %s'%str(head))
 		for h in self.heads.values():
 			self.sim.activate(h, h.run())
+
+		####Here is the bundler initiation
+		b=Bundler(sim=self.sim, driver=self.driver, machine=self)
+		self.sim.activate(b,b.run())
+		####That was the initiaion of the bundler
+		
 		self.treeMoni=Monitor(name='trees harvested')
 		self.treeMoni.observe(len(self.trees), self.sim.now())
 		self.roadList=[] #simply a list of roads.

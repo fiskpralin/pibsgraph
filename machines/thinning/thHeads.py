@@ -35,6 +35,7 @@ class ThinningCraneHead(Process):
 		self.gripArea=0
 		self.trees=[]
 		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
+		self.bundler=False
 		self.currentPile=None
 		
 	def treeChopable(self, t):
@@ -80,54 +81,88 @@ class ThinningCraneHead(Process):
 		return t
 
 	def dumpTrees(self, direction=None):
-		"""releases the trees at the current position. (And dumps the trees in piles)"""
-		if direction is None: direction=self.road.direction
-		cart=self.m.getCartesian
-		t=self.getNextTree(self.road)#
-		c=[]
-		if len(self.trees)==0: return []
-		if not t or self.currentPile==None:
-			if self.road==self.m.roads['main']:
-				self.currentPile=Pile(pos=self.m.getTreeDumpSpot(self.side),terrain=self.m.G.terrain)
-				print '*Created main Pile'
-			else:
-				self.currentPile=Pile(pos=self.road.startPoint,terrain=self.m.G.terrain)
-				print '*Created corridor Pile'
-		i=0
-		for tree in copy.copy(self.trees):
-			tree.isSpherical=False
-			tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
-			tree.pos=[5000,5000]
-			""" #Here the trees arechanged, but we dont need it since all is saved in the piles. I HOPE ;)! 
-			tree.color='#5C3317' #brown, same as stumps
-			dth=pi/30.
-			direct=random.uniform(direction-dth, direction+dth)
-			r=tree.radius
-			l=tree.h
-			a=1.0 #change to 1 to get the correct value
-			c1=cart([-r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
-			c2=cart([-r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
-			c3=cart([r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
-			c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
-			tree.nodes=[c1,c2,c3,c4]
-			tree.radius=sqrt(r**2+l**2)
-			"""
-			self.currentPile.trees.append(tree)#adds the tree to the current pile
-			i=i+1
-			self.trees.remove(tree)
-			print 'added the',i,'th tree' 
+		if not self.bundler:
+			"""releases the trees at the current position. (And dumps the trees in piles)"""
+			if direction is None: direction=self.road.direction
+			cart=self.m.getCartesian
+			t=self.getNextTree(self.road)#
+			c=[]
+			if len(self.trees)==0: return []
+			if not t or self.currentPile==None:
+				if self.road==self.m.roads['main']:
+					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
+					print '*Created main Pile'
+				else:
+					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
+					print '*Created corridor Pile'
+			i=0
+			for tree in copy.copy(self.trees):
+				tree.isSpherical=False
+				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
+				tree.pos=[5000,5000]
+				""" #Here the trees arechanged, but we dont need it since all is saved in the piles. I HOPE ;)! 
+				tree.color='#5C3317' #brown, same as stumps
+				dth=pi/30.
+				direct=random.uniform(direction-dth, direction+dth)
+				r=tree.radius
+				l=tree.h
+				a=1.0 #change to 1 to get the correct value
+				c1=cart([-r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
+				c2=cart([-r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
+				c3=cart([r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
+				c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
+				tree.nodes=[c1,c2,c3,c4]
+				tree.radius=sqrt(r**2+l**2)
+				"""
+				self.currentPile.trees.append(tree)#adds the tree to the current pile
+				i=i+1
+				self.trees.remove(tree)
+				print 'added the',i,'th tree' 
 
-		if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
-		self.treeWeight=0
-		self.gripArea=0
-		self.currentPile.updatePile(direction)#sets pile parameters in a nice way
-		c.extend(self.twigCrack())
-		if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
-			self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
-			print '*Saved the current pile in the terrain:',len(self.currentPile.trees),'trees in pile'
-			self.currentPile=None
-		self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
-		return c
+			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
+			self.treeWeight=0
+			self.gripArea=0
+			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+			c.extend(self.twigCrack())
+			if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
+				self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
+				print '*Saved the current pile in the terrain:',len(self.currentPile.trees),'trees in pile'
+				self.currentPile=None
+			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
+			return c
+
+		else:
+			"""releases the trees at the current position. (And dumps the trees in piles)"""
+			if direction is None: direction=self.road.direction
+			cart=self.m.getCartesian
+			t=self.getNextTree(self.road)#
+			c=[]
+			if len(self.trees)==0: return []
+			if self.currentPile==None:
+				self.currentPile=Pile(pos=self.m.pos,terrain=self.m.G.terrain)#HERE ADD ITS CORRECT POSITION
+			i=0
+			for tree in copy.copy(self.trees):
+				tree.isSpherical=False
+				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
+				tree.pos=[5000,5000]
+				self.currentPile.trees.append(tree)#adds the tree to the current pile
+				i=i+1
+				self.trees.remove(tree)
+				print 'added the',i,'th tree' 
+
+			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
+			self.treeWeight=0
+			self.gripArea=0
+			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+			c.extend(self.twigCrack())
+			for t in self.currentPile.trees:
+				bundler.currentBundle.trees.append(t)
+				print 'moved the trees from the cP of head to cB of bundler', len(self.m.Bundler.currentBundle.trees), 'are now in that bundle'
+				bundler.currentBundle.updatePile(pi/2)#can i do this? probably wrong direction
+				self.currentPile=None
+			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
+			return c
+	
 		
 	def getStartPos(self):
 		if self.side=='left':
