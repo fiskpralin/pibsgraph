@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+import os, sys #insert /dev to path so we can import these modules.
 if __name__=='__main__':
-	import os, sys #insert /dev to path so we can import these modules.
+
 	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 	if cmd_folder not in sys.path:
 		sys.path.insert(0, cmd_folder)
@@ -15,6 +16,7 @@ from matplotlib.path import Path
 import time
 import numpy as np
 import random
+from scipy.stats import pareto
 
 #from obstacle import Obstacle
 from stump import Stump
@@ -277,7 +279,8 @@ class Terrain():
 				for s in copy.deepcopy(self.stumps):
 					self.remove(s)
 				self.stumps=[]
-			start='terrain/terrainFiles/planting/SAV-'
+			start=os.path.dirname(os.path.abspath(__file__)) #current folder
+			start+='/terrainFiles/planting/SAV-'
 			if not B and self.stumpFile == 'undefined':
 				self.stumpFile=random.choice(self.stumpFiles)
 				B=start+str(self.stumpFile)+'.DAT'
@@ -412,9 +415,10 @@ class Terrain():
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
-	def GetBoulders(self, pos, R):
+	def GetBoulders(self, pos, R, distr='pareto'):
 		"""
 		we choose to base all this on the volume
+		possible distributions: 'exp' or 'pareto'
 		"""
 		#new, based on volume
 		boul=[]
@@ -424,12 +428,21 @@ class Terrain():
 		thresh=0.125/1000.0 #minimum volume
 		meanR=pow(self.meanBoulderV/pi*3.0/4.0, 1.0/3.0) #from mean volume
 		meanV=self.meanBoulderV
-		lambd=1./(meanV-thresh)
 		Vols=[]
 		#randomly dist.
-		for i in range(nboul):
-			vol=thresh+random.expovariate(lambd)
-			Vols.append(vol)
+		if distr=='exp':
+			lambd=1./(meanV-thresh) #for exponential
+			for i in range(nboul):
+				vol=thresh+random.expovariate(lambd)
+				Vols.append(vol)
+		elif distr=='pareto':
+			alpha=1.1 #for pareto
+			xm=(alpha-1)/alpha*(meanV-thresh) #pareto
+			for i in range(nboul):
+				vol=thresh+pareto.rvs(alpha, scale=xm)
+				Vols.append(vol)
+		else:
+			raise Exception('unknown distribution %s'%str(distr))
 		Vols=sorted(Vols, key=lambda vol: -vol) #sort, biggest first to get it in there..
 		for vol in Vols:
 			placed = False
