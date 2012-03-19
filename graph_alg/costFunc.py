@@ -25,15 +25,17 @@ def sumWeights(R, P):
 		last=nTmp2
 	return C
 def roadAreaCoverage(R):
-	"""calculate the percentage of the area that is covered by roads."""
-	w=R.graph['w']
+	"""
+	calculate the percentage of the area that is covered by roads.
+	"""
 	rA=0
-	a=w*w/2.
 	for e in R.edges():
 		rA+=singleRoadSegmentCoverage(e,R)
 	return rA*R.graph['Ainv']
 def edgeLength(e):
-	"""calculates length of edge"""
+	"""
+	calculates length of edge
+	"""
 	return sqrt((e[0][0]-e[1][0])**2+(e[0][1]-e[1][1])**2) #pythagora's
 def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 	"""

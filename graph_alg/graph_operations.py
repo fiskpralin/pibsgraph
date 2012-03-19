@@ -1,11 +1,11 @@
 import networkx as nx
 import costFunc as cf
 import numpy as np
-from math import *
+from math import sin, cos, tan, pi
 
 def update_after_mod(e,R):
 	"""
-	updates graph after edge was removed. Assumes that routingcost function has stored correct data before.
+	updates graph after edge was removed or added. Assumes that routingcost function has stored correct data before.
 	"""
 	print "updates some data"
 	for nTmp in e[2]['visited_from_node']: #each node that visited the removed edge

@@ -164,23 +164,35 @@ class Terrain():
 		for key in self._grid.keys():
 			self._grid[key]=[] #cleared
 	def _getGridIndex(self,p):
-		"""returns grid index of pos p"""
-		if p[0]>0: ind1=int(ceil(p[0]*self._gridLinv))
-		elif p[0]==0: ind1=1
-		else: ind1=int(floor(p[0]*self._gridLinv))
-		if p[1]>0: ind2=int(ceil(p[1]*self._gridLinv))
-		elif p[1]==0: ind2=1
-		else: ind2=int(floor(p[1]*self._gridLinv))
+		"""
+		returns grid index of pos p
+		"""
+		if p[0]>0:
+			ind1=int(ceil(p[0]*self._gridLinv))
+		elif p[0]==0:
+			ind1=1
+		else:
+			ind1=int(floor(p[0]*self._gridLinv))
+		if p[1]>0:
+			ind2=int(ceil(p[1]*self._gridLinv))
+		elif p[1]==0:
+			ind2=1
+		else:
+			ind2=int(floor(p[1]*self._gridLinv))
 		return (ind1, ind2)
 	def remove(self,obst):
 		"""
 		removes from grid and internal lists.
-		This method should always be used instead of e.g. t.obstacles.remove(obst)
+		This method should always be used instead of e.g. t.obstacles.remove(obst) because
+		it is so many lists to keep track of.
 		"""
-		if obst in self.obstacles: self.obstacles.remove(obst)
+		if obst in self.obstacles:
+			self.obstacles.remove(obst)
 		ind=obst._gridIndex
-		if not ind:	ind=self._getgridIndex(obst.pos)
-		if obst in self._grid[ind]: self._grid[ind].remove(obst)
+		if not ind:
+			ind=self._getgridIndex(obst.pos)
+		if obst in self._grid[ind]:
+			self._grid[ind].remove(obst)
 		list=None
 		if isinstance(obst, Tree): list=self.trees
 		elif isinstance(obst, Stump): list=self.stumps
@@ -188,6 +200,12 @@ class Terrain():
 		elif isinstance(obst, Hole): list=self.holes
 		else: raise Exception('type'+obst.__class__.__name__+' is not supported for removal')
 		if obst in list: list.remove(obst)
+	def addObstacle(self, obst):
+		"""
+		adds obstacle to all the internal lists, except for the child-specific ones, e.g. trees
+		"""
+		self.obstacles.append(obst)
+		self._insertToGrid(obst)
 	def getNeighborObst(self,pos, index=False, Lmax=0):
 		"""returns obstacle from the neighboring cells given by Lmax"""
 		if index: ind=pos
@@ -415,10 +433,11 @@ class Terrain():
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
-	def GetBoulders(self, pos, R, distr='pareto'):
+	def GetBoulders(self, pos, R, distr='pareto', alpha=1.1):
 		"""
 		we choose to base all this on the volume
 		possible distributions: 'exp' or 'pareto'
+		alpha is the shape parameter for pareto.
 		"""
 		#new, based on volume
 		boul=[]
@@ -436,7 +455,6 @@ class Terrain():
 				vol=thresh+random.expovariate(lambd)
 				Vols.append(vol)
 		elif distr=='pareto':
-			alpha=1.1 #for pareto
 			xm=(alpha-1)/alpha*(meanV-thresh) #pareto
 			for i in range(nboul):
 				vol=thresh+pareto.rvs(alpha, scale=xm)

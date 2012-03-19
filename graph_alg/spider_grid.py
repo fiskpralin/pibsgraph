@@ -210,7 +210,7 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 			G.add_edge(last, node,weight=getDistance(last, node), visits=0, visited_from_node=[], c=0)
 			last=node
 	G.graph['w']=4
-	A=getArea(G)
+	A=polygon_area(areaPoly)
 	G.graph['elements']=el
 	G.graph['A']=A
 	G.graph['Ainv']=1./G.graph['A']

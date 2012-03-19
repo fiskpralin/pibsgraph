@@ -16,17 +16,18 @@ from functions import *
 import collision as col
 
 	
-def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, areaPoly=None):
+def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1,origin=None, diagonals=False, angle=None, areaPoly=None):
 	"""
 	Creates a square grid graph with dx=dy=L. Umin and umax is the boundaries for the edge uniform distribution.
 	xyRatio =0 creates a square area. xyRatio>1 creates an "x>y" rectangle.
 	angle is how the grid is turned in radians. 0=default
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
 	"""	
-	if angle>pi/2.: raise Exception('onley angles <pi/2 are defined for grid')
+	if angle>pi/2.: raise Exception('only angles <pi/2 are defined for grid')
 	if not areaPoly:
 		raise Exception('if areaPoly is not given, elements must be given.')
 	C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
+	if not origin: origin=(0,0) #not really used.. change code layout?
 	dx=L
 	dy=L
 	cart=getCartesian
@@ -84,14 +85,14 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, ar
 	while rem:
 		rem=False
 		for n in G.nodes(): #pretty ugly, but a must..
-			if G.degree(n)==1:
+			if G.degree(n)<=1:
 				rem=True
 				G.remove_node(n)
 				break
 
 	G.graph['overlap']={} #will later be filled.
 	G.graph['w']=4 #width of road
-	A=getArea(G)
+	A=polygon_area(areaPoly)
 	elements=el
 	G.graph['elements']=el
 	G.graph['A']=A
@@ -100,14 +101,6 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1, diagonals=False, angle=None, ar
 	G.graph['density']=elements/G.graph['A']
 
 	return G
-
-def getArea(R):
-	"""returns the area"""
-	rA=0
-	for e in R.edges():
-		rA+=sRCov(e,R)
-	print "area:", rA
-	return rA
 
 def sRCov(e, R):
 	"""
@@ -130,7 +123,7 @@ def inside(pos,areaPoly):
 	max is a list with two elements. max[0]==xmax, max[1]==ymax. 
 	"""
 	return col.pointInPolygon(pos,areaPoly)
-def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, angle=None, areaPoly=None):
+def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, origin=None,angle=None, areaPoly=None):
 	#triGridGraph(elements,L=1, umin=0, umax=0):
 	"""
 	* Creates a triangular uniform grid.
@@ -196,7 +189,7 @@ def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, angle=None, areaPoly=None):
 				break
 	G.graph['overlap']={} #will later be filled.
 	G.graph['w']=4
-	A=getArea(G)
+	A=polygon_area(areaPoly)
 	elements=el
 	G.graph['elements']=el
 	G.graph['A']=A
