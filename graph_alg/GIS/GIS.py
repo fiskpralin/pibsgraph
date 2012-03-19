@@ -1,15 +1,13 @@
 from mpl_toolkits.mplot3d import axes3d, Axes3D # <-- NOTE!
 import matplotlib.pyplot as plt
-import matplotlib
 import numpy as np
-try:
-    from PIL import Image
-except ImportError, exc:
-    raise SystemExit("PIL must be installed to run this example")
-
+import matplotlib.image as mpimg
+from matplotlib.patches import Polygon
+import os
 if __name__=='__main__':
-	import os, sys #insert /dev to path so we can import these modules.
-	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+	import sys #insert /dev to path so we can import these modules.
+	cmd_folder = os.path.split(os.path.split(os.path.dirname(os.path.abspath(__file__)))[0])[0]
+	print cmd_folder
 	if not cmd_folder in sys.path:
 		sys.path.insert(0, cmd_folder)
 from matplotlib import cm
@@ -17,7 +15,6 @@ import collision as col
 import functions as fun
 
 #open
-
 
 def getGlobalCoordinate(globalOrigin, localPos=None, areaPoly=None):
 	"""
@@ -31,8 +28,6 @@ def getGlobalCoordinate(globalOrigin, localPos=None, areaPoly=None):
 		for i in range(len(areaPoly)):
 			pol.append((globalOrigin[0]+areaPoly[i][0],globalOrigin[1]+areaPoly[i][1] )) #same format, meters.
 		return pol
-
-
 def getFileList(areaPoly):
 	"""
 	returns a list of the files that contains the data for the positions.
@@ -66,7 +61,6 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	-we need to work exclusively with numpy arrays, this is heavy stuff.
 	-Problem with intersections between the files... how to handle?
 	"""
-	#if not name: name='GIS/tab/67275_5950_25.asc'
 	if not globalOrigin: globalOrigin=(596120, 6727530) #located on map.. nice position..
 	if not areaPoly: areaPoly=[(0,0), (200,0), (200,200), (0,200)] #default..
 	globalPoly=getGlobalCoordinate(globalOrigin, areaPoly=areaPoly)
@@ -83,45 +77,41 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	yrange=range[2:4]
 	#now, we should find out which files we need...
 	fileList=getFileList(globalPoly)
-	x, y, z=[], [], []
+	x, y, z=None, None, None #will later be created
 	xlist, ylist, zlist=[], [], []
 	m=1 #modulu, to reduce the grid resolution.. should be set from area of polygon..
-	yold=yrange[0]
-	# this read tmp should be speeded up... do it all in numpy arrays for instance..
-	polyMiddle, radius=fun.getPolygonInnerCircle(globalPoly)
-	#we have an algorithm here that first check for the bounding box of our polygon
-	#then checks for an inner circle and finally, if point is in bounding box but not
-	#circle, checks colission detection, which is expensive...
-	#maybe the bounding box is enough? What harm does it that we have som extra points?
-	polyInnerRadiusSq=radius**2
+	yold=None
+	if len(fileList)>1: raise Exception('we do not support file overlaps right now..')
+	folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tab')
 	for fname in fileList:
-		f=open('GIS'+'/'+'tab'+'/'+fname)
+		f=open(os.path.join(folder, fname))
 		for index, line in enumerate(f):
 			l=line.split()
 			if len(l)==0: break
 			xtmp=int(l[0])
 			ytmp=int(l[1])
-			if index==0: yold=ytmp #list out of loop
 			if ytmp>yrange[1]: break
 			if xtmp<=xrange[1] and xtmp>=xrange[0] and ytmp>=yrange[0] and xtmp%m==0 and ytmp%m==0:
-				#point in polygon should be in c.. much faster..
-				pos=(xtmp, ytmp)
-				if fun.getDistanceSq(pos, polyMiddle)>polyInnerRadiusSq: #pretty fast, now do the brute force test for the few points left...
-					if not col.pointInPolygon((xtmp, ytmp), globalPoly): continue
+				if yold==None: yold=ytmp
 				ztmp=float(l[2])
 				if ytmp != yold: #new row..
-					x.append(xlist)
-					y.append(ylist)
-					z.append(zlist)
+					#identify if we're gonna need the next file in line..
+					if x==None:
+						x=np.array(xlist)
+						y=np.array(ylist)
+						z=np.array(zlist)
+					else:
+						x=np.vstack((x, xlist))
+						y=np.vstack((y, ylist))
+						z=np.vstack((z, zlist))
+					#y.append(ylist)
+					#z.append(zlist)
 					xlist, ylist, zlist = [], [], []
 				xlist.append(xtmp)
 				ylist.append(ytmp)
 				zlist.append(ztmp)
 				yold=ytmp
 		f.close()
-	x=np.array(x)
-	y=np.array(y)
-	z=np.array(z)
 	x-=globalOrigin[0]
 	y-=globalOrigin[1]
 	return x,y,z
@@ -148,9 +138,9 @@ def plotSurface(x=None,y=None,z=None):
 	
 	fig = plt.figure()
 	ax2 = Axes3D(fig)
-	ax2.grid(True)
 	ax2.contour(x,y,z, zdir='z')
 	ax2.set_zlim3d(50, 105)
+	plt.colorbar()
 	return ax
 def plot2DContour(x=None,y=None,z=None, ax=None):
 	"""
@@ -162,7 +152,24 @@ def plot2DContour(x=None,y=None,z=None, ax=None):
 	if not ax:
 		fig = plt.figure()
 		ax = fig.add_subplot(111, aspect='equal')
-	ax.grid(True)
+	minZ=min([min(ztmp) for ztmp in z])
+	maxZ=max([max(ztmp) for ztmp in z])
+	levels=np.linspace(minZ,maxZ, 25) #15 lines
+	c=ax.contour(x,y,z, zdir='z', linewidths=1, levels=levels,cmap=cm.autumn)
+	cb=plt.colorbar(c)
+	cb.lines.set_linewidth(10)
+	return ax
+
+def plot3DContour(x=None,y=None,z=None, ax=None):
+	"""
+	plots the contours of z  in xy-plane
+	"""
+	if z==None or y==None or x==None: raise Exception('x,y,z needs to be given.')
+	if len(z)!=len(y) or len(y)!=len(x): raise Exception('lengths of vectors needs to be identical')
+	x,y,z=np.array(x),np.array(y),np.array(z) #if not already
+	if not ax:
+		fig = plt.figure()
+		ax =Axes3D(fig)
 	ax.contour(x,y,z, zdir='z')
 	return ax
 
@@ -172,25 +179,43 @@ def plotBackground(areaPoly=None, ax=None, globalOrigin=None):
 	google maps or something similar?
 
 	#local coordinates in areaPoly, with origin in origin
-	origin is given in swref99 coordinates, not local.
-	"""
+	origin is given in sweref99 coordinates, not local.
+	"""	
 	if not areaPoly: raise Exception('need area polygon in order to plot background')
 	if not ax:
 		fig=plt.figure()
 		ax=fig.add_subplot(111, aspect='equal')
-	bg = Image.open('GIS/672_59_11.tif')
-	dpi = matplotlib.rcParams['figure.dpi']
-	im = plt.imshow(bg, origin='lower')
-	figorigin=595000, 6725000 #eniro source.. 
+	figCorner=(595000, 6725000) #for this specific area, not general		
+	if not globalOrigin:
+		globalOrigin=figCorner
+	#now, let our global origin be in the origin..
+	w=5000 #for this specific image..
+	h=5000
+	figorigin=np.array(figCorner)-np.array(globalOrigin)
+	limits=[figorigin[0], figorigin[0]+w, figorigin[1], figorigin[1]+h]
+	folder=os.path.dirname(os.path.abspath(__file__))
+	bg=mpimg.imread(os.path.join(folder,'672_59_11.tif'))
+	im = plt.imshow(bg, cmap='gray',origin='lower', extent=limits)
+	
+	#now, adjust to our polygon..
+	limits=list(fun.polygonLim(areaPoly))
+	w=max(10, max(limits)/10.)
+	limits[0]-=w #to get some space to polygon
+	limits[1]+=w
+	limits[2]-=w
+	limits[3]+=w
+	ax.axis(limits)
 	return ax
 	
 if __name__=='__main__':
 	import cProfile
-	globalOrigin=(595000, 6725000)
-	areaPoly=[(0,0), (1000,0), (1000,1000), (0,1000)]
+	globalOrigin=(596120, 6727530) #located on map.. nice position..
+	areaPoly=[(0,0), (1000,100), (1000,600), (700,1000), (300,1000)]
 	#cProfile.run("readTerrain(globalOrigin=globalOrigin, areaPoly=areaPoly)")
-	x,y,z=readTerrain(globalOrigin=globalOrigin, areaPoly=areaPoly)
+	x,y,z=readTerrain(globalOrigin=(596120, 6727530) , areaPoly=areaPoly)
 	#ax=plotSurface(*coord)
 	ax=plotBackground(areaPoly, globalOrigin=globalOrigin)
 	plot2DContour(x,y,z,ax)
+	pol=Polygon(areaPoly, closed=True, color='none', ec='k',lw=3, ls='solid')
+	ax.add_patch(pol)
 	plt.show()

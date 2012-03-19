@@ -42,7 +42,8 @@ def SpiderGrid(L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None,
 		origin=(0,0)
 		if not origin in areaPoly: raise Exception('only origin at borderpoints supported right now ')
 	else:
-		if not origin: raise Exception('origin has to be defined for the SpiderGrid if area polygon is given')
+		if not origin:
+			origin=(0,0)
 		if not col.pointInPolygon(origin,areaPoly):
 			raise Exception('so far, SpiderGrid only supports origins on one of the border points')
 	#so, look if origin is on the lines... if it is, swift it just a bit.
@@ -378,7 +379,8 @@ def makeLines(areaPoly, origin, L, C, thMin):
 if __name__=='__main__':
 	areaPoly=[(0.0,0.0), (500.0, 0.0), (1200.0,1000.0), (1000, 1300),(-100,1000.0)]
 	#areaPoly=[(0.0,0.0), (100.0, 0.0), (120.0,100.0), (100, 130),(-100,100.0)]
-	G=SpiderGrid(areaPoly=areaPoly, origin=(50.0, 0.0))
+	areaPoly=[(0,0), (1000,100), (1000,600), (700,1000), (300,1000)]
+	G=SpiderGrid(areaPoly=areaPoly, origin=(0.0, 0.0))
 	import matplotlib as mpl
 	import matplotlib.pyplot as plt
 	from matplotlib.patches import Polygon

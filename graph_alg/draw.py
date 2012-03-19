@@ -5,7 +5,7 @@ from matplotlib.patches import Circle
 from matplotlib.lines import Line2D  
 
 
-def draw_custom(G=None, ax=None, edge_visits=False, cost=False):
+def draw_custom(G=None, ax=None, edge_visits=False, cost=False, road_color='k', road_width=1):
 	if not G: raise Exception()
 	if not ax:
 		fig=plt.figure()
@@ -19,11 +19,11 @@ def draw_custom(G=None, ax=None, edge_visits=False, cost=False):
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
 		if edge_visits:
-			l = Line2D(x,y, color='k', linewidth=1+np.log(e[2]['visits'])/(np.log(len(G))*0.2))
+			l = Line2D(x,y, color=road_color, linewidth=road_width+np.log(e[2]['visits'])/(np.log(len(G))*0.2))
 			pos=middle([x[0],y[0]], [x[1],y[1]])
 			if cost: ax.text(pos[0],pos[1],' '+'%.0f'%e[2]['c'])
 		else:
-			l = Line2D(x,y, color='k', linewidth=1)
+			l = Line2D(x,y, color=road_color, linewidth=road_width)
 		ax.add_line(l)
 	ax.set_xlim(*tuple(G.graph['lim'][0:2]))
 	ax.set_ylim(*tuple(G.graph['lim'][2:4]))
