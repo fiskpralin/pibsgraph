@@ -6,14 +6,10 @@ if __name__=='__main__':
 	if cmd_folder not in sys.path:
 		sys.path.insert(0, cmd_folder)
 from math import *
-from matplotlib.patches import Circle
 import collision as col
 from functions import getDistance, getCartesian, polygon_area
 import functions as fun #the way it should be.
-import matplotlib as mpl
 import matplotlib.pyplot as plt
-from matplotlib.path import Path
-import time
 import numpy as np
 import random
 from scipy.stats import pareto
@@ -26,12 +22,14 @@ from boulder import Boulder
 from pile import Pile
 
 class Terrain():
-	"""The main terrain class.
+	"""
+	The main terrain class.
 	If global variable object G is given, it is assumed to have the variables:'
 		xlim: [min,max]
 		ylim: [min, max]
 		plantMinDist - the minimum distance between plants. If seedlings are not implemented you can skip this.
-	areaPol - a polygon that defines  the stand. Points are expected to be counterclockwise"""
+	    areaPol - a polygon that defines the stand. Points are expected to be counterclockwise
+		"""
 	def __init__(self,G=None, generate=False, dens=1, dbh_mean=0.5, dbh_std=0.1):
 		if not G: raise Exception('by design, you need G for terrain to work. (globalVar(), see sim.tools.py)')
 		self.G=G
@@ -151,7 +149,9 @@ class Terrain():
 				if x==0 or y==0: continue
 				self._grid[(x,y)]=[]
 	def _insertToGrid(self,obst):
-		"""inserts into grid"""
+		"""
+		inserts into grid
+		"""
 		ind=self._getGridIndex(obst.pos)
 		obst._gridIndex=ind
 		try: self._grid[ind].append(obst)
@@ -198,8 +198,7 @@ class Terrain():
 		elif isinstance(obst, Stump): list=self.stumps
 		elif isinstance(obst, Root): list=self.roots
 		elif isinstance(obst, Hole): list=self.holes
-		else: raise Exception('type'+obst.__class__.__name__+' is not supported for removal')
-		if obst in list: list.remove(obst)
+		if list and obst in list: list.remove(obst)
 	def addObstacle(self, obst):
 		"""
 		adds obstacle to all the internal lists, except for the child-specific ones, e.g. trees
@@ -241,27 +240,6 @@ class Terrain():
 			try: obstlist.extend(self._grid[indT])
 			except KeyError: #thrown if we are outside borders
 				pass
-		return obstlist
-	def old_getNeighborObst(self,pos, index=False, Lmax=0):
-		"""should be removed!!!"""
-		if index: ind=pos
-		else: ind=self._getGridIndex(pos)
-		if Lmax>self._gridL: #more than 8 neighbors are needed
-			k=int(ceil(Lmax*self._gridLinv+0.5))
-			dxL=range(-k, k+1)#the +1 is not included
-			dyL=dxL
-		else: #iterate through 8 neighbors and self
-			dxL=[-1,0,1]
-			dyL=[-1,0,1]
-		obstlist=[]
-		for dx in dxL:
-			for dy in dyL:
-				#if sqrt(dx**2+dy**2)>k:
-					#continue
-				indT=(ind[0]+dx, ind[1]+dy) #I am invinsible!!
-				try: obstlist.extend(self._grid[indT])
-				except KeyError: #thrown if we are outside borders.
-					pass
 		return obstlist
 	def restart(self):
 		"""
@@ -392,33 +370,7 @@ class Terrain():
 			t=Tree(pos, dbh=dbh,terrain=self, height=height, weight=weight, logWeight=logWeight, vol=vol, specie=specie)
 			if dbh>biggestDBH: biggestDBH=dbh
 		print "biggest dbh:", biggestDBH, "m"
-		self.removeCollisions()
-		f.close()
-	def removeCollisions(self):
-		"""
-		Obviously, the guys in the 70's did some mistakes and put their trees at the same positions.
-		This method takes care of this by placing the trees really close to each other.
-		One can discuss if they should be removed instead..
-		"""
-		rTemp=0
-		thTemp=0
-		dth=pi/25.
-		b=0.05 #constant for the spiral
-		for t in self.trees:
-			placed=True
-			while placed:
-				placed=False
-				for t2 in self.trees:
-					if t is not t2:
-						if col.collide(t,t2, t.pos):
-							tpos=t.pos
-							while col.collide(t,t2, tpos) or tpos[0]<self.xlim[0] or tpos[0]>self.xlim[1] or tpos[1]<self.ylim[0] or tpos[1]>self.ylim[1]: #trees collide... bad..
-								#search in a spiral.
-								thTemp+=dth
-								rTemp=b*thTemp
-								tpos=getCartesian([rTemp, thTemp], origin=t.pos)
-							t.pos=tpos
-							placed=True #redo again for all trees.				
+		f.close()				
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
 		obstList=self.getNeighborObst(pos, Lmax=R)
@@ -486,86 +438,21 @@ class Terrain():
 					break
 		return boul
 	def draw(self, ax=None): 
-		"""draw to an axis"""
-		if ax==None:
+		"""
+		draw to an axis
+		All the obstacles added to terrain are automatically drawn, given that they have a draw()-method.
+		"""
+		if ax==None: #initialize the axis. Should only be needed in demo-cases.
 			plt.ion()
 			fig = plt.figure()
 			ax = fig.add_subplot(111,aspect='equal', axisbg='#A2CD5A')
 			ax.axis(self.xlim+self.ylim)
 			ax.set_xlabel('x (m)')
-			ax.set_ylabel('y (m)')	
-		for index, o in enumerate(self.obstacles):
-			if o.visible: o.draw(ax)
-			if index>100000:
-				print "too many objects, breaks"
-				plt.clf()
-				break #to many objects
-		#for e in self._grid.keys():
-			#ax.plot((e[0]-0.5)*self._gridL, (e[1]-0.5)*self._gridL, 'bo') #middle of cell
-	def removeObstacle(self,o):
-		"""
-		removes the obstacle from all the terrain lists.
-		"""
-		self.obstacles.remove(o)
-		if isinstance(o, Tree):
-			self.trees.remove(o)
-		elif isinstance(o, Stump):
-			self.stumps.remove(o)
-		elif isinstance(o, Root):
-			self.roots.remove(o)
-if __name__=='__main__':
-	"""this is a comparison between two getNeighbor functions."""
-	random.seed(1)
-	tic=time.clock()
-	plot=True
-	L=100
-	lookups=1000
-	from sim.tools import globalVar
-	G=globalVar()
-	G.gridL=2
-	t=Terrain(G=G, generate=True, areaPoly=[(0,0), (L,0), (L,L), (0,L)], A=150, dens=2, dbh_mean=0.5, dbh_std=0.1)
-	print "time to generate terrain:", time.clock()-tic
-	oldtrees=0
-	newtrees=0
-	random.seed(1)
-	tic=time.clock()
-
-	for i in xrange(lookups):
-		pos=random.uniform(0,L), random.uniform(0,L)
-		Lmax=random.uniform(5,25)
-		a=t.old_getNeighborObst(pos, Lmax=Lmax)
-		for tree in a:
-			oldtrees+=1
-			p=1+3*4/2. #just something to represent time consumption for every tree.
-	old=time.clock()-tic
-	random.seed(1)
-	tic=time.clock()
-	for i in xrange(lookups):
-		pos=random.uniform(0,L), random.uniform(0,L)
-		Lmax=random.uniform(5,25)
-		a=t.getNeighborObst(pos, Lmax=Lmax)
-		for tree in a:
-			newtrees+=1
-			p=1+3*4/2. #just something to represent time consumption for every tree.
-	new=time.clock()-tic
-	print "time for %d lookups: old: %f new:%f"%(lookups, old, new)
-	print "trees with old method: %e, trees with new method: %e"%(oldtrees, newtrees)
-	point=(random.uniform(40,60), random.uniform(40,60))
-	Lmax=20
-	l1=t.getNeighborObst(point,Lmax=Lmax)
-	l2=t.old_getNeighborObst(point,Lmax=Lmax)
-	if plot:
-		f=plt.figure()
-		for l, a in (l1,'121'), (l2, '122'):
-			ax=f.add_subplot(a, aspect='equal', axisbg='#A2CD5A')
-			c=Circle(point, 20, facecolor='b', alpha=300)
-			ax.add_patch(c)
-			for tree in l:
-				tree.color='r'
-			t.draw(ax)
-			plt.plot(point[0], point[1], 'co')
-			ax.set_ylim(point[1]-35, point[1]+35)
-			ax.set_xlim(point[0]-35, point[0]+35)
-			for tree in l:
-				tree.color='g'
-		plt.show()
+			ax.set_ylabel('y (m)')
+		olist=[o for o in self.obstacles if o.visible]
+		if len(olist)>100000:
+			print "too many objects to plot, breaks"
+			plt.clf()
+		else:
+			for o in olist:
+				o.draw(ax) #draws the object to the axis
