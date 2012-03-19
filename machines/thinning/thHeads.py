@@ -8,7 +8,7 @@ import matplotlib as mpl
 import numpy as np
 import copy
 
-from terrain.pile import Pile
+from terrain.pile import Pile, Bundle
 
 
 ###################################################
@@ -35,7 +35,7 @@ class ThinningCraneHead(Process):
 		self.gripArea=0
 		self.trees=[]
 		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
-		self.bundler=False
+		self.bundler=True
 		self.currentPile=None
 		
 	def treeChopable(self, t):
@@ -136,10 +136,11 @@ class ThinningCraneHead(Process):
 			if direction is None: direction=self.road.direction
 			cart=self.m.getCartesian
 			t=self.getNextTree(self.road)#
+			b=self.m.bundler
 			c=[]
 			if len(self.trees)==0: return []
 			if self.currentPile==None:
-				self.currentPile=Pile(pos=self.m.pos,terrain=self.m.G.terrain)#HERE ADD ITS CORRECT POSITION
+				self.currentPile=Pile(pos=b.pos) #HERE ADD ITS CORRECT POSITION
 			i=0
 			for tree in copy.copy(self.trees):
 				tree.isSpherical=False
@@ -155,10 +156,13 @@ class ThinningCraneHead(Process):
 			self.gripArea=0
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
 			c.extend(self.twigCrack())
+			if b.currentBundle is None:
+				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
 			for t in self.currentPile.trees:
-				bundler.currentBundle.trees.append(t)
-				print 'moved the trees from the cP of head to cB of bundler', len(self.m.Bundler.currentBundle.trees), 'are now in that bundle'
-				bundler.currentBundle.updatePile(pi/2)#can i do this? probably wrong direction
+				b.currentBundle.trees.append(t)
+				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
+				print 'xSection of bundle in bundler:', b.currentBundle.xSection 
+				b.currentBundle.updatePile()#no direction because default is pi/2
 				self.currentPile=None
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			return c

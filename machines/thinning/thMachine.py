@@ -62,8 +62,8 @@ class ThinningMachine(Machine, UsesDriver):
 			self.sim.activate(h, h.run())
 
 		####Here is the bundler initiation
-		b=Bundler(sim=self.sim, driver=self.driver, machine=self)
-		self.sim.activate(b,b.run())
+		self.bundler=Bundler(sim=self.sim, driver=self.driver, machine=self)
+		self.sim.activate(self.bundler,self.bundler.run())
 		####That was the initiaion of the bundler
 		
 		self.treeMoni=Monitor(name='trees harvested')
@@ -71,6 +71,7 @@ class ThinningMachine(Machine, UsesDriver):
 		self.roadList=[] #simply a list of roads.
 		self.roads={} #a dictionary, more sophisticated structure with simplifies finding the road for a spec. pos.
 		self.setUpCorridors()
+		
 	def run(self):
 		"""
 		PEM of thinning machine

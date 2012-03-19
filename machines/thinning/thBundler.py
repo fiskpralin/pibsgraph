@@ -16,68 +16,88 @@ This file is now just a copy of the heads, should be rebuilt to a bundler
 ##################################################
 class Bundler(Process,UsesDriver):
 	"""
-	This is the Bundler Class to be positioned in front of the machine. Will be run from machine.py I guess
-	with some sort of wait until
+	This is the Bundler Class to be positioned in front of the machine. Will be run from machine.py
 	"""
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-		
+
 		self.m=machine
 		self.s=self.m.G.simParam
+		self.pos=self.m.pos+[0,3]
 		self.timeBundle=self.s['timeBundle']
-		self.bundleWeight=0
-		self.xSection=0
 		self.maxXSection=self.s['maxXSectionJ']
-		self.xSectionThresh=self.s['xSectionThreshJ']
+		self.xSectionThresh=0.1#self.s['xSectionThreshJ']
 		self.currentBundle=None
-
+		self.forceBundler=False #Is set to true when bundler is filled or new pile from head does not fit
+		
 	def run(self):
 		"""
 		PEM of the bundler class
 		"""
 		"""
-		yield waituntil self.xSection>=self.xSectionThresh #or until self.xSection + new trees would be > self.maxXSection
 		for c 
 		#change the "drop position" for the heads
 		#store trees in bundler until it reaches threshold
 		#make bundle and dump the trees on the side of the main road
 		"""
-		time = 1
-		yield hold, self, time
+		while True:
+			yield waituntil, self, self.bundlerFilled
+			print 'The bundler runs and makes a bundle of the pile'
+			self.bundleIt()
+			self.dumpBundle()
+			self.resetBundle()
+			time = 1
+			yield hold, self, time
 		
 #FROM the cranehead still
-	def dumpTrees(self, direction=None):
-		"""releases the trees at the current position. (And dumps the trees in piles)"""
+	def dumpBundle(self, direction=None):
+		"""
+		Releases the bundle at the current position. (And dumps the bundle in terrain)
+		Needs to be fixed for bundler
+		"""
 		if direction is None: direction=pi/2
-		cart=self.m.getCartesian
-		self.treeWeight=0
-		self.gripArea=0
-		self.currentPile.updatePile(direction)#sets pile parameters in a nice way
-		self.m.G.terrain.piles.append(self.currentBundle)#adds the pile to the list of piles in terrain
-		print '*Saved the current bundle in the terrain:',len(self.currentBundle.trees),'trees in that Bundle'
-		self.currentPile=None
-		return self.cmnd([], time=self.timeDropTrees, auto=self.automatic['dumpTrees']) #Should this time really be there?
+
+		#here the nodes of the bundle are set when the bundle is put in the terrain
+		dumpPos=self.pos+[-2.5,0]#puts it beside the main road
+		cB=self.currentBundle
+		c1=getCartesian([-cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c2=getCartesian([-cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c3=getCartesian([cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c4=getCartesian([cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
+		cB.nodes=[c1,c2,c3,c4]
 		
-	def roadAssigned(self):
-		"""may later be used to wait for an assignment"""
-		if self.road: return True
+		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
+		print '*Saved the current bundle in the terrain:',len(self.currentBundle.trees),'trees in that Bundle'
+
+	def bundleIt(self):
+		"""
+		Performs the actual bundling of the trees. 
+		"""
+		cB=self.currentBundle
+		cB.length = 5 #cut in five meter long sections
+		cB.xSection=sum([t.dbh**2 for t in cB.trees])
+  		cB.biomass = sum([t.weight for t in cB.trees])#initial weight no losses when doing the bundles
+   		cB.radius = sqrt(cB.length**2+(cB.diameter/2)**2)
+		
+	def bundlerFilled(self):
+		"""
+		controls when the bundler runs and makes a bundle.
+		"""
+		if self.currentBundle:
+			if self.forceBundler==True:
+				return True
+			elif self.currentBundle.xSection > self.xSectionThresh: return True
+			else: return False
 		else: return False
 
-	def reset(self):
-		self.road=None #indicates that head is passive
-		self.bundleWeight=0
-		self.xSection=0
+	def resetBundle(self):
+		self.forceBundler=False
 		self.currentBundle=None
-		
 
-	def getCraneMountPoint(self):
-		"""returns the point where the crane meets the head"""
-		cart=self.m.getCartesian
-		cyl=self.m.getCylindrical(self.pos)
-		if not self.road or self.direction==pi/2.: #head is at "base" or with default direction
-			return(cart([cyl[0]-self.length/2., cyl[1]]))
-		return cart([0, -self.length/2], origin=self.pos, direction=self.direction, fromLocalCart=True)
 
 	def draw(self):
+		"""
+		This is the drawing of the actual bundler without any trees in it
+		"""
 		pass 
