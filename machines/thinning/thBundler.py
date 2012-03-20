@@ -46,8 +46,14 @@ class Bundler(Process,UsesDriver):
 			self.bundleIt()
 			self.dumpBundle()
 			self.resetBundle()
-			self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling'])#true here means the rest is automatic
+			#this is how it looked, reason for bug:
+			#self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling'])#true here means the rest is automatic
+			#this is how it should look:
+			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c #true here means the rest is automatic
+
+			
 			for c in self.releaseDriver(): yield c
+
 			print 'end of bundlerrun'
 		
 	def dumpBundle(self, direction=None):
@@ -102,7 +108,26 @@ class Bundler(Process,UsesDriver):
 	def resetBundle(self):
 		self.forceBundler=False
 		self.currentBundle=None
+	def cmndWithDriver(self, commands, time):
+		"""
+		a method to set up the yield command, for use of the driver for a specific time.
+		overrides superclass method
 
+		priority not added here. If you want that, see how it's implemented in the same
+		method for the planting machine.
+		"""
+		if self.usesDriver: #don't need to reserve driver..
+			commands.extend([(hold, self, time)])
+		else:
+			commands.extend([(request, self, self.driver), (hold, self, time)])
+			self.usesDriver=True
+			switchTime=self.m.times['switchFocus']
+			if self.driver.isIdle(): #check for how long he's been idle
+				switchTime-=self.driver.idleTime()
+				if switchTime<0: switchTime=0
+			commands.extend([(hold, self, switchTime)]) #add time to switch focus
+			commands.extend([(hold, self, time)])
+		return commands
 
 	def draw(self):
 		"""

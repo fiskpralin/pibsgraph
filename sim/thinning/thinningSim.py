@@ -267,7 +267,7 @@ def setDefaultThinningParams(simParam={}):
 	s['cuttingF']=False#
 	s['twigCrackF']=False#
 	s['restOfBundling']=True# Should the rest of the bundling process be automatic?
-	s['startBundler']=True# Need the dirver push a button or is it made automatically?
+	s['startBundler']=False# Need the dirver push a button or is it made automatically?
 	
 	#HEADS C,D,E,F
 	s['headWidthCD']=1

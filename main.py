@@ -112,7 +112,7 @@ if __name__=='__main__':
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
 		#G.terrain=PlantMTerrain(G, ttype='5')
-		G.plotDelay=20
+		#G.plotDelay=20
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=1)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
