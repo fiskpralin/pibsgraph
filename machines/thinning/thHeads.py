@@ -157,8 +157,7 @@ class ThinningCraneHead(Process):
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
 			c.extend(self.twigCrack())
 			if b.currentBundle is None:
-				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
-				#terrain.addObstacle()blac
+				b.currentBundle=Bundle(self.m.pos, terrain=self.m.G.terrain)# position not correct?
 			for t in self.currentPile.trees:
 				b.currentBundle.trees.append(t)
 				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
