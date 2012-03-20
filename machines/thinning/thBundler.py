@@ -33,24 +33,20 @@ class Bundler(Process,UsesDriver):
 		
 	def run(self):
 		"""
-		PEM of the bundler class
-		"""
-		"""
-		for c 
-		#change the "drop position" for the heads
-		#store trees in bundler until it reaches threshold
-		#make bundle and dump the trees on the side of the main road
+		PEM of the bundler class.
+		This method checks for a condition to run which is when it filled above threshold
+		or the incoming pile does not fit. It makes a bundle with some set properties
+		end dump it beside the road. 
 		"""
 		while True:
 			yield waituntil, self, self.bundlerFilled
 			print 'The bundler runs and makes a bundle of the pile'
+			self.startTheBundler()
 			self.bundleIt()
 			self.dumpBundle()
 			self.resetBundle()
-			time = 1
-			yield hold, self, time
+			for c in cmnd[] yield c
 		
-#FROM the cranehead still
 	def dumpBundle(self, direction=None):
 		"""
 		Releases the bundle at the current position. (And dumps the bundle in terrain)
@@ -69,6 +65,14 @@ class Bundler(Process,UsesDriver):
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
 		print '*Saved the current bundle in the terrain:',len(self.currentBundle.trees),'trees in that Bundle'
+
+	def startTheBundler(self):
+		"""
+		Adds the time it takes for the driver to push the "start bundling"-button.
+		"""
+		return 
+
+
 
 	def bundleIt(self):
 		"""
