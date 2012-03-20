@@ -38,7 +38,9 @@ def distToOrigin(e,R):
 def getDistance(p1,p2):
 	return sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)
 def cycleRoad(G, R, ax=None, aCap=True):
-	"""works with cycles instead of shortest paths"""
+	"""
+	works with cycles instead of shortest paths
+	"""
 	if aCap: aCap=G.graph['areaCap']
 	inf = 1e15
 	eps=1e-9
@@ -168,6 +170,9 @@ def cycleRoad(G, R, ax=None, aCap=True):
 			go.update_after_mod(e,R)
 	for e in R.edges(data=True):
 		modifyEdge(e, R, reset=True)
+	print "construction finished."
+	print "road area coverage:", R.graph['areaCover']
+	print "total area:", G.graph['A']
 	print "road overall cost, compensated with rho:", cf.roadCost2(R)
 	#draw_custom(R, ax=ax, edge_visits=True, cost=False)
 def modifyEdge(edge, R, reset=False):
@@ -176,7 +181,9 @@ def modifyEdge(edge, R, reset=False):
 	else:
 		edge[2]['weight']=getDistance(edge[0], edge[1])*(1-float(edge[2]['visits'])/(4.0*float(R.graph['elements'])))
 def addListProcedure(addList,remList, R, c,i,lastAdded=None):
-	"""does some stuff connected to addList"""
+	"""
+	does some stuff connected to addList
+	"""
 	#print "goes into loop..."
 	#routingcost is really expensive, procedure to minimize number of calls.
 	for aTmp in addList:
@@ -185,10 +192,6 @@ def addListProcedure(addList,remList, R, c,i,lastAdded=None):
 		else: aTmp[2]['c']=cTmp
 	if len(addList)!=0:
 		addList=sorted(addList, key=lambda edge: edge[2]['c']) #first sort
-		#print """-------------"""
-		#for a in addList:
-		#	pass#print a[2]['c']
-		#print "'''''''''''''''"
 		a=addList[0]
 		eps=1e-9 #tolerance
 		if a[2]['c']<-eps and abs(a[2]['c'])>c+eps: #add edge again
@@ -223,7 +226,8 @@ def singleRun(vis=True):
 	#raw_input('press any key')
 def findAwsomeDiagonals(addList,R):
 	"""
-	identifies hugely trafficed bends, and straightens them out. 
+	identifies hugely trafficed bends, and straightens them out.
+	"in production-not yet done"
 	"""
 	
 	

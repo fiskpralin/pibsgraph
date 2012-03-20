@@ -235,12 +235,34 @@ class ThinningCraneHead(Process):
 			return []
 
 	def getCraneMountPoint(self):
-		"""returns the point where the crane meets the head"""
+		"""
+		returns the point where the crane meets the head
+		"""
 		cart=self.m.getCartesian
 		cyl=self.m.getCylindrical(self.pos)
 		if not self.road or self.direction==pi/2.: #head is at "base" or with default direction
 			return(cart([cyl[0]-self.length/2., cyl[1]]))
 		return cart([0, -self.length/2], origin=self.pos, direction=self.direction, fromLocalCart=True)
+	def cmndWithDriver(self, commands, time):
+		"""
+		a method to set up the yield command, for use of the driver for a specific time.
+		overrides superclass method
+
+		priority not added here. If you want that, see how it's implemented in the same
+		method for the planting machine.
+		"""
+		if self.usesDriver: #don't need to reserve driver..
+			commands.extend([(hold, self, time)])
+		else:
+			commands.extend([(request, self, self.driver), (hold, self, time)])
+			self.usesDriver=True
+			switchTime=self.m.times['switchFocus']
+			if self.driver.isIdle(): #check for how long he's been idle
+				switchTime-=self.driver.idleTime()
+				if switchTime<0: switchTime=0
+			commands.extend([(hold, self, switchTime)]) #add time to switch focus
+			commands.extend([(hold, self, time)])
+		return commands
 
 			
 class BCHead(ThinningCraneHead, UsesDriver):

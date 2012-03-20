@@ -249,7 +249,7 @@ class Forwarder(Machine):
 		self.treeWeight+=t.weight
 		self.treeVolume+=t.vol
 		self.pickup_road[2]['r'].harvestedTrees.remove(t)
-		self.G.terrain.removeObstacle(t)
+		self.G.terrain.remove(t)
 		self.sim.trees+=1
 		self.treeMoni.observe(self.trees, self.sim.now())
 		self.totalTreeMoni.observe(self.sim.trees, self.sim.now())

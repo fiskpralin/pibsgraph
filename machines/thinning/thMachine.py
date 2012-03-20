@@ -248,6 +248,26 @@ class ThinningMachine(Machine, UsesDriver):
 			return pnew
 		else:
 			return p
+	def cmndWithDriver(self, commands, time):
+		"""
+		a method to set up the yield command, for use of the driver for a specific time.
+		overrides superclass method
+
+		priority not added here. If you want that, see how it's implemented in the same
+		method for the planting machine.
+		"""
+		if self.usesDriver: #don't need to reserve driver..
+			commands.extend([(hold, self, time)])
+		else:
+			commands.extend([(request, self, self.driver), (hold, self, time)])
+			self.usesDriver=True
+			switchTime=self.times['switchFocus']
+			if self.driver.isIdle(): #check for how long he's been idle
+				switchTime-=self.driver.idleTime()
+				if switchTime<0: switchTime=0
+			commands.extend([(hold, self, switchTime)]) #add time to switch focus
+			commands.extend([(hold, self, time)])
+		return commands
 	def draw(self,ax):
 		"""draws the machine at current poistion and with current direction.
 		 All measurements are taken from the komatsu 901.4 harvester with 620/55 x 30,5 wheels on the back and 650/45 x 22,5 wheels in the front."""
