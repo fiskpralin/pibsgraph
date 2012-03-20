@@ -24,16 +24,19 @@ class Obstacle():
 		self._gridIndex=None
 		if terrain:
 			self.terrain=terrain
-			if not (self.__class__.__name__ == 'Boulder' or isinstance(self, Process)):
-				terrain.obstacles.append(self)
-				terrain._insertToGrid(self)
+			if not (self.__class__.__name__ == 'Boulder' or isinstance(self, Process)): #ugly if statement.. but needed for boulder performance..
+				terrain.addObstacle(self)
 
 	def getNodes(self, pos=None):
 		"""this method must be overrun and implemented if not spherical."""
 		if not isSpherical: raise Exception('ERROR: function getNodes is not implemented for %s. This is required.'%self.name)
 		if pos and pos != self.pos: raise Exception('nodes and pos not correlated for tree.')
 		return []
-
+	def remove(self):
+		"""
+		removes obstacle from the associated lists, except for the specie-specific one, e.g. terrain.trees.
+		"""
+		if self.terrain: self.terrain.remove(self)
 	def draw(self,ax):
 		if self.visible:
 			cir = Circle(tuple(self.pos), radius=self.radius, facecolor=self.color, alpha=self.alpha)
