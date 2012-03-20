@@ -60,6 +60,7 @@ class Terrain():
 			self._fileini()
 		else:
 			self.generateTrees(dens, dbh_mean, dbh_std)
+
 	def _fileini(self):
 		self.stumpFiles=[151,152,153,154,251,252,451,452,551,552,553,554]
 		self.treeFiles=[101,102,103,104,105,106,107,108,109,110,\
@@ -71,6 +72,7 @@ class Terrain():
 		self.exceptionalThinning=[ 210]#,, 221]#, 211] #files that have proven to be really good.. unfortunately 211 and 221 are corrupt..
 		self.maybeThinning=[102, 103, 403, 105, 304]
 		self.thinningFiles=self.exceptionalThinning+self.maybeThinning
+
 	def generateTrees(self,dens, dbh_mean, dbh_std):
 		"""
 		Generates trees. Can only handle square areas right now.
@@ -180,6 +182,7 @@ class Terrain():
 		else:
 			ind2=int(floor(p[1]*self._gridLinv))
 		return (ind1, ind2)
+
 	def remove(self,obst):
 		"""
 		removes from grid and internal lists.
@@ -199,12 +202,14 @@ class Terrain():
 		elif isinstance(obst, Root): list=self.roots
 		elif isinstance(obst, Hole): list=self.holes
 		if list and obst in list: list.remove(obst)
+
 	def addObstacle(self, obst):
 		"""
 		adds obstacle to all the internal lists, except for the child-specific ones, e.g. trees
 		"""
 		self.obstacles.append(obst)
 		self._insertToGrid(obst)
+
 	def getNeighborObst(self,pos, index=False, Lmax=0):
 		"""returns obstacle from the neighboring cells given by Lmax"""
 		if index: ind=pos

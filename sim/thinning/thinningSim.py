@@ -266,7 +266,8 @@ def setDefaultThinningParams(simParam={}):
 	s['dropTreesEF']=False#
 	s['cuttingF']=False#
 	s['twigCrackF']=False#
-	s['dropBundle']=True# The bundler J drops the trees at the side
+	s['restOfBundling']=True# Should the rest of the bundling process be automatic?
+	s['startBundler']=True# Need the dirver push a button or is it made automatically?
 	
 	#HEADS C,D,E,F
 	s['headWidthCD']=1
@@ -295,6 +296,7 @@ def setDefaultThinningParams(simParam={}):
 	#BUNDLER J
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
 	s['timeBundle']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
+	s['timeStartBundler']=1#[s] The time it takes to get the bundler going. (Push the button)
 	s['powBundleJ']=1#[kW] Power it takes to make a bundle at the bundler J
 	s['maxXSectionJ']=1#[m2] Maximum cross section of "stored" trees in bundler
 	s['xSectionThreshJ']=0.8#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.

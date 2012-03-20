@@ -49,7 +49,8 @@ moveArmInEF	False
 dropTreesEF	False
 cuttingF	False
 twigCrackF	False
-dropBundle	True		The bundler J drops the trees at the side
+restOfBundling	True		The bundler J drops the trees at the side
+startBundler	False		Need the driver push a button to start it or is it autostart?
 
 			#HEADS C,D,E,F
 headWidthCD	1	   [m]	Width of the continuous head
@@ -78,6 +79,7 @@ powCut	1	[kW]	power demanded to cut trees at the head
 			#BUNDLER J
 dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
 timeBundle	10	[s]	Time it takes to finish bundling of trees in the bundler.
+timeStartBundler	1	[s]	 The time it takes to get the bundler going.
 powBundleJ	1	[kW]	Power it takes to make a bundle at the bundler J
 maxXSectionJ	1	[m2]	Maximum cross section of "stored" trees in bundler
 xSectionThreshJ	0.8	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.

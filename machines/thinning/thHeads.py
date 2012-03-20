@@ -149,7 +149,7 @@ class ThinningCraneHead(Process):
 				self.currentPile.trees.append(tree)#adds the tree to the current pile
 				i=i+1
 				self.trees.remove(tree)
-				print 'added the',i,'th tree' 
+			print 'added',i,'trees' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -158,6 +158,7 @@ class ThinningCraneHead(Process):
 			c.extend(self.twigCrack())
 			if b.currentBundle is None:
 				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
+				#terrain.addObstacle()blac
 			for t in self.currentPile.trees:
 				b.currentBundle.trees.append(t)
 				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
@@ -165,6 +166,7 @@ class ThinningCraneHead(Process):
 				b.currentBundle.updatePile()#no direction because default is pi/2
 				self.currentPile=None
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
+			print 'end of dumpTrees'
 			return c
 	
 		
