@@ -115,10 +115,6 @@ def overLapA(e1,e2, R):
 	angle=get_angle(e1,e2) 	#get angle between the road segments..
 	eps=1e-8
 	if angle<eps:
-		print "this is wrong, but we let it be just to get a result"
-		return 1
-		print e1
-		print e2
 		raise Exception('angle=0 between roads... incident? something must be wrong')
 	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaps
 	alpha=pi-angle #this is the angle that matters here...

@@ -45,7 +45,7 @@ def simRandomRoad(G=None,vis=True, anim=False):
 	"""
 	if not G: G=globalVar()
 	if not G.areaPoly: G.areaPoly=[(0.0,0.0), (100.0, 0.0), (100.0,100.0), (180, 180), (100, 170),(-100,100.0)]
-	if not G.roadNet: G.roadNet=ga.construct.makeRoadGraph(L=24,ulim=(0,1),angle=0.2, areaPoly=G.areaPoly, grid='spider')
+	if not G.roadNet: G.roadNet=ga.construct.makeRoadGraph(L=24,ulim=(0,1),angle=0.2, areaPoly=G.areaPoly, grid='square')
 	for e in G.roadNet.edges(data=True):
 		e[2]['r']=Road(endPoints=e[0:2]) #road instance, that can be used in simulations.
 	ForwarderSim(G, vis, anim)

@@ -19,6 +19,7 @@ def makeRoadGraph(L=24, origin=(0,0), grid='square', ulim=(0,0),areaPoly=None,an
 	"""
 	constructs a road graph.
 	"""
+	if not areaPoly: raise Exception('we need a polygon to work on, areaPoly')
 	if grid=='square':
 		G=gr.sqGridGraph(L, umin=ulim[0], umax=ulim[1], xyRatio=1, origin=origin,angle=angle, diagonals=diagonals, areaPoly=areaPoly)
 	elif grid =='tri' or grid=='triangular':

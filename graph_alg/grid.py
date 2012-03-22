@@ -15,46 +15,44 @@ if __name__=='__main__':
 from functions import *
 import collision as col
 
-	
 def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1,origin=None, diagonals=False, angle=None, areaPoly=None):
 	"""
 	Creates a square grid graph with dx=dy=L. Umin and umax is the boundaries for the edge uniform distribution.
 	xyRatio =0 creates a square area. xyRatio>1 creates an "x>y" rectangle.
 	angle is how the grid is turned in radians. 0=default
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
-	"""	
-	if angle>pi/2.: raise Exception('only angles <pi/2 are defined for grid')
+	"""
 	if not areaPoly:
-		raise Exception('if areaPoly is not given, elements must be given.')
+		raise Exception('areaPoly must be given.')
+	if angle ==None: #find the longest edge, and use its angle
+		print "get the angle"
+		angle=getAngleFromLongestEdge(areaPoly, origin)
+		print "got the angle.", angle
+	while angle>pi/2. or angle<0: #if it is.. most often does not enter loop
+		if angle<0:
+			angle+=pi/2.
+		else:
+			angle-=pi/2.
+	print "angle:", angle
 	C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
 	if not origin: origin=(0,0) #not really used.. change code layout?
 	dx=L
 	dy=L
 	cart=getCartesian
-	digits=3
-	#xl=np.arange(0,Nx*dx, dx, dtype=np.float)
+	digits=3 #we round of to this in order to avoid numerical errors. 1mm is enough :)
 	"""The strategy is to first cover an extra large area, and then take away the nodes that are outside.
 	for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
 	5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area."""
 	d=1/sqrt(2)+0.001
-	if areaPoly:
-		xmin,xmax,ymin,ymax=polygonLim(areaPoly)
-		print xmin,xmax,ymin,ymax
-	else:
-		Ny=floor(sqrt(elements/xyRatio))
-		Nx=Ny*xyRatio
-		xmax=Nx*L+L*d
-		ymax=Ny*L+L*d
-		xmin=-L*d
-		ymin=-L*d
-		areaPoly=[(xmin,ymin), (xmax, ymin), (xmax,ymax), (xmin,ymax)] #square
+	xmin,xmax,ymin,ymax=polygonLim(areaPoly)
+	
+	xl=np.arange(xmin+C,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float) #hypothenuse
+	yl=np.arange(ymin+C,ceil(sqrt(xmax**2+ymax**2)), dy, dtype=np.float) 
 
-	xl=np.arange(xmin,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float) #hypothenuse
-	yl=np.arange(ymin,ceil(sqrt(xmax**2+ymax**2)), dy, dtype=np.float) #hypothenuse in another way
-	if not angle: angle=0
 	direction=angle+pi/2.
 	G=nx.Graph( L=L, type='sqGridGraph', C=C)
 	G.graph['lim']=np.array([xmin-0.5*L,xmax+0.5*L, ymin-0.5*L, ymax+0.5*L])
+	G.graph['areaPoly']=areaPoly
 	el=0
 	for xloc in xl:
 		for yloc in yl:
@@ -101,23 +99,6 @@ def sqGridGraph(L=24, umin=0, umax=0, xyRatio=1,origin=None, diagonals=False, an
 	G.graph['density']=elements/G.graph['A']
 
 	return G
-
-def sRCov(e, R):
-	"""
-	Computes the coverage (in m2, not percent) of the edge e
-	only accurate for 90degree intersections.
-	"""
-	l=cf.edgeLength(e)
-	w=R.graph['L']
-	rA=l*w #base area, but we should subtract overlaps.
-	print "overlap algorithm has not been tested..."
-	for node, other in [(e[0], e[1]), (e[1], e[0])]:
-		for neigh in R.neighbors(node):
-			if neigh==other: continue #this is edge e..
-			a=go.overLapA(e, (node, neigh), R) #the overlapping area.
-			rA-=a/2. #divide by two since counted twice.
-			#we get a problem if more than two road segments are  sharing this overlap..			
-	return rA
 def inside(pos,areaPoly):
 	"""
 	max is a list with two elements. max[0]==xmax, max[1]==ymax. 
@@ -196,5 +177,33 @@ def triGridGraph(L=24, umin=0, umax=0, xyRatio=1, origin=None,angle=None, areaPo
 	G.graph['L']=L
 	G.graph['Ainv']=1./G.graph['A']
 	G.graph['density']=elements/G.graph['A']
+	G.graph['areaPoly']=areaPoly
 	return G
 
+def getAngleFromLongestEdge(areaPoly, origin=None):
+	"""
+	finds the angle of the longest edge in relation to the x-axis.
+	if there is a draw, the edge closest to the origin wins.
+
+	This function is only usable for konvex polygons, but works for concave as well.
+
+	the square distance is used since it's faster to compute
+	"""
+	if not origin: origin=(0,0)
+	last=areaPoly[-1]
+	longest=None
+	dmax=0
+	for node in areaPoly:
+		d2=getDistanceSq(node, last)
+		if d2==dmax: #look for distance to origin
+			dtmp=min([getDistanceSq(node, origin), getDistanceSq(last, origin)])
+			dtmp2=min([getDistanceSq(node, longest[0]), getDistanceSq(last, longest[1])])
+			if dtmp<dtmp2:
+				longest = (node,last)
+				dmax=d2
+		elif d2>dmax:
+			longest = (node,last)
+			dmax=d2
+		last=node
+	#now, what's the angle?
+	return angleToXAxis(longest)

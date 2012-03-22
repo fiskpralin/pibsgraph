@@ -1,3 +1,9 @@
+if __name__=='__main__':
+	import os, sys #insert /dev to path so we can import these modules.
+	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+	if not cmd_folder in sys.path:
+		sys.path.insert(0, cmd_folder)
+
 import networkx as nx
 from math import *
 from matplotlib.patches import Rectangle
@@ -12,22 +18,9 @@ import graph_operations as go
 from draw import *
 
 from construct import *
+from functions import getDistance
 
 
-def testRoads(R,p1,p2,ax=None):
-	"""plots the roads p1,p2 in the road net."""
-	plt.cla()
-	ax=draw_custom(R, ax=ax, edge_visits=True)
-	if not ax:
-		fig=plt.figure()
-		ax=fig.add_subplot(111, aspect='equal')
-		ax.set_axis_bgcolor('#ffbb55')
-		ax.set_xlabel('x')
-		ax.set_ylabel('y')
-	draw_road(p1 , ax,'c')
-	draw_road(p2 , ax,'r')
-	raw_input('press any key')
-	return ax
 def distToOrigin(e,R):
 	a=np.array(e[0])
 	b=np.array(e[1])
@@ -35,8 +28,6 @@ def distToOrigin(e,R):
 	middle=b+0.5*d
 	o=R.graph['origin']
 	return sqrt((middle[0]-o[0])**2+(middle[1]-o[1])**2)
-def getDistance(p1,p2):
-	return sqrt((p1[0]-p2[0])**2+(p1[1]-p2[1])**2)
 def cycleRoad(G, R, ax=None, aCap=True):
 	"""
 	works with cycles instead of shortest paths
@@ -174,8 +165,11 @@ def cycleRoad(G, R, ax=None, aCap=True):
 	print "road area coverage:", R.graph['areaCover']
 	print "total area:", G.graph['A']
 	print "road overall cost, compensated with rho:", cf.roadCost2(R)
-	#draw_custom(R, ax=ax, edge_visits=True, cost=False)
 def modifyEdge(edge, R, reset=False):
+	"""
+	used systematically in order to deal with the "taxi-cab-geometry-problem", i.e. there
+	are several paths of equal length between two specific points.
+	"""
 	if reset:
 		edge[2]['weight']=getDistance(edge[0], edge[1])
 	else:
@@ -214,11 +208,11 @@ def singleRun(vis=True):
 	tic=time.clock()
 	L=24
 	origin=(0.0,0.0)
-	#areaPoly=[(0.0,0.0), (100.0, 0.0), (100.0,100.0), (180, 180), (100, 170),(-100,100.0)]
-	Ls=200.0
-	areaPoly=[(0.0,0.0), (2*Ls, 0.0), (2*Ls,Ls),(0.0,Ls)]
-	#random.seed(1)
-	R=makeRoadGraph(L=L,grid='square',ulim=(0,0),origin=origin, angle=0, areaCap=0.20,areaPoly=areaPoly, diagonals=False)
+	Ls=100.0
+	#areaPoly=[(0.0,0.0), (2*Ls, 0.0), (2*Ls,Ls),(0.0,Ls)]
+	areaPoly=[(0.0,0.0), (3*Ls, Ls), (1.5*Ls,1.5*Ls),(0.0,Ls)]
+
+	R=makeRoadGraph(L=L,grid='square',ulim=(0,0),origin=origin, angle=None, areaCap=0.20,areaPoly=areaPoly, diagonals=False)
 	if vis:
 		ax=draw_custom(R, edge_visits=True)
 		plot_coverage(R,ax)
@@ -229,7 +223,7 @@ def findAwsomeDiagonals(addList,R):
 	identifies hugely trafficed bends, and straightens them out.
 	"in production-not yet done"
 	"""
-	
+	pass
 	
 	#first, list the 
 

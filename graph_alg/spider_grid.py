@@ -243,13 +243,6 @@ def findIntersection(origin, th, areaPoly):
 		raise Exception('line has no intersection with polygon area')
 	return tuple(point)
 
-def angleToXAxis(ray):
-	"""
-	returns the angle in relation to the xaxis.
-	vector from p1 to p2
-	"""
-	r,th=getCylindrical(ray[1], origin=ray[0], direction=0)
-	return th
 def pointOnPolygonBorder(point, poly):
 	"""
 	determines if point is on border of polygon
