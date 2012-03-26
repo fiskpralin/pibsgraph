@@ -32,11 +32,28 @@ def roadAreaCoverage(R):
 	for e in R.edges():
 		rA+=singleRoadSegmentCoverage(e,R)
 	return rA*R.graph['Ainv']
+def sRCov(e, R):
+	"""
+	Computes the coverage (in m2, not percent) of the edge e
+	only accurate for 90degree intersections.
+	"""
+	l=edgeLength(e)
+	w=R.graph['L']
+	rA=l*w #base area, but we should subtract overlaps.
+	print "overlap algorithm has not been tested..."
+	for node, other in [(e[0], e[1]), (e[1], e[0])]:
+		for neigh in R.neighbors(node):
+			if neigh==other: continue #this is edge e..
+			a=go.overLapA(e, (node, neigh), R) #the overlapping area.
+			rA-=a/2. #divide by two since counted twice.
+			#we get a problem if more than two road segments are  sharing this overlap..
+	return rA
 def edgeLength(e):
 	"""
 	calculates length of edge
 	"""
 	return sqrt((e[0][0]-e[1][0])**2+(e[0][1]-e[1][1])**2) #pythagora's
+
 def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 	"""
 	Computes the coverage (in m2, not percent) of the edge e
@@ -51,14 +68,11 @@ def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 		modif=0.5 #count half of the overlap, it is taken into consideration twice.
 	l=edgeLength(e)
 	A=l*R.graph['w']
-	nodes=[e[0],e[1]]
 	#new stuff
-	for i in [0,1]:
-		node=nodes[i]
+	for node, other in [(e[0], e[1]), (e[1], e[0])]:
 		if R.degree(node)<=2: continue #we also get a "gap", for d=2 this gap is of equal size as the overlap.
-		othernode=nodes[i-1]
 		for neigh in R.neighbors(node):
-			if neigh==othernode: continue #(node, neigh) is road e, identical road..
+			if neigh==other: continue #(node, neigh) is road e, identical road..
 			a=go.overLapA(e, (node, neigh), R)
 			A-=a*modif #compensate for overlap.
 	return A

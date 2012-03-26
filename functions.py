@@ -140,7 +140,13 @@ def getAngle(r1, r2):
 		if th>2*pi: raise Exception('something is wrong with getAngle')
 		th=pi-th
 	return th
-	
+def angleToXAxis(ray):
+	"""
+	returns the angle in relation to the xaxis.
+	vector from p1 to p2
+	"""
+	r,th=getCylindrical(ray[1], origin=ray[0], direction=0)
+	return th	
 class rect():
 	"""
 	rectangle

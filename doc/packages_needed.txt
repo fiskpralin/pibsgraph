@@ -1,0 +1,10 @@
+This is a list of the packages needed to run everything. 
+
+Not really complete, something may be missing. In that case, add it.
+
+* Numpy
+* Simpy
+* SciPy
+* NetworkX
+* GDAL?
+* xlrd, xlwt
