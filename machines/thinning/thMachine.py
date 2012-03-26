@@ -198,6 +198,7 @@ class ThinningMachine(Machine, UsesDriver):
 			if len(self.positions)<i+2: return self.pos
 			i+=1
 		raise Exception('getNextPos is not expected to come this far.')
+
 	def getTreeDumpSpot(self, side):
 		"""
 		returns the position to dump the trees
@@ -210,6 +211,7 @@ class ThinningMachine(Machine, UsesDriver):
 		elif side=='right':
 			return cart([W, -L], fromLocalCart=True)
 		else: raise Exception('getTreeDumpSpot does not recognize side %s'%side)
+
 	def getNodes(self, pos=None):
 		"""
 		if position is not current position, it is expected that vechicle goes there from the current
@@ -230,12 +232,16 @@ class ThinningMachine(Machine, UsesDriver):
 		nodes.append(c([-W/2., -L/2.], origin=pos, direction=direction, fromLocalCart=True))
 		nodes.append(c([W/2., -L/2.], origin=pos, direction=direction, fromLocalCart=True))
 		return nodes
+
 	def setPos(self, pos, cmnd=False):
 		time=super(ThinningMachine,self).setPos(pos)+self.times['move const']
 		for h in self.heads.values():
 			h.pos=h.getStartPos() #crane are always in this pos while moving
+		if self.bundler:
+			self.bundler.pos=self.bundler.getBPos() #sets the position of the bundler to before machine
 		if cmnd: return self.cmnd([],time, self.automaticMove)
 		else: return time
+
 	def getRoadClearPos(self):
 		"""used for the mainRoad. Check if the road is clear or if we have to take a small movement first and clear it."""
 		p=self.getNextPos()
@@ -333,7 +339,9 @@ class ThinningMachine(Machine, UsesDriver):
 		ax.add_patch(p)
 		#draw the heads and crane:
 		for h in self.heads.values():
-			h.draw(ax)	
+			h.draw(ax)
+		if self.bundler:
+			self.bundler.draw(ax)
 		#cabin:
 		l=1.8 #pure estimation for these three variables
 		w=W-2*r

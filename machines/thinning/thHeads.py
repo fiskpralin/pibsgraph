@@ -141,6 +141,7 @@ class ThinningCraneHead(Process):
 			if len(self.trees)==0: return []
 			if self.currentPile==None:
 				self.currentPile=Pile(pos=b.pos) #HERE ADD ITS CORRECT POSITION
+				print 'Created current pile in bundler at cBpos,bPos', self.currentPile.pos, b.pos
 			i=0
 			for tree in copy.copy(self.trees):
 				tree.isSpherical=False
@@ -158,7 +159,7 @@ class ThinningCraneHead(Process):
 			c.extend(self.twigCrack())
 			if b.currentBundle is None:
 				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
-				#terrain.addObstacle()blac
+				#terrain.addObstacle()
 			for t in self.currentPile.trees:
 				b.currentBundle.trees.append(t)
 				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
