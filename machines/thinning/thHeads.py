@@ -140,17 +140,22 @@ class ThinningCraneHead(Process):
 			c=[]
 			if len(self.trees)==0: return []
 			if self.currentPile==None:
-				self.currentPile=Pile(pos=b.pos) #HERE ADD ITS CORRECT POSITION
-				print 'Created current pile in bundler at cBpos,bPos', self.currentPile.pos, b.pos
-			i=0
-			for tree in copy.copy(self.trees):
+				self.currentPile=Pile(pos=b.pos)
+				print 'Created a new current pile in bundler'
+
+			""" THIS IS the check if the crane can dump trees in the bundler.  needs some look at, since current
+			pile doesn not necessarily have a xSection. also no model for it... aso
+			if self.currentPile.xSection+b.currentBundle.xSection>b.maxXSection:
+				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+			"""
+				
+			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
 				self.currentPile.trees.append(tree)#adds the tree to the current pile
-				i=i+1
 				self.trees.remove(tree)
-			print 'added',i,'trees' 
+			print 'added',index+1,'trees to the currentPile' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -158,8 +163,8 @@ class ThinningCraneHead(Process):
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
 			c.extend(self.twigCrack())
 			if b.currentBundle is None:
-				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
-				#terrain.addObstacle()
+				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)
+				#terrain.addObstacle(b.currentBundle)#add this to see bundle in the bundler before dumped in terrain
 			for t in self.currentPile.trees:
 				b.currentBundle.trees.append(t)
 				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'

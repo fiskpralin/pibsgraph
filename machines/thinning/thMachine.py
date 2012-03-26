@@ -337,11 +337,10 @@ class ThinningMachine(Machine, UsesDriver):
 		ax.add_patch(p)
 		p=mpl.patches.Polygon(np.array([r2, r21,r3,r4, r41,r5]), closed=True, facecolor=self.color)
 		ax.add_patch(p)
-		#draw the heads and crane:
-		for h in self.heads.values():
-			h.draw(ax)
-		if self.bundler:
+		if self.bundler:		#draw the bundler:
 			self.bundler.draw(ax)
+		for h in self.heads.values():		#draw the heads and crane:
+			h.draw(ax)
 		#cabin:
 		l=1.8 #pure estimation for these three variables
 		w=W-2*r

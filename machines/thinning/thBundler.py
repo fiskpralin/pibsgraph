@@ -49,17 +49,16 @@ class Bundler(Process,UsesDriver):
 	def dumpBundle(self, direction=None):
 		"""
 		Releases the bundle at the current position. (And dumps the bundle in terrain)
-		Needs to be fixed for bundler
 		"""
 		if direction is None: direction=pi/2
 
 		#here the nodes of the bundle are set when the bundle is put in the terrain
 		dumpPos=np.array(self.pos)+np.array([-2.5,0])#puts it beside the main road doesn't work though
 		cB=self.currentBundle
-		c1=getCartesian([-cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c2=getCartesian([-cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c3=getCartesian([cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c4=getCartesian([cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c1=getCartesian([-cB.diameter/2,cB.length/2], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c2=getCartesian([-cB.diameter/2, -cB.length/2], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c3=getCartesian([cB.diameter/2, -cB.length/2], origin=dumpPos, direction=direction, fromLocalCart=True)
+		c4=getCartesian([cB.diameter/2,cB.length/2], origin=dumpPos, direction=direction, fromLocalCart=True)
 		cB.nodes=[c1,c2,c3,c4]
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
