@@ -11,6 +11,8 @@ if __name__=='__main__':
 	if not cmd_folder in sys.path:
 		sys.path.insert(0, cmd_folder)
 from matplotlib import cm
+from string import split
+
 import collision as col
 import functions as fun
 
@@ -31,9 +33,12 @@ def getGlobalCoordinate(globalOrigin, localPos=None, areaPoly=None):
 def getFileList(areaPoly):
 	"""
 	returns a list of the files that contains the data for the positions.
+
+	fileformat varies between .tab, .asc and .tif, as does the folders but the names are the same.
+	
 	areaPoly should be given in sweref99 2D coordinates.
 	"""
-	fileList=['67250_5950_25.asc','67250_5975_25.asc', '67275_5950_25.asc', '	67275_5975_25.asc']
+	fileList=['67250_5950_25','67250_5975_25', '67275_5950_25', '67275_5975_25']
 	cornerList=[(595000, 6725000),(597500, 6725000), (595000,6727500),(597500,6727500) ]
 	w=2500 #m width of cell file is representing
 	h=2500
@@ -84,7 +89,7 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	if len(fileList)>1: raise Exception('we do not support file overlaps right now..')
 	folder=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'tab')
 	for fname in fileList:
-		f=open(os.path.join(folder, fname))
+		f=open(os.path.join(folder, fname+'.asc'))
 		for index, line in enumerate(f):
 			l=line.split()
 			if len(l)==0: break
@@ -206,6 +211,7 @@ def plotBackground(areaPoly=None, ax=None, globalOrigin=None):
 	limits[3]+=w
 	ax.axis(limits)
 	return ax
+
 	
 if __name__=='__main__':
 	import cProfile

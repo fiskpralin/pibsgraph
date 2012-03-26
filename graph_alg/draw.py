@@ -31,7 +31,7 @@ def draw_custom(G=None, ax=None, edge_visits=False, cost=False, road_color='k', 
 
 
 	#plot the polygon
-	poly = Polygon(G.graph['areaPoly'],closed=True, color='#ffbb55', ec='k',lw=3, ls='solid')
+	poly = Polygon(G.graph['areaPoly'],closed=True, color='none', ec='k',lw=3, ls='solid')
 	ax.add_patch(poly)
 	return ax
 def middle(p1,p2):
