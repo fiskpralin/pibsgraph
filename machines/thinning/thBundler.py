@@ -63,7 +63,7 @@ class Bundler(Process,UsesDriver):
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
 		self.m.G.terrain.addObstacle(cB)
-		print '*Saved the current bundle in the terrain:',len(self.currentBundle.trees),'trees in that Bundle',cB.pos
+		print '*SAVED the current bundle with',len(self.currentBundle.trees),'trees in the terrain at pos:',cB.pos
 
 	def getBPos(self, direction=None):
 		"""
