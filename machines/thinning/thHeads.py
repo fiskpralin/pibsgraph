@@ -191,10 +191,14 @@ class ThinningCraneHead(Process):
 			self.road.color='r'
 			self.road.color=col
 			return c
+		
 		elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
-			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
-			else: time=self.setPos(self.road.startPoint)
+			if not self.m.hasBundler:
+				if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else: time=self.setPos(self.road.startPoint)
+			else:
+				time=self.setPos(self.m.bundler.pos)
 			self.cmnd(c, time, auto=self.automatic['moveArmIn'])
 			c.extend(self.dumpTrees()) #dumps them down.
 		
@@ -327,10 +331,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 					time=self.setPos(sPoint)
 					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
 				else:
-					print "HERE"
-					print self.m.bundler.pos, sPoint
-					time=self.setPos(self.m.bundler.pos)#here is a bug! Why cant setpos take the bundler pos?
-					print "THERE"
+					time=self.setPos(self.m.bundler.pos)
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
