@@ -35,7 +35,7 @@ class ThinningCraneHead(Process):
 		self.gripArea=0
 		self.trees=[]
 		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
-		self.bundler=True
+		self.bundler=False
 		self.currentPile=None
 		
 	def treeChopable(self, t):
@@ -139,9 +139,9 @@ class ThinningCraneHead(Process):
 			b=self.m.bundler
 			c=[]
 			if len(self.trees)==0: return []
-			if self.currentPile==None:
-				self.currentPile=Pile(pos=b.pos)
-				print 'Created a new current pile in bundler'
+			if b.currentBundle==None:
+				b.currentBundle=Bundle(pos=b.pos)
+				print 'Created a new current bundle in the bundler'
 
 			""" THIS IS the check if the crane can dump trees in the bundler.  needs some look at, since current
 			pile doesn not necessarily have a xSection. also no model for it... aso
@@ -153,24 +153,16 @@ class ThinningCraneHead(Process):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
-				self.currentPile.trees.append(tree)#adds the tree to the current pile
+				b.currentBundle.trees.append(tree)#adds the tree to the current bundler in bundler
 				self.trees.remove(tree)
-			print 'added',index+1,'trees to the currentPile' 
+			print 'added',index+1,'trees to the currentBundle in bundler' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
 			self.gripArea=0
-			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
 			c.extend(self.twigCrack())
-			if b.currentBundle is None:
-				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)
-				#terrain.addObstacle(b.currentBundle)#add this to see bundle in the bundler before dumped in terrain
-			for t in self.currentPile.trees:
-				b.currentBundle.trees.append(t)
-				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
-				print 'xSection of bundle in bundler:', b.currentBundle.xSection 
-				b.currentBundle.updatePile()#no direction because default is pi/2
-				self.currentPile=None
+
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			print 'end of dumpTrees'
 			return c
@@ -234,9 +226,14 @@ class ThinningCraneHead(Process):
 		updated.
 		"""
 		if self.twigCracker and self.currentPile:
-			self.currentPile.updatePile(self.road.direction)
+			self.currentPile.twigCrackPile(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
 			print 'Trees have been twigcracked, it took', time, 'seconds'
+			return self.cmnd([], time, auto=self.automatic['twigCrack'])
+		elif self.twigCracker and self.m.bundler.currentBundle:
+			#self.currentBundle.twigCrackPile(self.road.direction)#doesn't exist and doesn't work
+			time=self.timeTwigCrack+self.timeCutAtHead
+			print 'Trees twig cracked but no effect because we have a bundler'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
 		else:
 			print 'Trees not twig cracked'

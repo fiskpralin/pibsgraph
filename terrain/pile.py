@@ -24,23 +24,28 @@ class Pile(Obstacle):
 
 	def updatePile(self, direction=None):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
-		
 		if not self.length:
 			self.length = max([t.h for t in self.trees])
-		else: self.length=5 #cut!
-		
 		self.maxDiam = max([t.dbh for t in self.trees])
 		if not self.diameter:
 			self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
-		else: self.diameter = self.diameter*(1-((self.diameter*61.364-0.3318)/100)) #twigcrack!
-		
 		if not self.biomass:
 			self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
-		else: self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
-		
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
+		self.setNodes(direction)
 
+	def twigCrackPile(self,direction):
+		self.length=5 #cut!
+		self.maxDiam = max([t.dbh for t in self.trees])
+		self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
+		self.diameter = self.diameter*(1-((self.diameter*61.364-0.3318)/100)) #twigcrack!
+		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
+		self.setNodes(direction)
+
+	def setNodes(self,direction=None):
 		#here the nodes of the pile are set
+		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
+		
 		c1=getCartesian([-self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
 		c2=getCartesian([-self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
 		c3=getCartesian([self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
@@ -72,24 +77,11 @@ class Bundle(Pile):
 		if direction is None: direction= pi/2 #is this rally good? well I guess.
 		self.length = max([t.h for t in self.trees])
 		self.maxDiam = max([t.dbh for t in self.trees])
-		self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
   		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
-   		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
-		self.xSection = sum([t.dbh**2 for t in self.trees])# This models what we compare with thresh in bundler
-		
-
-		#here the nodes of the bundle are set
-		c1=getCartesian([-self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=getCartesian([-self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=getCartesian([self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=getCartesian([self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
-		self.nodes=[c1,c2,c3,c4]
-		
-	def getNodes(self, pos=None):
-		if not self.nodes:
-			return False
-		else:
-			return self.nodes
+		self.xSection = sum([t.dbh**2 for t in self.trees])# This models what we compare with thresh in bundlerDONT USE DBH HERE!!!
+		self.diameter = sqrt(self.xSection*4/pi)
+		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
+		self.setNodes(direction)
 		
 	def draw(self, ax):
 		if self.nodes: #plot as polygon.
