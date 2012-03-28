@@ -18,7 +18,7 @@ class ThinningCraneHead(Process):
 	"""
 	common stuff for craneheads. Some of the method must be overridden, thus class should only be used as a superclass.
 	"""
-	def __init__(self, sim, name=None, machine=None):
+	def __init__(self, sim, name=None, machine=None, twigCrack=False):
 		if not name: name='cranehead'
 		self.m=machine
 		self.s=self.m.G.simParam
@@ -34,8 +34,7 @@ class ThinningCraneHead(Process):
 		self.treeWeight=0
 		self.gripArea=0
 		self.trees=[]
-		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
-		self.bundler=False
+		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
 		
 	def treeChopable(self, t):
@@ -81,7 +80,7 @@ class ThinningCraneHead(Process):
 		return t
 
 	def dumpTrees(self, direction=None):
-		if not self.bundler:
+		if not self.m.hasBundler:
 			"""releases the trees at the current position. (And dumps the trees in piles)"""
 			if direction is None: direction=self.road.direction
 			cart=self.m.getCartesian
@@ -272,9 +271,9 @@ class ThinningCraneHead(Process):
 			
 class BCHead(ThinningCraneHead, UsesDriver):
 	"""This is the cranehead of Rickard and julia"""
-	def __init__(self, sim, driver, machine):
+	def __init__(self, sim, driver, machine, twigCrack):
 		UsesDriver.__init__(self,driver)
-		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine)
+		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine,twigCrack=twigCrack)
 		self.road=None #the correct road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
@@ -386,9 +385,9 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 	"""
 	This is a conventional cranehead for thinning with a possibility to accumulate some trees.
 	"""
-	def __init__(self, sim, driver, machine):
+	def __init__(self, sim, driver, machine, twigCrack):
 		UsesDriver.__init__(self,driver)
-		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine)
+		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine, twigCrack=twigCrack)
 		self.road=None #the currect road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self

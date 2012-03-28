@@ -25,8 +25,8 @@ class ThinningMachine(Machine, UsesDriver):
 	
 	All measurements are taken from the komatsu 901.4 harvester with 620/55 x 30,5 wheels on the back and 650/45 x 22,5 wheels in the front.
 	"""
-	def __init__(self, name, sim, G, head='BC', nCranes=2, startPos=[12.5, -4]):
-		print "head:", head, "cranes:", nCranes
+	def __init__(self, name, sim, G, head='BC', nCranes=2, startPos=[12.5, -4], bundler=False, twigCrack=False):
+		print "head:", head, "cranes:", nCranes, "bundler:", bundler, "twigcracker:", twigCrack
 		self.driver=Operator(sim) #add driver
 		sim.activate(self.driver, self.driver.work())
 		Machine.__init__(self, name, sim, G=G, driver=self.driver, mass=21000)
@@ -44,6 +44,7 @@ class ThinningMachine(Machine, UsesDriver):
 		self.craneMaxL=s['maxCraneLength']#11
 		self.craneMinL=s['minCraneLength']#3
 		self.automaticMove=s['moveMachine']#False
+		self.hasBundler=bundler
 		self.length=6.939
 		self.width=2.720
 		self.pos=startPos
@@ -53,18 +54,19 @@ class ThinningMachine(Machine, UsesDriver):
 		self.heads={} #dictionary with keys 'left', 'right'
 		if head=='BC':
 			for i in range(nCranes):
-				h=BCHead(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
+				h=BCHead(sim=self.sim, driver=self.driver, machine=self, twigCrack=twigCrack) #adds to above list.
 		elif head=='convAcc':
 			for i in range(nCranes):
-				h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self) #adds to above list.
+				h=ConventionalHeadAcc(sim=self.sim, driver=self.driver, machine=self, twigCrack=twigCrack) #adds to above list.
 		else:
 			raise Exception('ThinningMachine did not recognize head %s'%str(head))
 		for h in self.heads.values():
 			self.sim.activate(h, h.run())
 
 		####Here is the bundler initiation
-		self.bundler=Bundler(sim=self.sim, driver=self.driver, machine=self)
-		self.sim.activate(self.bundler,self.bundler.run())
+		if bundler == True:
+			self.bundler=Bundler(sim=self.sim, driver=self.driver, machine=self)
+			self.sim.activate(self.bundler,self.bundler.run())
 		####That was the initiaion of the bundler
 		
 		self.treeMoni=Monitor(name='trees harvested')
@@ -188,6 +190,7 @@ class ThinningMachine(Machine, UsesDriver):
 			self.positions.append(P)
 		self.positions.append([self.positions[0][0], self.G.terrain.ylim[1]]) #the last spot.
 		print "time to set up roads: %f"%(time.clock()-tic)
+
 	def getNextPos(self):
 		"""
 		returns the next stop
@@ -237,7 +240,7 @@ class ThinningMachine(Machine, UsesDriver):
 		time=super(ThinningMachine,self).setPos(pos)+self.times['move const']
 		for h in self.heads.values():
 			h.pos=h.getStartPos() #crane are always in this pos while moving
-		if self.bundler:
+		if self.hasBundler:
 			self.bundler.pos=self.bundler.getBPos() #sets the position of the bundler to before machine
 		if cmnd: return self.cmnd([],time, self.automaticMove)
 		else: return time
@@ -275,6 +278,7 @@ class ThinningMachine(Machine, UsesDriver):
 			commands.extend([(hold, self, switchTime)]) #add time to switch focus
 			commands.extend([(hold, self, time)])
 		return commands
+
 	def draw(self,ax):
 		"""draws the machine at current poistion and with current direction.
 		 All measurements are taken from the komatsu 901.4 harvester with 620/55 x 30,5 wheels on the back and 650/45 x 22,5 wheels in the front."""
@@ -337,9 +341,9 @@ class ThinningMachine(Machine, UsesDriver):
 		ax.add_patch(p)
 		p=mpl.patches.Polygon(np.array([r2, r21,r3,r4, r41,r5]), closed=True, facecolor=self.color)
 		ax.add_patch(p)
-		if self.bundler:		#draw the bundler:
+		if self.hasBundler:  #draw the bundler
 			self.bundler.draw(ax)
-		for h in self.heads.values():		#draw the heads and crane:
+		for h in self.heads.values():#draw the cranes and heads
 			h.draw(ax)
 		#cabin:
 		l=1.8 #pure estimation for these three variables
