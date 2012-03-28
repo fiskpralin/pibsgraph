@@ -94,8 +94,8 @@ class ThinningCraneHead(Process):
 				else:
 					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
 					print '*Created corridor Pile'
-			i=0
-			for tree in copy.copy(self.trees):
+			
+			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
@@ -114,9 +114,8 @@ class ThinningCraneHead(Process):
 				tree.radius=sqrt(r**2+l**2)
 				"""
 				self.currentPile.trees.append(tree)#adds the tree to the current pile
-				i=i+1
 				self.trees.remove(tree)
-				print 'added the',i,'th tree' 
+				print 'added the',index+1,'th tree' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -324,8 +323,14 @@ class BCHead(ThinningCraneHead, UsesDriver):
 					if len(cmd)==0: break
 					for c in cmd: yield c
 				#trees have been gathered. return.
-				time=self.setPos(sPoint)
-				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				if not self.m.hasBundler: 
+					time=self.setPos(sPoint)
+					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else:
+					print "HERE"
+					print self.m.bundler.pos, sPoint
+					time=self.setPos(self.m.bundler.pos)#here is a bug! Why cant setpos take the bundler pos?
+					print "THERE"
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
@@ -366,7 +371,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		ax.add_patch(mpl.patches.Polygon(np.array([h1,h2,h3,h4]), closed=True, facecolor='k'))
 		#head
 		inOutRatio=0.7
-		c=self.m.getCartesian
 		W=self.width
 		w=inOutRatio*W
 		L=self.length
@@ -374,10 +378,10 @@ class BCHead(ThinningCraneHead, UsesDriver):
 			direction=self.m.direction-pi/2.+self.m.getCylindrical(self.pos)[1]
 		else:
 			direction=self.direction
-		c1=c([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=c([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=c([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c1=cart([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c2=cart([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c3=cart([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=cart([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
 
 
@@ -439,8 +443,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					cmd=self.chopNext()
 					if len(cmd)==0: break
 					for c in cmd: yield c
-				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
-				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				if not self.m.hasBundler:
+					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
+					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else:
+					time=self.setPos(self.m.bundler.pos)#if bundler always leave the trees there
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
@@ -465,12 +472,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		h4=cart([-wC/2., 0], direction=direct, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([h1,h2,h3,h4]), closed=True, facecolor='k'))
 		#head
-		c=self.m.getCartesian
 		W=self.width
 		L=self.length
 		direction=self.m.direction-pi/2.+self.m.getCylindrical(self.pos)[1]
-		c1=c([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=c([-W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=c([W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c1=cart([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c2=cart([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c3=cart([-W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=cart([W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))

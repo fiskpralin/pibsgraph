@@ -21,7 +21,7 @@ class Bundler(Process,UsesDriver):
 		self.color='blue'
 		self.m=machine
 		self.s=self.m.G.simParam
-		self.pos=np.array(self.m.pos)+np.array([0,self.s['dropPosJ']])
+		self.pos=list(np.array(self.m.pos)+np.array([0,self.s['dropPosJ']]))
 		self.timeBundle=self.s['timeBundle']
 		self.maxXSection=self.s['maxXSectionJ']
 		self.xSectionThresh=0.1#self.s['xSectionThreshJ']
@@ -54,7 +54,7 @@ class Bundler(Process,UsesDriver):
 
 		#here the nodes of the bundle are set when the bundle is put in the terrain
 		cB=self.currentBundle
-		cB.pos=np.array(self.pos)+np.array([-2.5,0])#puts it beside the main road doesn't work though
+		cB.pos=np.array(self.pos)+np.array([-2.5,0])#
 		c1=getCartesian([-cB.diameter/2,cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
 		c2=getCartesian([-cB.diameter/2, -cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
 		c3=getCartesian([cB.diameter/2, -cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
