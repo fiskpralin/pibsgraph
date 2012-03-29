@@ -18,7 +18,7 @@ class ThinningCraneHead(Process):
 	"""
 	common stuff for craneheads. Some of the method must be overridden, thus class should only be used as a superclass.
 	"""
-	def __init__(self, sim, name=None, machine=None):
+	def __init__(self, sim, name=None, machine=None, twigCrack=False):
 		if not name: name='cranehead'
 		self.m=machine
 		self.s=self.m.G.simParam
@@ -34,8 +34,7 @@ class ThinningCraneHead(Process):
 		self.treeWeight=0
 		self.gripArea=0
 		self.trees=[]
-		self.twigCracker=True #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
-		self.bundler=True
+		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
 		
 	def treeChopable(self, t):
@@ -81,7 +80,7 @@ class ThinningCraneHead(Process):
 		return t
 
 	def dumpTrees(self, direction=None):
-		if not self.bundler:
+		if not self.m.hasBundler:
 			"""releases the trees at the current position. (And dumps the trees in piles)"""
 			if direction is None: direction=self.road.direction
 			cart=self.m.getCartesian
@@ -95,8 +94,8 @@ class ThinningCraneHead(Process):
 				else:
 					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
 					print '*Created corridor Pile'
-			i=0
-			for tree in copy.copy(self.trees):
+			
+			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
@@ -115,9 +114,8 @@ class ThinningCraneHead(Process):
 				tree.radius=sqrt(r**2+l**2)
 				"""
 				self.currentPile.trees.append(tree)#adds the tree to the current pile
-				i=i+1
 				self.trees.remove(tree)
-				print 'added the',i,'th tree' 
+				print 'added the',index+1,'th tree' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -139,32 +137,30 @@ class ThinningCraneHead(Process):
 			b=self.m.bundler
 			c=[]
 			if len(self.trees)==0: return []
-			if self.currentPile==None:
-				self.currentPile=Pile(pos=b.pos) #HERE ADD ITS CORRECT POSITION
-			i=0
-			for tree in copy.copy(self.trees):
+			if b.currentBundle==None:
+				b.currentBundle=Bundle(pos=b.pos)
+				print 'Created a new current bundle in the bundler'
+
+			""" THIS IS the check if the crane can dump trees in the bundler.  needs some look at, since current
+			pile doesn not necessarily have a xSection. also no model for it... aso
+			if self.currentPile.xSection+b.currentBundle.xSection>b.maxXSection:
+				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+			"""
+				
+			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
-				self.currentPile.trees.append(tree)#adds the tree to the current pile
-				i=i+1
+				b.currentBundle.trees.append(tree)#adds the tree to the current bundler in bundler
 				self.trees.remove(tree)
-			print 'added',i,'trees' 
+			print 'added',index+1,'trees to the currentBundle in bundler' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
 			self.gripArea=0
-			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
 			c.extend(self.twigCrack())
-			if b.currentBundle is None:
-				b.currentBundle=Bundle(b.pos, terrain=self.m.G.terrain)# position not correct?
-				#terrain.addObstacle()blac
-			for t in self.currentPile.trees:
-				b.currentBundle.trees.append(t)
-				print 'moved the trees from the cP of head to cB of bundler', len(b.currentBundle.trees), 'are now in that bundle'
-				print 'xSection of bundle in bundler:', b.currentBundle.xSection 
-				b.currentBundle.updatePile()#no direction because default is pi/2
-				self.currentPile=None
+
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			print 'end of dumpTrees'
 			return c
@@ -195,10 +191,14 @@ class ThinningCraneHead(Process):
 			self.road.color='r'
 			self.road.color=col
 			return c
+		
 		elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
 			print "Goes back to DUMP trees", self.treeWeight, self.gripArea
-			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
-			else: time=self.setPos(self.road.startPoint)
+			if not self.m.hasBundler:
+				if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else: time=self.setPos(self.road.startPoint)
+			else:
+				time=self.setPos(self.m.bundler.pos)
 			self.cmnd(c, time, auto=self.automatic['moveArmIn'])
 			c.extend(self.dumpTrees()) #dumps them down.
 		
@@ -228,9 +228,14 @@ class ThinningCraneHead(Process):
 		updated.
 		"""
 		if self.twigCracker and self.currentPile:
-			self.currentPile.updatePile(self.road.direction)
+			self.currentPile.twigCrackPile(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
 			print 'Trees have been twigcracked, it took', time, 'seconds'
+			return self.cmnd([], time, auto=self.automatic['twigCrack'])
+		elif self.twigCracker and self.m.bundler.currentBundle:
+			#self.currentBundle.twigCrackPile(self.road.direction)#doesn't exist and doesn't work
+			time=self.timeTwigCrack+self.timeCutAtHead
+			print 'Trees twig cracked but no effect because we have a bundler'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
 		else:
 			print 'Trees not twig cracked'
@@ -269,9 +274,9 @@ class ThinningCraneHead(Process):
 			
 class BCHead(ThinningCraneHead, UsesDriver):
 	"""This is the cranehead of Rickard and julia"""
-	def __init__(self, sim, driver, machine):
+	def __init__(self, sim, driver, machine, twigCrack):
 		UsesDriver.__init__(self,driver)
-		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine)
+		ThinningCraneHead.__init__(self, sim, name="BCHead", machine=machine,twigCrack=twigCrack)
 		self.road=None #the correct road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
@@ -322,8 +327,11 @@ class BCHead(ThinningCraneHead, UsesDriver):
 					if len(cmd)==0: break
 					for c in cmd: yield c
 				#trees have been gathered. return.
-				time=self.setPos(sPoint)
-				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				if not self.m.hasBundler: 
+					time=self.setPos(sPoint)
+					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else:
+					time=self.setPos(self.m.bundler.pos)
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
@@ -364,7 +372,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		ax.add_patch(mpl.patches.Polygon(np.array([h1,h2,h3,h4]), closed=True, facecolor='k'))
 		#head
 		inOutRatio=0.7
-		c=self.m.getCartesian
 		W=self.width
 		w=inOutRatio*W
 		L=self.length
@@ -372,10 +379,10 @@ class BCHead(ThinningCraneHead, UsesDriver):
 			direction=self.m.direction-pi/2.+self.m.getCylindrical(self.pos)[1]
 		else:
 			direction=self.direction
-		c1=c([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=c([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=c([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c1=cart([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c2=cart([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c3=cart([-w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=cart([w/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))
 
 
@@ -383,9 +390,9 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 	"""
 	This is a conventional cranehead for thinning with a possibility to accumulate some trees.
 	"""
-	def __init__(self, sim, driver, machine):
+	def __init__(self, sim, driver, machine, twigCrack):
 		UsesDriver.__init__(self,driver)
-		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine)
+		ThinningCraneHead.__init__(self, sim, name="ConvHeadAcc", machine=machine, twigCrack=twigCrack)
 		self.road=None #the currect road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
@@ -437,8 +444,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					cmd=self.chopNext()
 					if len(cmd)==0: break
 					for c in cmd: yield c
-				time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
-				if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				if not self.m.hasBundler:
+					time=self.setPos(sPoint) # trees have been gathered. return to machine after each maxAcc
+					if mainRoad: time+=self.setPos(self.m.getTreeDumpSpot(self.side))
+				else:
+					time=self.setPos(self.m.bundler.pos)#if bundler always leave the trees there
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
@@ -463,12 +473,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		h4=cart([-wC/2., 0], direction=direct, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([h1,h2,h3,h4]), closed=True, facecolor='k'))
 		#head
-		c=self.m.getCartesian
 		W=self.width
 		L=self.length
 		direction=self.m.direction-pi/2.+self.m.getCylindrical(self.pos)[1]
-		c1=c([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c2=c([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c3=c([-W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
-		c4=c([W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c1=cart([W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c2=cart([-W/2., L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c3=cart([-W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
+		c4=cart([W/2., -L/2.],origin=self.pos, direction=direction, fromLocalCart=True)
 		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor=self.color))

@@ -31,8 +31,8 @@ def getDistanceSq(pos1,pos2):
 	return (pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2
 def getCartesian(posCyl,origin=None, direction=None, local=False, fromLocalCart=False):
 	"""
-	convert from cartesian to cylindrical coordinates
-	direction is pretty "unintuitive"... THIS MUST BE OTHER WAY AROUND!
+	convert from cylindrical to cartesian coordinates
+	direction is pretty "unintuitive"... 
 	"""
 	r=posCyl[0]
 	theta=posCyl[1]
@@ -64,8 +64,8 @@ def getCartesian(posCyl,origin=None, direction=None, local=False, fromLocalCart=
 	return [x,y]
 def getCylindrical(pos, origin=None, direction=None):
 	"""
-	convert from cylindrical to cartesian coordinates
-	maybe the geometrical definition of the dot product should be used instead? or numpy internal routines? THIS MUST BE OTHER WAY AROUND!!
+	convert from cartesian to cylindrical coordinates
+	maybe the geometrical definition of the dot product should be used instead? or numpy internal routines?
 	"""
 	if origin==None:
 		x=0

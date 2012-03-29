@@ -2,11 +2,16 @@
 THINNING:
 
 Ett antal träd som tas i gripen och läggs ned på marken bildar en hög (=pile) som får medeldiametern enligt det grövsta trädets brösthöjdsdiameter (DBH) på bark enligt funktionen:
-1.      Högdiameter (m) = 0.1748 + 0.0345 DBH för grövsta trädet (cm)
+1.Högdiameter (m) = 0.1748 + 0.0345 DBH för grövsta trädet (cm)
 Vi går alltså direkt från DBH till högdiameter, eftersom det är det mest intressanta och Dan hade lämpligt data. Att använda kronans diameter (eller grenbiomassa) går nog också, men det är väldigt stor variation i det tillgängliga materialet så skattningarna blir väldigt osäkra bara för det första beräkningssteget (DBH till krondiameter eller grenbiomassa). Plus att det är dålig kunskap hur man går vidare till högdiameter.
-Om högen knäckkvistas minskas diametern procentuellt som en funktion av ursprunglig högdiameter (Ekvation 1) enligt:
-2.      Knäckkvistad högdiameter (m) = Högdiameter (m) * (1- ((Högdiameter (m) *61.364 – 0.3318)/100))
-Vid knäckkvistningen ramlar en del grenar och barr av, så högens massa skall då minskas procentuellt som en funktion av den ursprungliga högdiametern enligt:
-3.      Knäckkvistad högmassa (kg) = Högmassa (kg) * (1- ((Högdiameter (m) *17.237 + 3,9036)/100))
 
- 
+Om högen knäckkvistas minskas diametern procentuellt som en funktion av ursprunglig högdiameter (Ekvation 1) enligt:
+2.Knäckkvistad högdiameter (m) = Högdiameter (m) * (1- ((Högdiameter (m) *61.364 – 0.3318)/100))
+Vid knäckkvistningen ramlar en del grenar och barr av, så högens massa skall då minskas procentuellt som en funktion av den ursprungliga högdiametern enligt:
+
+3.Knäckkvistad högmassa (kg) = Högmassa (kg) * (1- ((Högdiameter (m) *17.237 + 3,9036)/100))
+
+4.Modell för avsmalning:
+För framtagning av avsmalningsfunktionen utgår du dina träddata: du har tre diameterar vid tre specifica höjder/längder angivna; diameter i stubbhöjd (0 m), diameter i brösthöjd (anges vid höjden 1,3 m)samt gagnvirkerlängd vid gränsdiameter (7,5 och 10 cm för gallringsbestånd och 25 och 50 samt 75 mm för röjningsbestånd). Använd två av punkterna (helst dbh och gränsdiameter) och gör en linjär funktion. Ex.: dbh 9 cm ger d1=9cm och h1=1,3m, gagnvirkeslängs vid 7,5 cm = 5,7m ger d2=7,5cm och h2=5,7m, avsmalningskostant=(d1-d2)/(h1-h2)=0,34 cm/m; stammen avsmalnar med 0,34 cm/m från dbh och uppåt! Vad blir då diameter vid kaplängd 5m? Utgå från dbh, dvs vi skall avsmalna stammen en sträcka av 5-1,3m=3,7 m, detta ger 0,34*3,7=1,26 cm, dvs diameter vid 5 m = 9-1,26=7,74cm. 
+
+5.Observera att även de högar som inte knäckkvistats ska läggas samman (trots avsaknad av kap) detta för att de ändå kommer kapas av skotaren

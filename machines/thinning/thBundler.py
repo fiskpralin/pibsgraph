@@ -8,9 +8,6 @@ import copy
 from terrain.pile import Pile, Bundle
 
 
-"""
-This file is now just a copy of the heads, should be rebuilt to a bundler
-"""
 ###################################################
 # Bundler
 ##################################################
@@ -21,10 +18,10 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-
+		self.color='blue'
 		self.m=machine
 		self.s=self.m.G.simParam
-		self.pos=self.m.pos+[0,3]
+		self.pos=list(np.array(self.m.pos)+np.array([0,self.s['dropPosJ']]))
 		self.timeBundle=self.s['timeBundle']
 		self.maxXSection=self.s['maxXSectionJ']
 		self.xSectionThresh=0.1#self.s['xSectionThreshJ']
@@ -45,42 +42,42 @@ class Bundler(Process,UsesDriver):
 			self.bundleIt()
 			self.dumpBundle()
 			self.resetBundle()
-			#this is how it looked, reason for bug:
-			#self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling'])#true here means the rest is automatic
-			#this is how it should look:
-			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c #true here means the rest is automatic
-
-			
+			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			for c in self.releaseDriver(): yield c
-
 			print 'end of bundlerrun'
 		
 	def dumpBundle(self, direction=None):
 		"""
 		Releases the bundle at the current position. (And dumps the bundle in terrain)
-		Needs to be fixed for bundler
 		"""
 		if direction is None: direction=pi/2
 
 		#here the nodes of the bundle are set when the bundle is put in the terrain
-		dumpPos=self.pos+[-2.5,0]#puts it beside the main road
 		cB=self.currentBundle
-		c1=getCartesian([-cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c2=getCartesian([-cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c3=getCartesian([cB.diameter/2, 0], origin=dumpPos, direction=direction, fromLocalCart=True)
-		c4=getCartesian([cB.diameter/2,cB.length], origin=dumpPos, direction=direction, fromLocalCart=True)
+		cB.pos=np.array(self.pos)+np.array([-2.5,0])#
+		c1=getCartesian([-cB.diameter/2,cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
+		c2=getCartesian([-cB.diameter/2, -cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
+		c3=getCartesian([cB.diameter/2, -cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
+		c4=getCartesian([cB.diameter/2,cB.length/2], origin=cB.pos, direction=direction, fromLocalCart=True)
 		cB.nodes=[c1,c2,c3,c4]
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
-		print '*Saved the current bundle in the terrain:',len(self.currentBundle.trees),'trees in that Bundle'
+		self.m.G.terrain.addObstacle(cB)
+		print '*SAVED the current bundle with',len(self.currentBundle.trees),'trees in the terrain at pos:',cB.pos
+
+	def getBPos(self, direction=None):
+		"""
+		Updates the position of the bundler each time the machine moves. This method is called
+		from the setpos in thMachine
+		"""
+		if direction==None: direction=pi/2.
+		return getCartesian([self.s['dropPosJ'],pi/2.],origin=self.m.pos,direction=direction)
 	
 	def startTheBundler(self):
 		"""
 		Adds the time it takes for the driver to push the "start bundling"-button.
 		"""
 		return self.cmnd([],self.s['timeStartBundler'], auto=self.s['startBundler'])
-
-
 
 	def bundleIt(self):
 		"""
@@ -94,7 +91,8 @@ class Bundler(Process,UsesDriver):
 		
 	def bundlerFilled(self):
 		"""
-		controls when the bundler runs and makes a bundle.
+		controls when the bundler runs and makes a bundle. This shoudl be updated to take in
+		tree.dstump and gvl_75 as well and take the criteria from the added cut stems!
 		"""
 		if self.currentBundle:
 			if self.forceBundler==True:
@@ -106,6 +104,7 @@ class Bundler(Process,UsesDriver):
 	def resetBundle(self):
 		self.forceBundler=False
 		self.currentBundle=None
+
 	def cmndWithDriver(self, commands, time):
 		"""
 		a method to set up the yield command, for use of the driver for a specific time.
@@ -125,10 +124,21 @@ class Bundler(Process,UsesDriver):
 				if switchTime<0: switchTime=0
 			commands.extend([(hold, self, switchTime)]) #add time to switch focus
 			commands.extend([(hold, self, time)])
-		return commands
+			return commands
 
-	def draw(self):
+	def draw(self,ax):
 		"""
-		This is the drawing of the actual bundler without any trees in it
+		This is the drawing of the actual bundler without any trees in it. Oh come on
+		you can do a nicer bundler than this!
 		"""
-		pass 
+		#sets the nodes
+		cart=getCartesian
+		dx=1
+		dy=1
+		origin=self.pos
+		a1=cart([dx,dy],origin=origin,fromLocalCart=True)
+		a2=cart([-dx,dy],origin=origin,fromLocalCart=True)
+		a3=cart([-dx,-dy],origin=origin,fromLocalCart=True)
+		a4=cart([dx,-dy],origin=origin,fromLocalCart=True)
+		a=[a1,a2,a3,a4]
+		ax.add_patch(mpl.patches.Polygon(np.array(a), closed=True, facecolor=self.color))

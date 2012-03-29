@@ -315,7 +315,7 @@ class ThinningSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a thinning machine
 	"""
-	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None):
+	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
 
 		#if no file to read the simulationsparameters from:
@@ -327,7 +327,7 @@ class ThinningSim(SimExtend):
 			self.G.terrain.readTrees(thinning=True)
 		craneMax=11
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]
-		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes)
+		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes, bundler=bundler,twigCrack=twigCrack)
 		self.treeStats() #do some statistics on the trees
 		self.activate(self.m,self.m.run())
 		self.simulate(until=10000)
