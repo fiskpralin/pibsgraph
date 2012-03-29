@@ -390,7 +390,7 @@ class Terrain():
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
-	def GetBoulders(self, pos, R, distr='pareto', alpha=1.1):
+	def GetBoulders(self, pos, R, distr='exp', alpha=1.1):
 		"""
 		we choose to base all this on the volume
 		possible distributions: 'exp' or 'pareto'

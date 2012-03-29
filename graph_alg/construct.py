@@ -18,6 +18,9 @@ from draw import *
 def makeRoadGraph(L=24, origin=(0,0), grid='square', ulim=(0,0),areaPoly=None,angle=0, beta=1.25, areaCap=0.20,diagonals=False):
 	"""
 	constructs a road graph.
+
+
+	OLD!!! REMOVE!!
 	"""
 	if not areaPoly: raise Exception('we need a polygon to work on, areaPoly')
 	if grid=='square':

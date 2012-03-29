@@ -67,7 +67,7 @@ def getCylindrical(pos, origin=None, direction=None):
 	convert from cylindrical to cartesian coordinates
 	maybe the geometrical definition of the dot product should be used instead? or numpy internal routines? THIS MUST BE OTHER WAY AROUND!!
 	"""
-	if not origin:
+	if origin==None:
 		x=0
 		y=0
 	else:

@@ -56,7 +56,6 @@ def getFileList(areaPoly):
 	if len(files)==0: raise Exception('could not find matching terrain files')
 	return files
 
-	
 def readTerrain(globalOrigin=None, areaPoly=None):
 	"""
 	reads in data and returns local grid  x,y,z coordinates.
@@ -80,6 +79,8 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	range=fun.polygonLim(globalPoly)
 	xrange=range[0:2]
 	yrange=range[2:4]
+	xrange=[xrange[0]-2, xrange[1]+2]
+	yrange=[yrange[0]-2, yrange[1]+2]
 	#now, we should find out which files we need...
 	fileList=getFileList(globalPoly)
 	x, y, z=None, None, None #will later be created
@@ -92,10 +93,9 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 		f=open(os.path.join(folder, fname+'.asc'))
 		for index, line in enumerate(f):
 			l=line.split()
-			if len(l)==0: break
 			xtmp=int(l[0])
 			ytmp=int(l[1])
-			if ytmp>yrange[1]: break
+			if ytmp>yrange[1]: break #because of how file is organized, we can do this.
 			if xtmp<=xrange[1] and xtmp>=xrange[0] and ytmp>=yrange[0] and xtmp%m==0 and ytmp%m==0:
 				if yold==None: yold=ytmp
 				ztmp=float(l[2])
@@ -109,8 +109,6 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 						x=np.vstack((x, xlist))
 						y=np.vstack((y, ylist))
 						z=np.vstack((z, zlist))
-					#y.append(ylist)
-					#z.append(zlist)
 					xlist, ylist, zlist = [], [], []
 				xlist.append(xtmp)
 				ylist.append(ytmp)
@@ -119,6 +117,9 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 		f.close()
 	x-=globalOrigin[0]
 	y-=globalOrigin[1]
+	x=np.transpose(x) #we want it in the standard form that scipy understands.
+	y=np.transpose(y) #this form corresponds to numpy.mgrid standard, but not numpy.meshgrid
+	z=np.transpose(z)
 	return x,y,z
 def plotSurface(x=None,y=None,z=None):
 	"""
@@ -147,7 +148,7 @@ def plotSurface(x=None,y=None,z=None):
 	ax2.set_zlim3d(50, 105)
 	plt.colorbar()
 	return ax
-def plot2DContour(x=None,y=None,z=None, ax=None):
+def plot2DContour(x=None,y=None,z=None, ax=None, w=1):
 	"""
 	plots the contours of z  in xy-plane
 	"""
@@ -160,7 +161,7 @@ def plot2DContour(x=None,y=None,z=None, ax=None):
 	minZ=min([min(ztmp) for ztmp in z])
 	maxZ=max([max(ztmp) for ztmp in z])
 	levels=np.linspace(minZ,maxZ, 25) #15 lines
-	c=ax.contour(x,y,z, zdir='z', linewidths=1, levels=levels,cmap=cm.autumn)
+	c=ax.contour(x,y,z, zdir='z', linewidths=w, levels=levels,cmap=cm.autumn)
 	cb=plt.colorbar(c)
 	cb.lines.set_linewidth(10)
 	return ax

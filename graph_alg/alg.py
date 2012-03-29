@@ -28,15 +28,21 @@ def distToOrigin(e,R):
 	middle=b+0.5*d
 	o=R.graph['origin']
 	return sqrt((middle[0]-o[0])**2+(middle[1]-o[1])**2)
-def cycleRoad(G, R, ax=None, aCap=True):
+def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 	"""
 	works with cycles instead of shortest paths
+
+	modifies G into R:... this is a strange procedure and should be changed.
 	"""
-	if aCap: aCap=G.graph['areaCap']
+	R.graph['beta']=beta	
+	if not G: G=copy.deepcopy(R)
+	R.graph['areaCover']=cf.roadAreaCoverage(R)
+
 	inf = 1e15
 	eps=1e-9
 	lastAdded=None
 	origin=G.graph['origin']
+	if not origin: raise Exception('need info about origin')
 	#first, modify the weight of the edges a couple of times.
 	for i in xrange(10):
 		paths=nx.algorithms.shortest_paths.weighted.single_source_dijkstra(R, origin)
