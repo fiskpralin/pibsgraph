@@ -91,7 +91,8 @@ class Bundler(Process,UsesDriver):
 		
 	def bundlerFilled(self):
 		"""
-		controls when the bundler runs and makes a bundle.
+		controls when the bundler runs and makes a bundle. This shoudl be updated to take in
+		tree.dstump and gvl_75 as well and take the criteria from the added cut stems!
 		"""
 		if self.currentBundle:
 			if self.forceBundler==True:
@@ -127,9 +128,9 @@ class Bundler(Process,UsesDriver):
 
 	def draw(self,ax):
 		"""
-		This is the drawing of the actual bundler without any trees in it
+		This is the drawing of the actual bundler without any trees in it. Oh come on
+		you can do a nicer bundler than this!
 		"""
-		
 		#sets the nodes
 		cart=getCartesian
 		dx=1
