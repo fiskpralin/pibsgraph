@@ -353,7 +353,9 @@ class Terrain():
 			a['volStr']=line[74:77]#volume with bark, dm3
 			a['specieStr']=line[24:25]
 			a['logWeight']=line[66:69]
-			for s in ['xStr', 'yStr', 'dbhStr', 'hStr', 'wStr', 'volStr', 'logWeight']: #procedure to skip strings beginning with '0', which python2 reads as octals
+			a['gvl_75']=line[48:51]
+			a['dstump']=line[36:39]
+			for s in ['xStr', 'yStr', 'dbhStr', 'hStr', 'wStr', 'volStr', 'logWeight','gvl_75','dstump']: #procedure to skip strings beginning with '0', which python2 reads as octals
 				if len(a[s])==0: print "Error:",s,a[s], line
 				else:
 					while a[s][0] == '0' and len(a[s])>1: a[s]=a[s][1:]#skip beginning '0'
@@ -364,6 +366,8 @@ class Terrain():
 			vol=eval(a['volStr'])/1000. #m3
 			specie=eval(a['specieStr'])
 			logWeight=eval(a['logWeight'])
+			gvl_75=eval(a['gvl_75'])/10.   #m
+			dstump=eval(a['dstump'])/1000.       #m
 			if specie==1:
 				specie='pine'
 			elif specie==2:
