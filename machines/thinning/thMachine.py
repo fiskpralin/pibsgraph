@@ -97,6 +97,7 @@ class ThinningMachine(Machine, UsesDriver):
 			#p is self.getNextPos()
 			for c in self.setPos(p, cmnd=True): yield c
 			if self.getNextPos()==self.pos:
+				self.bundler.forceBundler=True#THIS IS MY OWN WAY ASK LINUS SHOULD IT BE HERE!?
 				self.sim.stopSimulation()
 				yield hold, self, 0.001 #give it time to stop..
 			r=self.roads[self.pos[1]] #current roads.. should be like 10 of them..

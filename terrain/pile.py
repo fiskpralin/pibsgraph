@@ -90,6 +90,7 @@ class Bundle(Pile):
 		"""
 		if tree is None: raise('EXCEPTION: getXSection must get a tree')
 		stumpXS=tree.dstump**2
+		print tree.dbh, tree.gvl_75, 1.3, tree.gvl_75-1.3
 		atFiveXS=(tree.dbh+(0.075-tree.dbh)/(tree.gvl_75-1.3)*3.7)**2
 		return stumpXS+atFiveXS	
 

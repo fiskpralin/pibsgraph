@@ -24,7 +24,7 @@ class Bundler(Process,UsesDriver):
 		self.pos=list(np.array(self.m.pos)+np.array([0,self.s['dropPosJ']]))
 		self.timeBundle=self.s['timeBundle']
 		self.maxXSection=self.s['maxXSectionJ']
-		self.xSectionThresh=0.1#self.s['xSectionThreshJ']
+		self.xSectionThresh=self.s['xSectionThreshJ']
 		self.currentBundle=None
 		self.forceBundler=False #Is set to true when bundler is filled or new pile from head does not fit
 		
@@ -85,7 +85,7 @@ class Bundler(Process,UsesDriver):
 		"""
 		cB=self.currentBundle
 		cB.length = 5 #cut in five meter long sections
-		cB.xSection=sum([t.dstump**2 for t in cB.trees])
+		cB.xSection=sum([cB.getXSection(tree=t) for t in cB.trees])
   		cB.biomass = sum([t.weight for t in cB.trees])#initial weight no losses when doing the bundles
    		cB.radius = sqrt(cB.length**2+(cB.diameter/2)**2)
 		

@@ -142,7 +142,7 @@ class ThinningCraneHead(Process):
 				print 'Created a new current bundle in the bundler'
 			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-				print "Head load forces bundler to run"
+				print "Trees in head forces bundler to run"
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
