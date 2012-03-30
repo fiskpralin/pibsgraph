@@ -37,7 +37,7 @@ class Pile(Obstacle):
 	def twigCrackPile(self,direction):
 		self.length=5 #cut!
 		self.maxDiam = max([t.dbh for t in self.trees])
-		self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
+		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
 		self.diameter = self.diameter*(1-((self.diameter*61.364-0.3318)/100)) #twigcrack!
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
 		self.setNodes(direction)
@@ -74,13 +74,28 @@ class Bundle(Pile):
 		This should be updated such that it works for the bundler. Does only set som parameters
 		for the current bundle, does not execute the bundling, that is done in method in thBundler.py
 		"""
-		if direction is None: direction= pi/2 #is this rally good? well I guess.
+		if direction is None: direction= pi/2 #is this really good? well I guess.
 		self.length = max([t.h for t in self.trees])
-		self.maxDiam = max([t.dbh for t in self.trees])
-  		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
-		self.xSection = sum([t.dbh**2 for t in self.trees])# This models what we compare with thresh in bundlerDONT USE DBH HERE!!!
+		self.maxDiam = max([t.dbh for t in self.trees])#IS THIS NEEDED? 
+  		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses, SHOULD WE ADD TWIGCRACK FEATURES?
+		self.xSection = sum([self.getXSection(tree=t) for t in self.trees])# This models what we compare with thresh in bundler
 		self.diameter = sqrt(self.xSection*4/pi)
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
+		self.setNodes(direction)
+
+	def getXSection(self, tree=None):
+		"""
+		Adds the cross section of the stump and at five meters for each tree. Uses a linear function for the thickness of the stem.
+		The model from Dan has been changed to resemble an ordinary linear function instead  but it is still the same.
+		"""
+		if tree is None: raise('EXCEPTION: getXSection must get a tree')
+		stumpXS=tree.dstump**2
+		atFiveXS=(tree.dbh+(0.075-tree.dbh)/(tree.gvl_75-1.3)*3.7)**2
+		return stumpXS+atFiveXS	
+
+	def twigCrackBundle(self,direction):
+		self.maxDiam = max([t.dbh for t in self.trees])
+		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
 		self.setNodes(direction)
 		
 	def draw(self, ax):

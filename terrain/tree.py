@@ -9,7 +9,7 @@ from matplotlib.path import Path
 
 from obstacle import *
 class Tree(Obstacle):
-	def __init__(self, pos, radius=None,terrain=None ,dbh=None, height=None, weight=None, logWeight=None, vol=None, specie=None):
+	def __init__(self, pos, radius=None,terrain=None ,dbh=None, height=None, weight=None, logWeight=None, vol=None, specie=None, gvl_75=None, dstump=None):
 		Obstacle.__init__(self, pos, isSpherical=True, radius=radius, terrain=terrain, color='g')
 		self.z=0
 		self.logWeight=logWeight
@@ -31,10 +31,12 @@ class Tree(Obstacle):
 		self.name = "Tree"
 		self.harvested=False
 		self.specie=specie
+		self.gvl_75=gvl_75
+		self.dstump=dstump
 		if terrain: terrain.trees.append(self)
 		self.nodes=None
-		self.marked=False #marked fro harvesting
-		#we ommit the rest for now..
+		self.marked=False #marked for harvesting
+		#we omit the rest for now..
 	def getNodes(self, pos=None):
 		if self.isSpherical and not self.nodes:
 			return False

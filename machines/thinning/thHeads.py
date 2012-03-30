@@ -140,12 +140,10 @@ class ThinningCraneHead(Process):
 			if b.currentBundle==None:
 				b.currentBundle=Bundle(pos=b.pos)
 				print 'Created a new current bundle in the bundler'
-
-			""" THIS IS the check if the crane can dump trees in the bundler.  needs some look at, since current
-			pile doesn not necessarily have a xSection. also no model for it... aso
-			if self.currentPile.xSection+b.currentBundle.xSection>b.maxXSection:
+			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
+			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
+				print "Head load forces bundler to run"
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-			"""
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
@@ -159,7 +157,7 @@ class ThinningCraneHead(Process):
 			self.treeWeight=0
 			self.gripArea=0
 			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
-			c.extend(self.twigCrack())
+			c.extend(self.twigCrack())#Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter
 
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			print 'end of dumpTrees'
@@ -232,11 +230,13 @@ class ThinningCraneHead(Process):
 			time=self.timeTwigCrack+self.timeCutAtHead
 			print 'Trees have been twigcracked, it took', time, 'seconds'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
+		
 		elif self.twigCracker and self.m.bundler.currentBundle:
-			#self.currentBundle.twigCrackPile(self.road.direction)#doesn't exist and doesn't work
+			self.m.bundler.currentBundle.twigCrackBundle(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
-			print 'Trees twig cracked but no effect because we have a bundler'
+			print 'Trees twigcracked: bundler-> biomass change only'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
+
 		else:
 			print 'Trees not twig cracked'
 			return []

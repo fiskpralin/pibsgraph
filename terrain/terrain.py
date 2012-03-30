@@ -376,7 +376,7 @@ class Terrain():
 				specie='leaf'
 			else:
 				raise(Exception('readtrees: specie-code %d is not recognized. '%specie))
-			t=Tree(pos, dbh=dbh,terrain=self, height=height, weight=weight, logWeight=logWeight, vol=vol, specie=specie)
+			t=Tree(pos, dbh=dbh,terrain=self, height=height, weight=weight, logWeight=logWeight, vol=vol, specie=specie, gvl_75=gvl_75, dstump=dstump)
 			if dbh>biggestDBH: biggestDBH=dbh
 		print "biggest dbh:", biggestDBH, "m"
 		f.close()				
