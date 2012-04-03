@@ -42,14 +42,14 @@ def remove_edge(e, R):
 	"""removes edge e from R and updates related statistics"""
 	dA=cf.singleRoadSegmentCoverage(e, R, remove=True)
 	R.remove_edge(e[0], e[1])
-	R.graph['areaCover']-=dA*R.graph['Ainv']
+	R.areaCover-=dA*R.Ainv
 	update_after_mod(e,R)
 def add_edge(e, R):
 	"""adds e to R and updates statistics."""
 	dA=cf.singleRoadSegmentCoverage(e, R, add=True)
 	R.add_edges_from([tuple(e)])
 	a=R.get_edge_data(e[0], e[1])
-	R.graph['areaCover']+=dA*R.graph['Ainv']
+	R.areaCover+=dA*R.Ainv
 	e[2]['c']=cf.routingCost(R,e,storeData=True)
 	#update_after_mod(e,R)
 def get_angle(e1,e2):
@@ -95,10 +95,10 @@ def overLapA(e1,e2, R):
 	e2=e2[0:2]
 	#first, find out if this calculation has been performed before.
 	try:
-		overlap=R.graph['overlap']
+		overlap=R.overlap
 	except: #create dictionary
-		R.graph['overlap']={} 
-		overlap=R.graph['overlap']
+		R.overlap={} 
+		overlap=R.overlap
 	#The key structure ((from1, to1), (from2, to2)) gives us four alternatives. Simply try them all.
 	#room for optimization...
 	keylist=[((e1[0], e1[1]), (e2[0], e2[1])),
@@ -119,7 +119,7 @@ def overLapA(e1,e2, R):
 	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaps
 	alpha=pi-angle #this is the angle that matters here...
 	#the following variables look like "mumbo-jumbo" It's all trigonometry but should be documented somewhere...
-	d=0.5*R.graph['w']
+	d=0.5*R.roadWidth
 	x=2*d*sin(alpha*0.5)
 	y=d*cos(alpha*0.5)
 	z=0.5*x/tan((pi-alpha)/2)
@@ -134,7 +134,7 @@ if __name__=='__main__':
 		G.add_node(node)
 	G.add_edge((0,0), (1,0), weight=1)
 	G.add_edge((1,0), (1,1), weight=1)
-	G.graph['w']=1
+	G.roadWidth=1
 	angle=get_angle(G.edges()[0], G.edges()[1]) #just test of the angle..
 	if angle-np.pi/2.>0.0001: raise Exception('either get_angle doesnt work or we are creating graph in the wrong way')
 	print overLapA(G.edges()[0], G.edges()[1], G)

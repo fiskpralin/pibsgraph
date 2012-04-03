@@ -17,7 +17,6 @@ import costFunc as cf
 import graph_operations as go
 from draw import *
 
-from construct import *
 from functions import getDistance
 
 
@@ -26,7 +25,7 @@ def distToOrigin(e,R):
 	b=np.array(e[1])
 	d=a-b
 	middle=b+0.5*d
-	o=R.graph['origin']
+	o=R.origin
 	return sqrt((middle[0]-o[0])**2+(middle[1]-o[1])**2)
 def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 	"""
@@ -34,14 +33,14 @@ def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 
 	modifies G into R:... this is a strange procedure and should be changed.
 	"""
-	R.graph['beta']=beta	
+	R.beta=beta	
 	if not G: G=copy.deepcopy(R)
-	R.graph['areaCover']=cf.roadAreaCoverage(R)
+	R.areaCover=cf.roadAreaCoverage(R)
 
 	inf = 1e15
 	eps=1e-9
 	lastAdded=None
-	origin=G.graph['origin']
+	origin=G.origin
 	if not origin: raise Exception('need info about origin')
 	#first, modify the weight of the edges a couple of times.
 	for i in xrange(10):
@@ -150,7 +149,7 @@ def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 		#for r in remList:
 		#	print r[0:2]
 		#print "removed, next", remList[0][0:2]
-		if e[2]['c']>eps and aCap and R.graph['areaCover']-cf.singleRoadSegmentCoverage(e, R, remove=True)*G.graph['Ainv']<aCap:
+		if e[2]['c']>eps and aCap and R.areaCover-cf.singleRoadSegmentCoverage(e, R, remove=True)*G.Ainv<aCap:
 			print "tries to exit", e[0:2], "ec:", e[2]['c']
 			added, addList, remList, lastAdded=addListProcedure(addList,remList,R,e[2]['c'],i,lastAdded)
 			if added:
@@ -168,18 +167,20 @@ def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 	for e in R.edges(data=True):
 		modifyEdge(e, R, reset=True)
 	print "construction finished."
-	print "road area coverage:", R.graph['areaCover']
-	print "total area:", G.graph['A']
+	print "road area coverage:", R.areaCover
+	print "total area:", G.A
 	print "road overall cost, compensated with rho:", cf.roadCost2(R)
+	
 def modifyEdge(edge, R, reset=False):
 	"""
 	used systematically in order to deal with the "taxi-cab-geometry-problem", i.e. there
 	are several paths of equal length between two specific points.
 	"""
 	if reset:
-		edge[2]['weight']=getDistance(edge[0], edge[1])
+		edge[2]['weight']=R.edgeWeightCalc(edge[0], edge[1])
 	else:
-		edge[2]['weight']=getDistance(edge[0], edge[1])*(1-float(edge[2]['visits'])/(4.0*float(R.graph['elements'])))
+		edge[2]['weight']=R.edgeWeightCalc(edge[0], edge[1])*(1-float(edge[2]['visits'])/(4.0*float(R.elements)))
+		
 def addListProcedure(addList,remList, R, c,i,lastAdded=None):
 	"""
 	does some stuff connected to addList

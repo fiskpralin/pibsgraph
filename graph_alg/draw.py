@@ -26,12 +26,12 @@ def draw_custom(G=None, ax=None, edge_visits=False, cost=False, road_color='k', 
 		else:
 			l = Line2D(x,y, color=road_color, linewidth=road_width)
 		ax.add_line(l)
-	ax.set_xlim(*tuple(G.graph['lim'][0:2]))
-	ax.set_ylim(*tuple(G.graph['lim'][2:4]))
+	ax.set_xlim(*tuple(G.lim[0:2]))
+	ax.set_ylim(*tuple(G.lim[2:4]))
 
 
 	#plot the polygon
-	poly = Polygon(G.graph['areaPoly'],closed=True, color='none', ec='k',lw=3, ls='solid')
+	poly = Polygon(G.areaPoly,closed=True, color='none', ec='k',lw=3, ls='solid')
 	ax.add_patch(poly)
 	return ax
 def middle(p1,p2):
@@ -51,12 +51,12 @@ def plot_coverage(G=None, ax=None):
 		circles=int(np.sqrt(np.dot(d,d))/6.)#one every 6m
 		for i in range(circles):
 			p=p2+d*(i+1)/(circles+1)
-			c=Circle(p, radius=G.graph['C'], alpha=470, color='#666677')
+			c=Circle(p, radius=G.C, alpha=470, color='#666677')
 			ax.add_patch(c)"""
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
 		try:
-			w=G.graph['C']*2
+			w=G.C*2
 		except:
 			w=24
 		nodes=[]

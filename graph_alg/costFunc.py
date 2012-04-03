@@ -31,14 +31,14 @@ def roadAreaCoverage(R):
 	rA=0
 	for e in R.edges():
 		rA+=singleRoadSegmentCoverage(e,R)
-	return rA*R.graph['Ainv']
+	return rA*R.Ainv
 def sRCov(e, R):
 	"""
 	Computes the coverage (in m2, not percent) of the edge e
 	only accurate for 90degree intersections.
 	"""
 	l=edgeLength(e)
-	w=R.graph['L']
+	w=R.L
 	rA=l*w #base area, but we should subtract overlaps.
 	print "overlap algorithm has not been tested..."
 	for node, other in [(e[0], e[1]), (e[1], e[0])]:
@@ -67,7 +67,7 @@ def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 	else:
 		modif=0.5 #count half of the overlap, it is taken into consideration twice.
 	l=edgeLength(e)
-	A=l*R.graph['w']
+	A=l*R.roadWidth
 	#new stuff
 	for node, other in [(e[0], e[1]), (e[1], e[0])]:
 		if R.degree(node)<=2: continue #we also get a "gap", for d=2 this gap is of equal size as the overlap.
@@ -78,32 +78,32 @@ def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 	return A
 def roadCost2(R):
 	"""calculates the overall transportation cost of a road, normalized with respect to the area."""
-	w=R.graph['w'] #width of roads
+	w=R.roadWidth #width of roads
 	C1=0 #cost
-	rho=R.graph['density']
+	rho=R.density
 	for n in R.nodes(data=True): #may be defined in an other way later.
 		P1=n[1]['shortest_path']
 		P2=n[1]['second_shortest']
-		C1=C1+R.graph['beta']*(sumWeights(R, P1))+sumWeights(R, P2)
+		C1=C1+R.beta*(sumWeights(R, P1))+sumWeights(R, P2)
 	return C1/rho
 
 def roadCost(R):
 	"""calculates the overall transportation cost of a road, normalized with respect to the area."""
-	w=R.graph['w'] #width of roads
+	w=R.roadWidth #width of roads
 	C1=0 #cost
 	C2=0
-	rho=R.graph['density']
-	Ainv=R.graph['Ainv']
-	origin=R.graph['origin']
+	rho=R.density
+	Ainv=R.Ainv
+	origin=R.origin
 	inf=1e15
 	for n in R.nodes(data=True): #may be defined in an other way later.
 		P1=n[1]['shortest_path']
 		P2=n[1]['second_shortest']
-		C1=C1+R.graph['beta']*(sumWeights(R, P1))+sumWeights(R, P2)
+		C1=C1+R.beta*(sumWeights(R, P1))+sumWeights(R, P2)
 	for e in R.edges():
 		d=edgeLength(e)
-		C2=C2+R.graph['cr']*d*w/Ainv
-	C1=C1*R.graph['cd']/(R.graph['A']**(3/2.)*rho)
+		C2=C2+R.cr*d*w/Ainv
+	C1=C1*R.cd/(R.A**(3/2.)*rho)
 	return C1+C2, C1, C2
 def shortestCycle(R,n):
 	"""
@@ -124,10 +124,10 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	"""culculates the difference in the sum of the paths. May store the new paths as well."""
 	#if not storeData: R=copy.deepcopy(R) #why was this here? extremely slow.
 	if len(e)<3: raise Exception('sumPathsDiff needs edge data as well.')
-	beta=R.graph['beta']
-	w=R.graph['w'] #width of roads
+	beta=R.beta
+	w=R.roadWidth #width of roads
 	C=0 #cost
-	origin=R.graph['origin']
+	origin=R.origin
 	inf=1e15
 	eps=1e-8
 	etpl=tuple(e) 
@@ -152,7 +152,7 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	action2([etpl])
 	#print "sumpathdiff, visited from ", len(e[2]['visited_from_node']), " nodes"
 	for nTmp in lst:
-		if nTmp[0]==R.graph['origin']: continue
+		if nTmp[0]==R.origin: continue
 		#print nTmp[1]
 		P11=nTmp[1]['shortest_path']
 		P12=nTmp[1]['second_shortest']
@@ -213,8 +213,8 @@ def refinedCost(R,  e, storeData=False):
 	* Needs testing and verification
 	"""
 	C=sumPathsDiff(R,e,storeData)
-	C2=R.graph['cr']*singleRoadSegmentCoverage(e)
-	return R.graph['cd']*C/R.graph['density']-C2
+	C2=R.cr*singleRoadSegmentCoverage(e)
+	return R.cd*C/R.density-C2
 def routingCost(R,e,storeData=False, add=False):
 	"""
 	Calculates the extra routing cost of removing or adding e.
@@ -223,7 +223,7 @@ def routingCost(R,e,storeData=False, add=False):
 	if not add and not R.has_edge(e[0],e[1]):
 		print e[0:2]
 		raise Exception('e is not in R, if e should be added "add=True" should be set.')
-	a=sumPathsDiff(R,e,storeData, add)/R.graph['density']
+	a=sumPathsDiff(R,e,storeData, add)/R.density
 	if not add: e[2]=R.get_edge_data(e[0],e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
 	return a
@@ -275,7 +275,7 @@ def roadFuncEval():
 	else: raise Exception('roadFuncEval: variable %s is not valid'%str(variable))
 	for elements, cr  in list:
 		G=sqGridGraph(elements, L, umin=0, umax=0.00001)
-		G.graph['origin']=origin
+		G.origin=origin
 		G.graph['beta']=1.25
 		G.graph['cd']=1
 		G.graph['cr']=cr

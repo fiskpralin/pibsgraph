@@ -39,6 +39,9 @@ class ExcelOutput():
 	def save(self):
 		self.wtbook.save(self.output)
 	def modify(self,row,col,content):
+		"""
+		modify cell (row, col) and set its content
+		"""
 		if self.rowMax: #skip the style
 			self.wtsheet.write(row, col, content)
 		else:
