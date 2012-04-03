@@ -44,6 +44,7 @@ class Bundler(Process,UsesDriver):
 			self.resetBundle()
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			for c in self.releaseDriver(): yield c
+			self.forceBundler=False
 			print 'end of bundlerrun'
 		
 	def dumpBundle(self, direction=None):
@@ -102,7 +103,6 @@ class Bundler(Process,UsesDriver):
 		else: return False
 
 	def resetBundle(self):
-		self.forceBundler=False
 		self.currentBundle=None
 
 	def cmndWithDriver(self, commands, time):
