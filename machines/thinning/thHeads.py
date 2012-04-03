@@ -224,8 +224,9 @@ class ThinningCraneHead(Process):
 			cut lengths and the added diamter in this model, as long as times for cutting etc are taken
 			into account in the forwarder step!
 			"""
-			self.currentPile.length=5
-			self.currentPile.setNodes(self.road.direction)
+			if self.currentPile:
+				self.currentPile.length=5
+				self.currentPile.setNodes(self.road.direction)
 			print 'Trees not twig cracked'
 			return []
 

@@ -111,12 +111,14 @@ class SimExtend(Simulation):
 			self.activate(self.p,self.p.run()) #should be terminated to work properly. 
 		else:
 			self.p=None #means we plot nothing at all.
+
 	def plotMoni(self, ax=None, number=None):
 		"""
 		PlotWorld invokes this function for each monitor. There are three monitors available for the simulation.
 		Inherit and override if you want to use those monitors.
 		"""
 		return None #means that we won't use monitors.
+
 	def setQueuePerc(self):
 		"""
 		returns the percent of time that the ques is nonempty
@@ -166,6 +168,7 @@ class SimExtend(Simulation):
 		self.stats['work time']=workPerc*0.01*self.now()
 		self.stats['rest time']=self.now()-self.stats['work time']
 		print "queue percentage:", self.queuePerc, "work percentage:", workPerc
+
 	def saveGeneralStats(self, name=None, value=None, unit=None):
 		"""
 		saves general statistics, that should be automatically written to output files
@@ -175,6 +178,7 @@ class SimExtend(Simulation):
 			raise Exception('needs name, value and unit for general statistics to be saved')
 		self._generalStatistics[name]=value
 		self._generalStatisticsUnits[name]=unit
+
 	def getGeneralStatsString(self):
 		"""
 		returns a string of the general stats:
