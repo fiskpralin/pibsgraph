@@ -37,7 +37,7 @@ class Bundler(Process,UsesDriver):
 		"""
 		while True:
 			yield waituntil, self, self.bundlerFilled
-			print 'The bundler runs and makes a bundle of the pile'
+			print 'Bundler runs'
 			for c in self.startTheBundler(): yield c
 			self.bundleIt()
 			self.dumpBundle()
@@ -45,7 +45,6 @@ class Bundler(Process,UsesDriver):
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			for c in self.releaseDriver(): yield c
 			self.forceBundler=False
-			print 'end of bundlerrun'
 		
 	def dumpBundle(self, direction=None):
 		"""
@@ -64,7 +63,7 @@ class Bundler(Process,UsesDriver):
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
 		self.m.G.terrain.addObstacle(cB)
-		print '*SAVED the current bundle with',len(self.currentBundle.trees),'trees in the terrain at pos:',cB.pos
+		print '*SAVED the bundle with',len(self.currentBundle.trees),'trees at pos:',cB.pos
 
 	def getBPos(self, direction=None):
 		"""

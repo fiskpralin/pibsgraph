@@ -98,9 +98,7 @@ class ThinningMachine(Machine, UsesDriver):
 			for c in self.setPos(p, cmnd=True): yield c
 			if self.getNextPos()==self.pos:
 				if self.hasBundler==True:
-					print self.bundler.forceBundler
 					self.bundler.forceBundler=True
-					print self.bundler.forceBundler
 					for c in self.releaseDriver(): yield c
 					yield waituntil, self, self.bundlerDone
 				self.sim.stopSimulation()
