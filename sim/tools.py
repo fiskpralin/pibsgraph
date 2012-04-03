@@ -55,10 +55,13 @@ class SimSeries():
 			self.G=globalVar()
 		self.filename=None #makes it possible to specify the filenmae before calling saveTofile.
 		self.f=None #file, will later be initialized
+
 	def run(self):
 		pass
+
 	def postProcess(self):
 		pass
+
 	def _saveToFile(self, string):
 		"""
 		generic method to save a string to the .txt file specified by self.filename.
