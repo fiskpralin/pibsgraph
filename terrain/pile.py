@@ -90,13 +90,11 @@ class Bundle(Pile):
 		"""
 		if tree is None: raise('EXCEPTION: getXSection must get a tree')
 		stumpXS=tree.dstump**2
-		print tree.h, tree.dbh, tree.gvl_75 #for debug only
 		if tree.h<5: atFiveXS=0
 		elif tree.gvl_75==0 or tree.gvl_75==1.3:
 			atFiveXS=(tree.dbh+(tree.dbh-tree.dstump)/1.3*3.7)**2
 		else:
 			atFiveXS=(tree.dbh+(0.075-tree.dbh)/(tree.gvl_75-1.3)*3.7)**2
-		print stumpXS, stumpXS+atFiveXS
 		return stumpXS+atFiveXS	
 
 	def twigCrackBundle(self,direction):

@@ -268,6 +268,7 @@ class VaryTerrain(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryAttachLoc(PMSimSeries):
 	"""
 	this class describes a simulation that varies the automation level.
@@ -292,6 +293,7 @@ class VaryAttachLoc(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryDegrees(PMSimSeries):
 	"""
 	this class describes a simulation that varies the allowed angle for the 2a cranes.
@@ -340,6 +342,7 @@ class VaryDibbleDist(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryMoundingbladeWidth(PMSimSeries):
 	"""this class describes a simulation that varies the width of the mounding blade
 	tested: Yes (kind of..)
@@ -363,6 +366,7 @@ class VaryMoundingbladeWidth(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryTargetStockingrate(PMSimSeries):
 	"""this class describes a simulation that varies the stockingrate
 	tested: Yes
@@ -386,6 +390,7 @@ class VaryTargetStockingrate(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryMinDist(PMSimSeries):
 	"""this class describes a simulation that varies the stockingrate
 	tested: Yes
@@ -409,6 +414,7 @@ class VaryMinDist(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryOperatorSwitchFocusSkill(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus switching skill
 	tested: Yes
@@ -459,6 +465,7 @@ class VaryAutomation(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class VaryRadialCraneSpeed(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus swiching skill
 	tested: Yes
@@ -482,6 +489,7 @@ class VaryRadialCraneSpeed(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
+
 class BestCase(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus switching skill
 	tested: Yes
@@ -507,6 +515,7 @@ class BestCase(PMSimSeries):
 				i+=1
 				print "No of sims: %d"%(i)
 			self.reset()
+
 class WorstCase(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus swiching skill
 	tested: Yes

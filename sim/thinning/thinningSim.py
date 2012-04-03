@@ -164,6 +164,7 @@ class varyAutomationThinningMachine(SimSeries):
 						str(auto['dumpTrees'])+'\t'+
 						str(auto['chop']))
 		self.f.close()
+
 	def _singleSim(self, G, nCranes=2, head='BC'):
 		"""
 		a single run.
@@ -171,6 +172,7 @@ class varyAutomationThinningMachine(SimSeries):
 		SimExtend.seed='undefined'
 		s=ThinningSim(G,vis=False,nCranes=nCranes, head=head)
 		return s
+
 def createThinningMovies():
 	G=globalVar()
 	G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
@@ -210,6 +212,7 @@ class corridorStatistics(SimSeries):
 					self._saveToFile("%d\t"%j+head+'\t'+'%.6f\t'%p+str(tFile)+'\t'+str(s.cNum)+'\t'+'%.6f'%s.avTreesPerCorr+'\t'+str(s.treesPerRoad)+'\t'+'%.6f'%s.avCorrTreeWeight)
 					j+=1
 		self.f.close()
+
 	def _singleSim(self, G, nCranes=2, head='BC'):
 		"""a single run."""
 		SimExtend.seed='undefined'
@@ -305,8 +308,6 @@ def setDefaultThinningParams(simParam={}):
 
 
 	
-	
-
 
 ###############################
 # Thinning sim
@@ -343,6 +344,7 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
+
 	def treeStats(self):
 		"""
 		calculates some statistics.. should maybe be done in terrain class instead?
@@ -403,6 +405,7 @@ class ThinningSim(SimExtend):
 		print "rexp:", rexp, "robs.", robs
 		aggregationIndex=robs/rexp
 		self.saveGeneralStats("clustering agg. index", aggregationIndex, "-")
+
 	def plotMoni(self, ax, number):
 		tcap=50
 		tmin=-0.1

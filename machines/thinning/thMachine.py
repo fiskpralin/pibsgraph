@@ -98,7 +98,9 @@ class ThinningMachine(Machine, UsesDriver):
 			for c in self.setPos(p, cmnd=True): yield c
 			if self.getNextPos()==self.pos:
 				if self.hasBundler==True:
-					self.bundler.forceBundler=True#THIS IS MY OWN WAY ASK LINUS SHOULD IT BE HERE!?
+					self.bundler.forceBundler=True
+					for c in self.releaseDriver(): yield c
+					yield waituntil, self, self.bundlerDone
 				self.sim.stopSimulation()
 				yield hold, self, 0.001 #give it time to stop..
 			r=self.roads[self.pos[1]] #current roads.. should be like 10 of them..
@@ -106,6 +108,13 @@ class ThinningMachine(Machine, UsesDriver):
 				if len(r[h.side])>0: h.road=r[h.side][0]
 			for c in self.releaseDriver(): yield c
 			yield waituntil, self, self.headsDoneAtSite
+
+	def bundlerDone(self):
+		"""
+		Checks if the bundler is done
+		"""
+		if self.bundler.forceBundler==True: return False
+		else: return True
 			
 	def headsDoneAtSite(self):
 		"""are the heads done?"""

@@ -1,4 +1,4 @@
-#This new file will hopefully be better 
+#This new file will hopefully be better 					2012-04-03
 #Less double work and correct naming of the 
 #parameters.
 
@@ -53,12 +53,12 @@ restOfBundling	True		The bundler J drops the trees at the side
 startBundler	False		Need the driver push a button to start it or is it autostart?
 
 			#HEADS C,D,E,F
-headWidthCD	1	   [m]	Width of the continuous head
-headWidthEF	0.5	   [m]	Width of the conventional head
+headWidthCD	1	[m]	Width of the continuous head
+headWidthEF	0.5	[m]	Width of the conventional head
 velocityFellTreeCD	0.08	[m2/s]	Velocity of the cutting
 velocityFellTreeEF	0.08	[m2/s]	Velocity of the cutting
-constFellTreeCD		0		The time it takes to start felling a tree (should be zero for the CDhead)
-constFellTreeEF		1		The time it takes to start felling a tree
+constFellTreeCD	0	[s]	The time it takes to start felling a tree (should be zero for the CDhead)
+constFellTreeEF	1	[s]	The time it takes to start felling a tree
 timeDropTreesCD	10	[s]	Time it takes to drop the trees for the continuous head
 timeDropTreesEF	10	[s]	Time it takes to drop the trees for the conventional head
 timeTwigCrack	5	[s]	Time it takes to twig crack a bunch of trees
@@ -81,7 +81,7 @@ dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is dista
 timeBundle	10	[s]	Time it takes to finish bundling of trees in the bundler.
 timeStartBundler	1	[s]	 The time it takes to get the bundler going.
 powBundleJ	1	[kW]	Power it takes to make a bundle at the bundler J
-maxXSectionJ	1	[m2]	Maximum cross section of "stored" trees in bundler
-xSectionThreshJ	0.8	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+maxXSectionJ	0.5	[m2]	Maximum cross section of "stored" trees in bundler
+xSectionThreshJ	0.4	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 			#PRIORITIES
 			#--

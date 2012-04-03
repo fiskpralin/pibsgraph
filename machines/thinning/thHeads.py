@@ -90,32 +90,15 @@ class ThinningCraneHead(Process):
 			if not t or self.currentPile==None:
 				if self.road==self.m.roads['main']:
 					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
-					print '*Created main Pile'
 				else:
 					self.currentPile=Pile(pos=self.pos,terrain=self.m.G.terrain)
-					print '*Created corridor Pile'
 			
 			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
-				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
-				tree.pos=[5000,5000]
-				""" #Here the trees arechanged, but we dont need it since all is saved in the piles. I HOPE ;)! 
-				tree.color='#5C3317' #brown, same as stumps
-				dth=pi/30.
-				direct=random.uniform(direction-dth, direction+dth)
-				r=tree.radius
-				l=tree.h
-				a=1.0 #change to 1 to get the correct value
-				c1=cart([-r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
-				c2=cart([-r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
-				c3=cart([r, 0], origin=self.pos, direction=direct, fromLocalCart=True)
-				c4=cart([r, l/a], origin=self.pos, direction=direct, fromLocalCart=True)
-				tree.nodes=[c1,c2,c3,c4]
-				tree.radius=sqrt(r**2+l**2)
-				"""
+				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]#just some nodes see next line
+				tree.pos=[5000,5000]#just moves the trees such that they are not plotted
 				self.currentPile.trees.append(tree)#adds the tree to the current pile
 				self.trees.remove(tree)
-				print 'added the',index+1,'th tree' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -124,7 +107,7 @@ class ThinningCraneHead(Process):
 			c.extend(self.twigCrack())
 			if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
 				self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
-				print '*Saved the current pile in the terrain:',len(self.currentPile.trees),'trees in pile'
+				print '*Saved a pile with',len(self.currentPile.trees),'trees at pos:', self.currentPile.pos
 				self.currentPile=None
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			return c
@@ -139,10 +122,9 @@ class ThinningCraneHead(Process):
 			if len(self.trees)==0: return []
 			if b.currentBundle==None:
 				b.currentBundle=Bundle(pos=b.pos)
-				print 'Created a new current bundle in the bundler'
 			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-				print "Trees in head forces bundler to run"
+				print "Bundler is to filled and forced to run"
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
@@ -151,7 +133,6 @@ class ThinningCraneHead(Process):
 				tree.pos=[5000,5000]
 				b.currentBundle.trees.append(tree)#adds the tree to the current bundler in bundler
 				self.trees.remove(tree)
-			print 'added',index+1,'trees to the currentBundle in bundler' 
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
@@ -160,7 +141,7 @@ class ThinningCraneHead(Process):
 			c.extend(self.twigCrack())#Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter
 
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
-			print 'end of dumpTrees'
+			self.cmnd(c,time=self.setPos(self.getStartPos()), auto=self.automatic['moveArmOut'])#return to the start position
 			return c
 	
 		
@@ -228,16 +209,24 @@ class ThinningCraneHead(Process):
 		if self.twigCracker and self.currentPile:
 			self.currentPile.twigCrackPile(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
-			print 'Trees have been twigcracked, it took', time, 'seconds'
+			print 'Trees twigcracked'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
 		
 		elif self.twigCracker and self.m.bundler.currentBundle:
 			self.m.bundler.currentBundle.twigCrackBundle(self.road.direction)
 			time=self.timeTwigCrack+self.timeCutAtHead
-			print 'Trees twigcracked: bundler-> biomass change only'
+			print 'Trees twigcracked: bundler -> biomass loss only'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
 
 		else:
+			"""
+			Even if the trees are not cut they will be so in the forwarder step and we can hence use the
+			cut lengths and the added diamter in this model, as long as times for cutting etc are taken
+			into account in the forwarder step!
+			"""
+			if self.currentPile:
+				self.currentPile.length=5
+				self.currentPile.setNodes(self.road.direction)
 			print 'Trees not twig cracked'
 			return []
 
@@ -250,6 +239,7 @@ class ThinningCraneHead(Process):
 		if not self.road or self.direction==pi/2.: #head is at "base" or with default direction
 			return(cart([cyl[0]-self.length/2., cyl[1]]))
 		return cart([0, -self.length/2], origin=self.pos, direction=self.direction, fromLocalCart=True)
+
 	def cmndWithDriver(self, commands, time):
 		"""
 		a method to set up the yield command, for use of the driver for a specific time.
