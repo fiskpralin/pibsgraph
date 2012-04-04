@@ -15,6 +15,36 @@ from string import *
 import time
 import random
 
+class tryDiffConfigThinningMachine(SimSeries):
+	"""
+	This class will make simulations of the different kinds of machine configurations that
+	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012
+	"""	
+	def __init__(self,it=1):
+		self.G=globalVar()
+		#self.G.plotDelay=500 #for debug only
+		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
+		self.G.terrain=Terrain(G=self.G)
+		for treeFile in self.G.terrain.thinningFiles:
+			self.G.terrain.treeFile=treeFile
+			self.G.terrain.readTrees()
+			for head in ['BC','convAcc']:
+				for nCranes in [1,2]:
+					for twigCrack in [False,True]:
+						for bundler in [False, True]:
+							for simNumber in range(1,it+1):
+								G=copy.deepcopy(self.G)
+								self.s=ThinningSim(G, False, False, head, nCranes, bundler, twigCrack)
+								#self.s.stats
+								print 'simulation:', simNumber
+								print 'nCranes:', nCranes
+								print 'bundler:', bundler
+								print 'twigCracker:', twigCrack
+								print 'head:', head
+								print 'treeFile:', treeFile
+								
+	print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
+
 
 class varyAutomationThinningMachine(SimSeries):
 	"""

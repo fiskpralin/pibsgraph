@@ -317,6 +317,7 @@ class Terrain():
 				raise(Exception('readtrees: specie-code %d is not recognized. '%specie))
 			s=Stump(pos, dbh=dbh, terrain=self, specie=specie)
 		f.close()
+		
 	def readTrees(self, path=None, thinning=True):
 		"""reads in trees from the specified files."""
 		start='terrain/terrainFiles/thinning/GA-'
