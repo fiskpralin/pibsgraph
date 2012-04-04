@@ -1,4 +1,5 @@
 from SimPy.Simulation  import *
+
 from machines.basics import UsesDriver, Operator
 from functions import getCartesian, getCylindrical, getDistance, getDistanceSq
 from math import pi, sin, asin, cos, sqrt
@@ -156,7 +157,7 @@ class Bundler(Process,UsesDriver):
 		t3=cart([-trw/2,allback],origin=origin,fromLocalCart=True)
 		t4=cart([trw/2,allback],origin=origin,fromLocalCart=True)
 		t=[t1,t2,t3,t4]
-		ax.add_patch(mpl.patches.Polygon(np.array(t), closed=True, facecolor="black"))
+		ax.add_patch(mpl.patches.Polygon(np.array(t), closed=True, facecolor='k'))
 
 		#draw the tyres of the bundler
 		ww=0.2 #width of the tyres
@@ -190,8 +191,8 @@ class Bundler(Process,UsesDriver):
 		w3=[w31,w32,w33,w34]
 		w4=[w41,w42,w43,w44]
 		for w in [w1,w2,w3,w4]:
-			ax.add_patch(mpl.patches.Polygon(np.array(w), closed=True, facecolor="black"))
-			
+			ax.add_patch(mpl.patches.Polygon(np.array(w), closed=True, facecolor='k'))
+		"""	
 		#draw the claws and the ring
 		widthring=0.6
 		widthclaw=0.8
@@ -201,16 +202,17 @@ class Bundler(Process,UsesDriver):
 		w2=cart([-widthring/2,thick+front-1.5*wr],origin=origin,fromLocalCart=True)
 		w3=cart([-widthring/2,-thick+front-1.5*wr],origin=origin,fromLocalCart=True)
 		w4=cart([widthring/2,-thick+front-1.5*wr],origin=origin,fromLocalCart=True)
-		ax.add_patch(mpl.patches.Polygon(np.array([w1,w2,w3,w4]), closed=True, facecolor="black"))
+		ax.add_patch(mpl.patches.Polygon(np.array([w1,w2,w3,w4]), closed=True, facecolor='k'))
 
 		c1=cart([widthclaw/2,thick+front-4*wr],origin=origin,fromLocalCart=True)
 		c2=cart([-widthclaw/2,thick+front-4*wr],origin=origin,fromLocalCart=True)
 		c3=cart([-widthclaw/2,-thick+front-4*wr],origin=origin,fromLocalCart=True)
 		c4=cart([widthclaw/2,-thick+front-4*wr],origin=origin,fromLocalCart=True)
-		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor="black"))
+		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor='k'))
 		
 		y1=cart([widthclaw/2,thick+front-5*wr],origin=origin,fromLocalCart=True)
 		y2=cart([-widthclaw/2,thick+front-5*wr],origin=origin,fromLocalCart=True)
 		y3=cart([-widthclaw/2,-thick+front-5*wr],origin=origin,fromLocalCart=True)
 		y4=cart([widthclaw/2,-thick+front-5*wr],origin=origin,fromLocalCart=True)
-		ax.add_patch(mpl.patches.Polygon(np.array([y1,y2,y3,y4]), closed=True, facecolor="black"))
+		ax.add_patch(mpl.patches.Polygon(np.array([y1,y2,y3,y4]), closed=True, facecolor='k'))
+		"""
