@@ -18,7 +18,7 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-		self.color='blue'
+		self.color='#CD0000'
 		self.m=machine
 		self.s=self.m.G.simParam
 		self.pos=list(np.array(self.m.pos)+np.array([0,self.s['dropPosJ']]))
@@ -130,14 +130,87 @@ class Bundler(Process,UsesDriver):
 		This is the drawing of the actual bundler without any trees in it. Oh come on
 		you can do a nicer bundler than this!
 		"""
-		#sets the nodes
 		cart=getCartesian
-		dx=1
-		dy=1
 		origin=self.pos
-		a1=cart([dx,dy],origin=origin,fromLocalCart=True)
-		a2=cart([-dx,dy],origin=origin,fromLocalCart=True)
-		a3=cart([-dx,-dy],origin=origin,fromLocalCart=True)
-		a4=cart([dx,-dy],origin=origin,fromLocalCart=True)
-		a=[a1,a2,a3,a4]
+		#sets the outer edges
+		width=1.2
+		back=-0.2
+		front=2.8
+		off=0.3
+		a1a=cart([width/2,front-off],origin=origin,fromLocalCart=True)
+		a1b=cart([width/2-off,front],origin=origin,fromLocalCart=True)
+		a2a=cart([-width/2+off,front],origin=origin,fromLocalCart=True)
+		a2b=cart([-width/2,front-off],origin=origin,fromLocalCart=True)
+		a3a=cart([-width/2,back+off],origin=origin,fromLocalCart=True)
+		a3b=cart([-width/2+off,back],origin=origin,fromLocalCart=True)
+		a4a=cart([width/2-off,back],origin=origin,fromLocalCart=True)
+		a4b=cart([width/2,back+off],origin=origin,fromLocalCart=True)
+		a=[a1a,a1b,a2a,a2b,a3a,a3b,a4a,a4b]
 		ax.add_patch(mpl.patches.Polygon(np.array(a), closed=True, facecolor=self.color))
+
+		#draw connection and transmission line
+		allback=-0.4
+		trw=0.2
+		t1=cart([trw/2,allback/2],origin=origin,fromLocalCart=True)
+		t2=cart([-trw/2,allback/2],origin=origin,fromLocalCart=True)
+		t3=cart([-trw/2,allback],origin=origin,fromLocalCart=True)
+		t4=cart([trw/2,allback],origin=origin,fromLocalCart=True)
+		t=[t1,t2,t3,t4]
+		ax.add_patch(mpl.patches.Polygon(np.array(t), closed=True, facecolor="black"))
+
+		#draw the tyres of the bundler
+		ww=0.2 #width of the tyres
+		wr=0.45 #radius of the tyres
+		origin1=[origin[0]+width/2+ww/2,origin[1]+(front-off-wr)]
+		origin2=[origin[0]-width/2-ww/2,origin[1]+(front-off-wr)]
+		origin3=[origin[0]-width/2-ww/2,origin[1]+(front-off-3*wr-0.2)]
+		origin4=[origin[0]+width/2+ww/2,origin[1]+(front-off-3*wr-0.2)]
+
+		w11=cart([ww/2,wr],origin=origin1,fromLocalCart=True)
+		w12=cart([-ww/2,wr],origin=origin1,fromLocalCart=True)
+		w13=cart([-ww/2,-wr],origin=origin1,fromLocalCart=True)
+		w14=cart([ww/2,-wr],origin=origin1,fromLocalCart=True)
+
+		w21=cart([ww/2,wr],origin=origin2,fromLocalCart=True)
+		w22=cart([-ww/2,wr],origin=origin2,fromLocalCart=True)
+		w23=cart([-ww/2,-wr],origin=origin2,fromLocalCart=True)
+		w24=cart([ww/2,-wr],origin=origin2,fromLocalCart=True)
+
+		w31=cart([ww/2,wr],origin=origin3,fromLocalCart=True)
+		w32=cart([-ww/2,wr],origin=origin3,fromLocalCart=True)
+		w33=cart([-ww/2,-wr],origin=origin3,fromLocalCart=True)
+		w34=cart([ww/2,-wr],origin=origin3,fromLocalCart=True)
+		
+		w41=cart([ww/2,wr],origin=origin4,fromLocalCart=True)
+		w42=cart([-ww/2,wr],origin=origin4,fromLocalCart=True)
+		w43=cart([-ww/2,-wr],origin=origin4,fromLocalCart=True)
+		w44=cart([ww/2,-wr],origin=origin4,fromLocalCart=True)
+		w1=[w11,w12,w13,w14]
+		w2=[w21,w22,w23,w24]
+		w3=[w31,w32,w33,w34]
+		w4=[w41,w42,w43,w44]
+		for w in [w1,w2,w3,w4]:
+			ax.add_patch(mpl.patches.Polygon(np.array(w), closed=True, facecolor="black"))
+			
+		#draw the claws and the ring
+		widthring=0.6
+		widthclaw=0.8
+		thick=0.0025
+
+		w1=cart([widthring/2,thick+front-1.5*wr],origin=origin,fromLocalCart=True)
+		w2=cart([-widthring/2,thick+front-1.5*wr],origin=origin,fromLocalCart=True)
+		w3=cart([-widthring/2,-thick+front-1.5*wr],origin=origin,fromLocalCart=True)
+		w4=cart([widthring/2,-thick+front-1.5*wr],origin=origin,fromLocalCart=True)
+		ax.add_patch(mpl.patches.Polygon(np.array([w1,w2,w3,w4]), closed=True, facecolor="black"))
+
+		c1=cart([widthclaw/2,thick+front-4*wr],origin=origin,fromLocalCart=True)
+		c2=cart([-widthclaw/2,thick+front-4*wr],origin=origin,fromLocalCart=True)
+		c3=cart([-widthclaw/2,-thick+front-4*wr],origin=origin,fromLocalCart=True)
+		c4=cart([widthclaw/2,-thick+front-4*wr],origin=origin,fromLocalCart=True)
+		ax.add_patch(mpl.patches.Polygon(np.array([c1,c2,c3,c4]), closed=True, facecolor="black"))
+		
+		y1=cart([widthclaw/2,thick+front-5*wr],origin=origin,fromLocalCart=True)
+		y2=cart([-widthclaw/2,thick+front-5*wr],origin=origin,fromLocalCart=True)
+		y3=cart([-widthclaw/2,-thick+front-5*wr],origin=origin,fromLocalCart=True)
+		y4=cart([widthclaw/2,-thick+front-5*wr],origin=origin,fromLocalCart=True)
+		ax.add_patch(mpl.patches.Polygon(np.array([y1,y2,y3,y4]), closed=True, facecolor="black"))

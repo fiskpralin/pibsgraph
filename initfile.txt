@@ -1,8 +1,5 @@
 #This new file will hopefully be better 					2012-04-03
-#Less double work and correct naming of the 
-#parameters.
-
-#It is nontrivial to decide what should be inparameters to calculate total used power. E.g. for a static crane with load we cannot immediately say what the used power is. Therefore it should be looked in to, should we use torque instead?
+#Less double work and correct naming of the parameters.
 ---------------------------------------------------------------------------
 A means: A machine with one crane
 B means: A machine with two cranes
@@ -11,7 +8,8 @@ D means: Continuous head with twig cracking and logging
 E means: Conventional head which can accumulate trees
 F means: Conventional head which can accumulate trees and twig crack and log
 J means: Bundler module in front of the machine which can make bundles of the trees and log them
-
+---------------------------------------------------------------------------
+####
 			#OVERALL
 maxCraneLength	11	[m]	How far the crane can reach
 minCraneLength	3	[m]	How close to the fasteningpoint the head on the crane can come
@@ -83,5 +81,3 @@ timeStartBundler	1	[s]	 The time it takes to get the bundler going.
 powBundleJ	1	[kW]	Power it takes to make a bundle at the bundler J
 maxXSectionJ	0.5	[m2]	Maximum cross section of "stored" trees in bundler
 xSectionThreshJ	0.4	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
-			#PRIORITIES
-			#--
