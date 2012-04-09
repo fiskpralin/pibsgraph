@@ -94,6 +94,8 @@ if __name__=='__main__':
 			PM.WorstCase(iterations)
 		elif sys.argv[1]=='varyAll':
 			PM.varyAll(iterations)
+		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachine
+			TH.tryDiffConfigThinningMachine()
 		else:
 			raise Exception('could not read input argument %s'%str(sys.argv[1]))
 		

@@ -53,7 +53,7 @@ class SimSeries():
 		self.outpfolder=None
 		if G is None:
 			self.G=globalVar()
-		self.filename=None #makes it possible to specify the filenmae before calling saveTofile.
+		self.filename=None #makes it possible to specify the filename before calling saveTofile.
 		self.f=None #file, will later be initialized
 
 	def run(self):
