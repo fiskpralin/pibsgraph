@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 import copy
 import time
+import sim.tools as tools
 """This module stores all the machines."""
 
 

@@ -4,126 +4,41 @@ import matplotlib.pyplot as plt
 import numpy as np
 from grid import *
 import copy
-import alg
 import graph_operations as go
+import functions as fun
 
-def sumWeights(R, P):
-	"""
-	calculates the sum of the weights in path P.
-	"""
-	if len(P)<=1: return 0 #should work for this case as well
-	C=0
-	last=P[0]
-	for nTmp2 in P[1:]:
-		if nTmp2==last: continue #overlap between roads, skip
-		try:
-			d=R.get_edge_data(*(last, nTmp2))
-			C=C+d['weight']
-		except:
-			print "start point:", P[0], "endpoint:", P[-1]
-			raise Exception("SumWeights: something is wrong. Edge does not seem to exist:",(last, nTmp2))
-		last=nTmp2
-	return C
-def roadAreaCoverage(R):
-	"""
-	calculate the percentage of the area that is covered by roads.
-	"""
-	rA=0
-	for e in R.edges():
-		rA+=singleRoadSegmentCoverage(e,R)
-	return rA*R.Ainv
-def sRCov(e, R):
-	"""
-	Computes the coverage (in m2, not percent) of the edge e
-	only accurate for 90degree intersections.
-	"""
-	l=edgeLength(e)
-	w=R.L
-	rA=l*w #base area, but we should subtract overlaps.
-	print "overlap algorithm has not been tested..."
-	for node, other in [(e[0], e[1]), (e[1], e[0])]:
-		for neigh in R.neighbors(node):
-			if neigh==other: continue #this is edge e..
-			a=go.overLapA(e, (node, neigh), R) #the overlapping area.
-			rA-=a/2. #divide by two since counted twice.
-			#we get a problem if more than two road segments are  sharing this overlap..
-	return rA
-def edgeLength(e):
-	"""
-	calculates length of edge
-	"""
-	return sqrt((e[0][0]-e[1][0])**2+(e[0][1]-e[1][1])**2) #pythagora's
 
-def singleRoadSegmentCoverage(e, R, add=False, remove=False):
-	"""
-	Computes the coverage (in m2, not percent) of the edge e
-	only accurate for 90degree intersections.
 
-	add and remove is if the segment is intended to be added or removed. There is a difference regarding how
-	the total road area should be modified, related to overlaps.
-	"""
-	if add or remove:
-		modif=1 #count all parts of the road except overlap, that is already fully represented
-	else:
-		modif=0.5 #count half of the overlap, it is taken into consideration twice.
-	l=edgeLength(e)
-	A=l*R.roadWidth
-	#new stuff
-	for node, other in [(e[0], e[1]), (e[1], e[0])]:
-		if R.degree(node)<=2: continue #we also get a "gap", for d=2 this gap is of equal size as the overlap.
-		for neigh in R.neighbors(node):
-			if neigh==other: continue #(node, neigh) is road e, identical road..
-			a=go.overLapA(e, (node, neigh), R)
-			A-=a*modif #compensate for overlap.
-	return A
-def roadCost2(R):
-	"""calculates the overall transportation cost of a road, normalized with respect to the area."""
-	w=R.roadWidth #width of roads
-	C1=0 #cost
-	rho=R.density
-	for n in R.nodes(data=True): #may be defined in an other way later.
-		P1=n[1]['shortest_path']
-		P2=n[1]['second_shortest']
-		C1=C1+R.beta*(sumWeights(R, P1))+sumWeights(R, P2)
-	return C1/rho
 
-def roadCost(R):
-	"""calculates the overall transportation cost of a road, normalized with respect to the area."""
-	w=R.roadWidth #width of roads
-	C1=0 #cost
-	C2=0
-	rho=R.density
-	Ainv=R.Ainv
-	origin=R.origin
-	inf=1e15
-	for n in R.nodes(data=True): #may be defined in an other way later.
-		P1=n[1]['shortest_path']
-		P2=n[1]['second_shortest']
-		C1=C1+R.beta*(sumWeights(R, P1))+sumWeights(R, P2)
-	for e in R.edges():
-		d=edgeLength(e)
-		C2=C2+R.cr*d*w/Ainv
-	C1=C1*R.cd/(R.A**(3/2.)*rho)
-	return C1+C2, C1, C2
+
 def shortestCycle(R,n):
 	"""
 	identifies the shortest cycle for undirected graphs
 	Returns it.
+
+	Should be able to do this faster without cycle_basis..
+
 	"""
 	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
 	#identify the shortest of them...
 	if len(cycles)==0: return None
-	weights=[sumWeights(R,P) for P in cycles]
+	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
+	m=min([len(c) for c in cycles])
+	cycles=[c for c in cycles if len(c)<1.5*m] #shortens list.
+	weights=[go.sumWeights(R,P) for P in cycles]
 	shortest=cycles[weights.index(min(weights))]
 	shortest.reverse()
 	shortest.append(shortest[0])
-	#reshuffle, want n in beginning and end
 	return shortest
 
 def sumPathsDiff(R,e,storeData=False, add=False):
-	"""culculates the difference in the sum of the paths. May store the new paths as well."""
+	"""
+	culculates the difference in the sum of the paths. May store the new paths as well.
+
+	This function is a freaking mess.. clean up..
+	"""
 	#if not storeData: R=copy.deepcopy(R) #why was this here? extremely slow.
-	if len(e)<3: raise Exception('sumPathsDiff needs edge data as well.')
+	if len(e)<3: raise Exception('sumPathsDiff needs edge data as well. set data=True so e[2] can be reached')
 	beta=R.beta
 	w=R.roadWidth #width of roads
 	C=0 #cost
@@ -134,11 +49,30 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	if add: #different orders of things, but otherwise the same.
 		action1=R.add_edges_from
 		action2=R.remove_edges_from
-		lst=R.nodes(data=True)#much slower.. but necessary.
+		#we need to reduce the number of nodes checked... if euc. distance
+		#to origin is less than half that from e, remove
+		dtmp=fun.getDistance(e[0], R.origin)
+		lst=[n for n in R.nodes(data=True) if fun.getDistance(n[0], R.origin)>dtmp*0.5]#really slow, but necessary
+		#lst=R.nodes(data=True)
 	else:
 		action1=R.remove_edges_from
 		action2=R.add_edges_from
 		lst=e[2]['visited_from_node'] #faster than above.
+		####################
+		####################
+		#ta bort när du är tillbaks.
+		######
+		listTmp=[n for n in lst if go.sumWeights(R,n[1]['shortest_path'])>=go.sumWeights(R,n[1]['second_shortest'])]
+		if len(listTmp)>0:
+			print "len", len(listTmp), " of ", len(lst)
+			print listTmp[0][0]
+			print go.sumWeights(R,listTmp[0][1]['shortest_path']), listTmp[0][1]['shortest_path']
+			print go.sumWeights(R,listTmp[0][1]['second_shortest']), listTmp[0][1]['second_shortest']
+			R.draw()
+			plt.show()
+		assert len([n for n in lst if go.sumWeights(R,n[1]['shortest_path'])>=go.sumWeights(R,n[1]['second_shortest'])])==0
+		####################
+		####################
 	action1([etpl])
 	if not nx.is_connected(R): #probably remove in this case. Not allowed since graph looses connectivity
 		action2([etpl])
@@ -148,7 +82,7 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	for n in lst:
 		P21=routeAfter[1][n[0]]
 		P21.reverse()
-		sumP21[n[0]]=sumWeights(R, P21) #need to do this before addding/removing edge again
+		sumP21[n[0]]=go.sumWeights(R, P21) #need to do this before addding/removing edge again
 	action2([etpl])
 	#print "sumpathdiff, visited from ", len(e[2]['visited_from_node']), " nodes"
 	for nTmp in lst:
@@ -156,9 +90,9 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 		#print nTmp[1]
 		P11=nTmp[1]['shortest_path']
 		P12=nTmp[1]['second_shortest']
-		old_s1=sumWeights(R,P11)
+		old_s1=go.sumWeights(R,P11)
 		#if add and storeData: print "p12:", add, storeData, P12
-		old_s2=sumWeights(R,P12)
+		old_s2=go.sumWeights(R,P12)
 		P21=routeAfter[1][nTmp[0]] #used to be try statement here, be aware of exceptions
 		#P21.reverse() #already reversed above now!
 		#P21=nx.dijkstra_path(R,nTmp[0], origin) #try single source also..may be faster for a lot of n
@@ -168,24 +102,24 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 			eTmp=[P21[0], P21[1]] #minus, since reveresed. Look above
 			eTmp.append(R.get_edge_data(eTmp[0], eTmp[1]))
 
-			P21W=sumWeights(R,P21) #needs to be calculated before eTmp is removed
+			P21W=go.sumWeights(R,P21) #needs to be calculated before eTmp is removed
 			R.remove_edges_from([tuple(eTmp)]) #temporary remove to get loop
 			cycle=shortestCycle(R,nTmp[0])
 			alternative=False
 			altW=inf
 			W22=None
 			if cycle: #if we found one..
-				altW=P21W+sumWeights(R,cycle)
+				altW=P21W+go.sumWeights(R,cycle)
 				tmp=copy.deepcopy(P21)
 				tmp.reverse() #want from origin to point
  				alternative=tmp+cycle
 			try:
 				P22=nx.dijkstra_path(R, origin, nTmp[0]) #cannot do this single source
-				if alternative and sumWeights(R,P22)>altW:
+				if alternative and go.sumWeights(R,P22)>altW:
 					P22=alternative
 					W22=altW
 				else:
-					W22=sumWeights(R,P22)
+					W22=go.sumWeights(R,P22)
 			except nx.exception.NetworkXNoPath:
 				if alternative:
 					P22=alternative
@@ -196,14 +130,15 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 			if C>=inf: break #saves some time, but is ugly
 			if abs(W22-old_s2)>eps:
 				C+=W22-old_s2
-			#if P22 != old_s2: C+=sumWeights(R,P22)-old_s2 #old one. wrong, right?
+			#if P22 != old_s2: C+=go.sumWeights(R,P22)-old_s2 #old one. wrong, right?
 			if storeData:
 				nTmp[1]['new_shortest_path']=P21
 				nTmp[1]['new_second_shortest']=P22
 		action2([etpl])
 	#print "C=", C
-	if C>=inf: R.add_edges_from([tuple(e)])
+	if C>=inf: R.add_edges_from([tuple(e)]) #we broke out without adding again..
 	return C
+
 def refinedCost(R,  e, storeData=False):
 	"""
 	* cost of removing edge e in road net R, does not modify R but saves some shortest
@@ -213,37 +148,38 @@ def refinedCost(R,  e, storeData=False):
 	* Needs testing and verification
 	"""
 	C=sumPathsDiff(R,e,storeData)
-	C2=R.cr*singleRoadSegmentCoverage(e)
+	C2=R.cr*go.singleRoadSegmentCoverage(e)
 	return R.cd*C/R.density-C2
+
+def totalCost(R):
+	"""
+	prototype, just to get a hint of how good it is..
+	"""
+	C=0
+	cmax=1e8
+	for e in R.edges(data=True):
+		c=routingCost(R,list(e), add=False)
+		if c>cmax: c=0
+		C+=c
+	return C
+		
 def routingCost(R,e,storeData=False, add=False):
 	"""
 	Calculates the extra routing cost of removing or adding e.
 	Should give a negative value for adding.
+	needs edge data, i.e. e[2] should be available. (use: R.edges(data=True))
 	"""
 	if not add and not R.has_edge(e[0],e[1]):
 		print e[0:2]
 		raise Exception('e is not in R, if e should be added "add=True" should be set.')
 	a=sumPathsDiff(R,e,storeData, add)/R.density
-	if not add: e[2]=R.get_edge_data(e[0],e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
+	if not add:
+		print a
+		assert a>=0 #should always be.. right?
+		e[2]=R.get_edge_data(e[0], e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
 	return a
-def cost(G, P1, P2):
-	"""
-	calculates the cost for replacing P1 with P2 in terrain graph G. Both P1 and P2 are lists of tuples of positions of paths
-	OLD
-	"""
-	costs={}
-	for path,ID in [P1,'P1'], [P2,'P2']:
-		c=0
-		if len(path)>1:
-			last=path[0]
-			for nTmp in path[1:]:
-				if last==nTmp: continue #overlaps between road there and back.
-				d=G.get_edge_data(*(last, nTmp))
-				c=c+d['weight']
-				last=nTmp
-		costs[ID]=c
-	return costs['P2']-costs['P1']
+
 def roadFuncEval():
 	"""
 	examines how the road cost function varies with area. It is supposed to be independent of area.
@@ -280,7 +216,7 @@ def roadFuncEval():
 		G.graph['cd']=1
 		G.graph['cr']=cr
 		R=copy.deepcopy(G)
-		alg.cycleRoad(G,R)
+		bruteForce(G,R)
 		r=roadCost(R)
 		Ctot.append(r[0])
 		C1.append(r[1])

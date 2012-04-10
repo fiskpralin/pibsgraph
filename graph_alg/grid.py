@@ -7,9 +7,8 @@ import sys
 from scipy.interpolate import RectBivariateSpline 
 from matplotlib.patches import Polygon
 
-import costFunc as cf
-import graph_operations as go
 import GIS.GIS as GIS
+import graph_operations as go
 if __name__=='__main__':
 	import os, sys #insert /dev to path so we can import these modules.
 	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
@@ -18,16 +17,18 @@ if __name__=='__main__':
 import functions as fun
 import collision as col
 import draw
-import costFunc as cf
+from weightFunctions import weightFunctionFirst, normalizedPitchDist
 
 
 class ExtendedGraph(nx.Graph):
 	"""
 	intended as an extension of networkx graph with some features that we want.
 
-	Grids inherit from this class.
+	Grids inherit from this class, with basically just a different constructor.
 
-	Need to test the coordinates for terrain against something..
+	Modifies networkX methods for adding and removing edges/nodes so that we can do some more refined statistics for this.
+
+	
 	"""
 	def __init__(self, origin=None, globalOrigin=None,areaPoly=None, gridtype=None):
 		if not areaPoly:
@@ -37,6 +38,11 @@ class ExtendedGraph(nx.Graph):
 		if not globalOrigin:
 			globalOrigin=(596120, 6727530) #sweref99..located on map.. nice position.. use as default.
 		self.areaPoly=areaPoly
+		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
+		side=10
+		self.lim=np.array([xmin-0.5*side,xmax+0.5*side, ymin-0.5*side, ymax+0.5*side])
+		self.A=fun.polygon_area(areaPoly)
+		self.Ainv=1./self.A #used a lot.. faster to just compute this once.
 		self.origin=origin
 		self.globalOrigin=globalOrigin
 		self.type=gridtype
@@ -52,13 +58,14 @@ class ExtendedGraph(nx.Graph):
 		self.t_z=z
 		self.roadWidth=4 #width of road
 		self.overlap={} #will later be filled. A speedup thing
-		self.weightFunction=weightFunctionFirst #reference to exter
+		self.weightFunction=normalizedPitchDist #reference to exter
+		self.areaCover=go.roadAreaCoverage(self)
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""
 		interpolates from the terrain data and returns line coordinates.
 		p1-start point
 		p2-end point
-
+g
 		output:
 		x - array of x-values along line
 		y - array of y-values along line
@@ -89,7 +96,57 @@ class ExtendedGraph(nx.Graph):
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
-	def draw(self, ax=None):
+	def remove_node(self,n):
+		"""
+		like the standard one, but takes away edge first so some data is stored that we need
+		"""
+		for neigh in self.neighbors(n):
+			self.remove_edge(n,neigh)
+		super(ExtendedGraph, self).remove_node(n=n)
+	def remove_nodes_from(self,nodes):
+		"""
+		we need to update data, so we only use the above one.
+		"""
+		for n in nodes:
+			self.remove_node(n)
+		
+	def remove_edge(self, e1, e2):
+		"""
+		removes edge e from R and updates related statistics
+		If more functionality is needed for your road-algorithm, override or write new function
+		"""
+		super(ExtendedGraph,self).remove_edge(u=e1,v=e2)
+		dA=go.singleRoadSegmentCoverage((e1,e2), self, remove=True)
+		self.areaCover-=dA*self.Ainv
+
+	def remove_edges_from(self, ebunch):
+		"""
+		removes edge e from R and updates related statistics
+		If more functionality is needed for your road-algorithm, override or write new function
+		"""
+		for e in ebunch: #one at a time because of overlap-calculations..
+			dA=go.singleRoadSegmentCoverage((e[0],e[1]), self, remove=True)
+			self.areaCover-=dA*self.Ainv
+			super(ExtendedGraph,self).remove_edges_from(ebunch=[e])
+
+
+	def add_edge(self, e1, e2, attr_dict=None, **kwargs):
+		"""
+		adds e to edges and updates statistics.
+		"""
+		e=(e1,e2, kwargs)
+		self.add_edges_from([e])
+
+	def add_edges_from(self, ebunch, attr_dict=None, **kwargs):
+		"""
+		same as above..but for many
+		"""
+		for e in ebunch: #because of area overlap we need to take one at a time
+			super(ExtendedGraph,self).add_edges_from(ebunch=[e], attr_dict=attr_dict, attr=kwargs)
+			dA=go.singleRoadSegmentCoverage((e[0],e[1]), self, add=True)
+			self.areaCover+=dA*self.Ainv
+			
+	def draw(self, ax=None, overlap=False):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
 		"""
@@ -98,6 +155,7 @@ class ExtendedGraph(nx.Graph):
 		pol=Polygon(self.areaPoly, closed=True, color='none', ec='k',lw=3, ls='solid')
 		ax.add_patch(pol)
 		draw.draw_custom(G=self, ax=ax, road_color='b', road_width=5)
+		if overlap: draw.plot_coverage(self,ax, color='r')
 		return ax
 
 
@@ -136,13 +194,10 @@ class SqGridGraph(ExtendedGraph):
 		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
 		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area."""
 		d=1/sqrt(2)+0.001
+		direction=angle+pi/2.
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
-	
 		xl=np.arange(xmin+C,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float) #hypothenuse
 		yl=np.arange(ymin+C,ceil(sqrt(xmax**2+ymax**2)), dy, dtype=np.float) 
-
-		direction=angle+pi/2.
-		self.lim=np.array([xmin-0.5*L,xmax+0.5*L, ymin-0.5*L, ymax+0.5*L])
 		el=0
 		for xloc in xl:
 			for yloc in yl:
@@ -186,11 +241,8 @@ class SqGridGraph(ExtendedGraph):
 					short_dist=d
 					shortest=n
 			self.origin=shortest
-		A=fun.polygon_area(areaPoly)
 		elements=el
-		self.elements=el
-		self.A=A
-		self.Ainv=1./self.A #used a lot.. faster to just compute this once.
+		self.elements=el			
 		self.density=elements/self.A
 def inside(pos,areaPoly):
 	"""
@@ -268,14 +320,10 @@ class TriGridGraph(ExtendedGraph):
 					break
 		self.overlap={} #will later be filled.
 		self.roadWidth=4
-		A=fun.polygon_area(areaPoly)
 		elements=el
 		self.elements=el
-		self.A=A
 		self.L=L
-		self.Ainv=1./self.A
 		self.density=elements/self.A
-		self.areaPoly=areaPoly
 
 def getAngleFromLongestEdge(areaPoly, origin=None):
 	"""
@@ -304,15 +352,4 @@ def getAngleFromLongestEdge(areaPoly, origin=None):
 		last=node
 	return fun.angleToXAxis(longest)
 
-def weightFunctionFirst(x,y,z):
-	"""
-	a weight function that has 3 vectors with positions as input and returns a weight
-	that is independent of the sampling rate etc.
 
-	The first one is just a simple test.
-	"""
-	d=fun.getDistance((x[0], y[0]), (x[-1], y[-1]))
-	mu= np.mean(z)
-	w=d+10000*sum(abs(z-mu))/len(z)
-	print w, d
-	return w
