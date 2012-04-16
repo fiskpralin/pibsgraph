@@ -35,6 +35,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 							for simNumber in range(1,it+1):
 								G=copy.deepcopy(self.G)
 								self.s=ThinningSim(G, False, False, head, nCranes, bundler, twigCrack)
+
+								
 								#self.s.stats
 								print 'simulation:', simNumber
 								print 'nCranes:', nCranes
@@ -42,8 +44,11 @@ class tryDiffConfigThinningMachine(SimSeries):
 								print 'twigCracker:', twigCrack
 								print 'head:', head
 								print 'treeFile:', treeFile
+
+
+
 								
-	print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
+		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
 
 
 class varyAutomationThinningMachine(SimSeries):
@@ -272,7 +277,6 @@ def setDefaultThinningParams(simParam={}):
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
 	s['switchFocusTime']=3#Time to switch focus from one thing to another
 	s['noIter']=100#number of iterations per configuration
-	s['levelOfThinning']=50#[%]
 
 	#MACHINES A,B
 	s['moveConst']=5#[s]
@@ -328,11 +332,11 @@ def setDefaultThinningParams(simParam={}):
 
 	#BUNDLER J
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
-	s['timeBundle']=10#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
+	s['timeBundle']=60#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
 	s['timeStartBundler']=1#[s] The time it takes to get the bundler going. (Push the button)
 	s['powBundleJ']=1#[kW] Power it takes to make a bundle at the bundler J
-	s['maxXSectionJ']=1#[m2] Maximum cross section of "stored" trees in bundler
-	s['xSectionThreshJ']=0.8#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+	s['maxXSectionJ']=0.5#[m2] Maximum cross section of "stored" trees in bundler
+	s['xSectionThreshJ']=0.4#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 	#PRIORITIES
 	#--
 
