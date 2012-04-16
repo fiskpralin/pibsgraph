@@ -60,7 +60,7 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 		lst=e[2]['visited_from_node'] #faster than above.
 		####################
 		####################
-		#ta bort när du är tillbaks.
+		#remove when you are back, and remember not to use swedish letters in this code ;).
 		######
 		listTmp=[n for n in lst if go.sumWeights(R,n[1]['shortest_path'])>=go.sumWeights(R,n[1]['second_shortest'])]
 		if len(listTmp)>0:

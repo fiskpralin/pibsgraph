@@ -36,6 +36,29 @@ class tryDiffConfigThinningMachine(SimSeries):
 								G=copy.deepcopy(self.G)
 								self.s=ThinningSim(G, False, False, head, nCranes, bundler, twigCrack)
 
+								machineConfig=self.getConfig(head,nCranes,twigCrack,bundler)
+								simnumber
+								treeFile
+								noHarvTrees=sum([len(b) for b in G.bundles])
+								#noCraneCycles
+								#harvBiomass
+								#harvStemmass
+								#harvStemVol
+								#noBundlesOrPiles
+								#minBunPileMass
+								#maxBunPileMass
+								#totBunPileMass
+								#minBunPileVol
+								#maxBunPileVol
+								#totBunPileVol
+								#noMainStops
+								#totTimeConsumed
+								#bundlingTime
+								#driverActiveTime
+								#totCraneWaitTime
+								#oneCraneWaitTime
+								#twoCranesWaitTime
+								#noCraneWaitings
 								
 								#self.s.stats
 								print 'simulation:', simNumber
@@ -49,6 +72,21 @@ class tryDiffConfigThinningMachine(SimSeries):
 
 								
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
+
+	def getConfig(self,head,nCranes,twigCrack,bundler):
+		if nCranes==1: a='A'
+		else: a='B'
+
+		if head=='BC' and twigCrack==False: b='c'
+		elif head=='BC' and twigCrack==True: b='d'
+		elif head=='convAcc' and twigCrack==False: b='e'
+		elif head=='convAcc' and twigCrack==True: b='f'
+		
+		if bundler==False: c='i'
+		elif bundler==True: c='j'
+		print a+b+c
+		return a+b+c
+	
 
 
 class varyAutomationThinningMachine(SimSeries):
