@@ -38,13 +38,12 @@ class Bundler(Process,UsesDriver):
 		"""
 		while True:
 			yield waituntil, self, self.bundlerFilled
-			print 'Bundler runs', now()
+			print 'Bundler runs'
 			for c in self.startTheBundler(): yield c
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			for c in self.releaseDriver(): yield c
 			self.bundleIt()
 			self.dumpBundle()
-			print now()
 			self.resetBundle()
 			self.forceBundler=False
 		
