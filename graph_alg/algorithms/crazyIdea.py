@@ -1,50 +1,47 @@
-if __name__=='__main__':
-	import os, sys #insert /dev to path so we can import these modules.
-	cmd_folder = os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
-	if not cmd_folder in sys.path:
-		sys.path.insert(0, cmd_folder)
-
+ 
 import networkx as nx
 from math import *
-from matplotlib.patches import Rectangle
 
-import matplotlib.pyplot as plt
-import time
-import random
-import copy
-from grid import *
-import costFunc as cf
-import graph_operations as go
-from draw import *
-
-from construct import *
-from functions import getDistance
+import graph_alg.grid as grid
+import graph_alg.costFunctions as cf
+import graph_alg.graph_operations as go
+from functions import getDistance, getDistanceSq
 
 
-def distToOrigin(e,R):
-	a=np.array(e[0])
-	b=np.array(e[1])
-	d=a-b
-	middle=b+0.5*d
-	o=R.graph['origin']
-	return sqrt((middle[0]-o[0])**2+(middle[1]-o[1])**2)
-def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
+
+def getClosestIntersection(G, n):
 	"""
-	works with cycles instead of shortest paths
+	returns the closest intersection, i.e. d(n)>=3
 
-	modifies G into R:... this is a strange procedure and should be changed.
+	can be refined by using indexing
 	"""
-	R.graph['beta']=beta	
-	if not G: G=copy.deepcopy(R)
-	R.graph['areaCover']=cf.roadAreaCoverage(R)
+	closestD=1e10
+	closest=None
+	for node in G.nodes():
+		if node==n: continue
+		if G.degree(node)<3: continue
+		d=getDistanceSq(node, n[0:2])
+		if d<closestD:
+			closestD=d
+			closest=node
+	return closestD, closest
+
+def crazyIdea(L=24, areaPoly=None, refinementRatio=5):
+	"""
+	just testing out an idea..
+	"""
+	G=grid.SqGridGraph(areaPoly=areaPoly, L=L/float(refinementRatio))
+	R=copy.deepcopy(G)
+
+	#so.. loop thorugh them all and take some of them away.
 
 	inf = 1e15
 	eps=1e-9
 	lastAdded=None
-	origin=G.graph['origin']
+	origin=G.origin
 	if not origin: raise Exception('need info about origin')
-	#first, modify the weight of the edges a couple of times.
-	for i in xrange(10):
+	#first, modify the weight of the edges a couple of times. Warmup
+	for i in xrange(1):
 		paths=nx.algorithms.shortest_paths.weighted.single_source_dijkstra(R, origin)
 		for node in R.nodes(data=True):
 			p1=paths[1][node[0]]
@@ -150,7 +147,7 @@ def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 		#for r in remList:
 		#	print r[0:2]
 		#print "removed, next", remList[0][0:2]
-		if e[2]['c']>eps and aCap and R.graph['areaCover']-cf.singleRoadSegmentCoverage(e, R, remove=True)*G.graph['Ainv']<aCap:
+		if e[2]['c']>eps and aCap and R.areaCover-go.singleRoadSegmentCoverage(e, R, remove=True)*G.Ainv<aCap:
 			print "tries to exit", e[0:2], "ec:", e[2]['c']
 			added, addList, remList, lastAdded=addListProcedure(addList,remList,R,e[2]['c'],i,lastAdded)
 			if added:
@@ -159,36 +156,40 @@ def cycleRoad(R, G=None, ax=None, aCap=0.25, beta=1.5):
 			else:
 				break #we are finished
 		if R.degree(e[0])>2 and R.degree(e[1])>2 and c<inf: #loop condition, at least degree 3
-			go.remove_edge(e, R) #remove from R.
+			remove_edge(e, R) #remove from R.
 			addList.append(e) #add to lists for potential adding again.
 			e[2]['c']*=-1 #reverse, we now gain c by adding it again.
 			e[2]['i_added']=i
 			#this procedure can most certainly be speeded up, expensive operations.
-			go.update_after_mod(e,R)
+			update_after_mod(e,R)
 	for e in R.edges(data=True):
 		modifyEdge(e, R, reset=True)
 	print "construction finished."
-	print "road area coverage:", R.graph['areaCover']
-	print "total area:", G.graph['A']
-	print "road overall cost, compensated with rho:", cf.roadCost2(R)
+	print "road area coverage:", R.areaCover
+	print "total area:", G.A
+	return R
+
 def modifyEdge(edge, R, reset=False):
 	"""
 	used systematically in order to deal with the "taxi-cab-geometry-problem", i.e. there
 	are several paths of equal length between two specific points.
 	"""
 	if reset:
-		edge[2]['weight']=getDistance(edge[0], edge[1])
+		edge[2]['weight']=R.edgeWeightCalc(edge[0], edge[1])
 	else:
-		edge[2]['weight']=getDistance(edge[0], edge[1])*(1-float(edge[2]['visits'])/(4.0*float(R.graph['elements'])))
+		edge[2]['weight']=R.edgeWeightCalc(edge[0], edge[1])*(1-float(edge[2]['visits'])/(4.0*float(R.elements)))
+		
 def addListProcedure(addList,remList, R, c,i,lastAdded=None):
 	"""
 	does some stuff connected to addList
+
+	This is the thing that adds complexity. 98% of the execution time is spent here.. insane..
 	"""
 	#print "goes into loop..."
 	#routingcost is really expensive, procedure to minimize number of calls.
 	for aTmp in addList:
 		cTmp=cf.routingCost(R,aTmp,storeData=False, add=True)
-		if abs(cTmp)<c and i-aTmp[2]['i_added']>10000: addList.remove(aTmp) #strange procedure, modify later.
+		if abs(cTmp)<c and i-aTmp[2]['i_added']>1000: addList.remove(aTmp) #strange procedure, modify later.
 		else: aTmp[2]['c']=cTmp
 	if len(addList)!=0:
 		addList=sorted(addList, key=lambda edge: edge[2]['c']) #first sort
@@ -204,26 +205,11 @@ def addListProcedure(addList,remList, R, c,i,lastAdded=None):
 			#for at in addList:
 			#	if at[0:2]==[(120.0, 168.0), (120.0, 144.0)]: raise Exception('edge was never removed..')
 			a[2]['c']*=-1 #you don't get any benefit from it now.
-			go.add_edge(a, R)
+			add_edge(a, R)
 			remList.append(a)
 			#print i, "1R has (312.0, 96.0), (312.0, 120.0):", R.has_edge((312.0, 96.0), (312.0, 120.0))
 			return True, addList, remList, lastAdded #next while cycle
 	return False, addList, remList, lastAdded
-def singleRun(vis=True):
-	"""a single run, change parameters in here."""
-	tic=time.clock()
-	L=24
-	origin=(0.0,0.0)
-	Ls=100.0
-	#areaPoly=[(0.0,0.0), (2*Ls, 0.0), (2*Ls,Ls),(0.0,Ls)]
-	areaPoly=[(0.0,0.0), (3*Ls, Ls), (1.5*Ls,1.5*Ls),(0.0,Ls)]
-
-	R=makeRoadGraph(L=L,grid='square',ulim=(0,0),origin=origin, angle=None, areaCap=0.20,areaPoly=areaPoly, diagonals=False)
-	if vis:
-		ax=draw_custom(R, edge_visits=True)
-		plot_coverage(R,ax)
-	#plt.draw()
-	#raw_input('press any key')
 def findAwsomeDiagonals(addList,R):
 	"""
 	identifies hugely trafficed bends, and straightens them out.
@@ -233,15 +219,46 @@ def findAwsomeDiagonals(addList,R):
 	
 	#first, list the 
 
+
+def update_after_mod(e,R):
+	"""
+	updates graph after edge was removed or added. Assumes that routingcost function has stored correct data before.
+	"""
+	for nTmp in e[2]['visited_from_node']: #each node that visited the removed edge
+		P1=nTmp[1]['second_shortest']+nTmp[1]['shortest_path']
+		P2=nTmp[1]['new_second_shortest']+nTmp[1]['new_shortest_path']
+		#ax=testRoads(R, nTmp[1]['new_shortest_path'], nTmp[1]['new_second_shortest'], ax) #used for debugging
+		for path, diff in (P1, -1), (P2, 1):
+			last=path[0]
+			for nTmp2 in path[1:]: #loop over the edges in path
+				if nTmp2==last: continue #overlap between roads, skip
+				try:
+					d=R.get_edge_data(*(last, nTmp2))
+					d['visits']=d['visits']+diff
+					if diff==-1 and nTmp in d['visited_from_node']:
+						d['visited_from_node'].remove(nTmp)
+					elif not nTmp in d['visited_from_node']:
+						d['visited_from_node'].append(nTmp)
+				except ValueError:
+					print "remove failed", d['visited_from_node']
+					print d['visited_from_node'].count(nTmp),nTmp
+					raise Exception('sads')
+				except:
+					if not ((last==e[0] and nTmp2==e[1]) or (last==e[1] and nTmp2==e[0])): #if not the removed edge
+						raise Exception('tries to modify edge that does not exist, something is wrong')
+				last=nTmp2
+		nTmp[1]['shortest_path']=nTmp[1]['new_shortest_path']
+		nTmp[1]['second_shortest']=nTmp[1]['new_second_shortest']
+
+def remove_edge(e, R):
+	"""removes edge e from R and updates related statistics"""
+	R.remove_edge(e[0], e[1])
+	update_after_mod(e,R)
+
+def add_edge(e, R):
+	"""adds e to R and updates statistics."""
+	R.add_edges_from([tuple(e)])
+	a=R.get_edge_data(e[0], e[1])
+	a['c']=cf.routingCost(R,e,storeData=True)
+	#update_after_mod(e,R)
 	
-	
-if __name__ == '__main__':
-	#random.seed(2)
-	vis=True
-	#alphaVariation()
-	#plt.ion()
-	#import cProfile as cP
-	#cP.run('singleRun(vis)')
-	singleRun(vis)
-	#cf.roadFuncEval()
-	if vis: plt.show()

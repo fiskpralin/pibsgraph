@@ -16,7 +16,9 @@ from string import split
 import collision as col
 import functions as fun
 
-#open
+"""
+This module provides a number of GIS-related routines.
+"""
 
 def getGlobalCoordinate(globalOrigin, localPos=None, areaPoly=None):
 	"""
@@ -121,6 +123,7 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	y=np.transpose(y) #this form corresponds to numpy.mgrid standard, but not numpy.meshgrid
 	z=np.transpose(z)
 	return x,y,z
+
 def plotSurface(x=None,y=None,z=None):
 	"""
 	plots the surface of a terrain grid given x,y,z
@@ -148,6 +151,7 @@ def plotSurface(x=None,y=None,z=None):
 	ax2.set_zlim3d(50, 105)
 	plt.colorbar()
 	return ax
+
 def plot2DContour(x=None,y=None,z=None, ax=None, w=1):
 	"""
 	plots the contours of z  in xy-plane

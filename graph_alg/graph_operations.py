@@ -1,57 +1,68 @@
 import networkx as nx
-import costFunc as cf
+import costFunctions as cf
 import numpy as np
-from math import sin, cos, tan, pi
+from math import *
+"""
+A module with a collection of functions connected to road nets and graphs.
+"""
 
-def update_after_mod(e,R):
+def sumWeights(R, P):
 	"""
-	updates graph after edge was removed or added. Assumes that routingcost function has stored correct data before.
+	calculates the sum of the weights in path P.
 	"""
-	print "updates some data"
-	for nTmp in e[2]['visited_from_node']: #each node that visited the removed edge
-		P1=nTmp[1]['second_shortest']+nTmp[1]['shortest_path']
-		P2=nTmp[1]['new_second_shortest']+nTmp[1]['new_shortest_path']
-		#ax=testRoads(R, nTmp[1]['new_shortest_path'], nTmp[1]['new_second_shortest'], ax) #used for debugging
-		for path, diff in (P1, -1), (P2, 1):
-			last=path[0]
-			for nTmp2 in path[1:]: #loop over the edges in path
-				if nTmp2==last: continue #overlap between roads, skip
-				try:
-					d=R.get_edge_data(*(last, nTmp2))
-					d['visits']=d['visits']+diff
-					if diff==-1 and nTmp in d['visited_from_node']:
-						d['visited_from_node'].remove(nTmp)
-					elif not nTmp in d['visited_from_node']:
-						d['visited_from_node'].append(nTmp)
-				except ValueError:
-					print "remove failed", d['visited_from_node']
-					print d['visited_from_node'].count(nTmp),nTmp
-					raise Exception('sads')
-				except:
-					if not ((last==e[0] and nTmp2==e[1]) or (last==e[1] and nTmp2==e[0])): #if not the removed edge
-						print  (last, nTmp2), e[0:2], diff
-						from draw import *
-						ax=draw_custom(R, edge_visits=True)
-						plot_coverage(R,ax)
-						plt.show()
-						raise Exception('tries to modify edge that does not exist, something is wrong')
-				last=nTmp2
-		nTmp[1]['shortest_path']=nTmp[1]['new_shortest_path']
-		nTmp[1]['second_shortest']=nTmp[1]['new_second_shortest']
-def remove_edge(e, R):
-	"""removes edge e from R and updates related statistics"""
-	dA=cf.singleRoadSegmentCoverage(e, R, remove=True)
-	R.remove_edge(e[0], e[1])
-	R.graph['areaCover']-=dA*R.graph['Ainv']
-	update_after_mod(e,R)
-def add_edge(e, R):
-	"""adds e to R and updates statistics."""
-	dA=cf.singleRoadSegmentCoverage(e, R, add=True)
-	R.add_edges_from([tuple(e)])
-	a=R.get_edge_data(e[0], e[1])
-	R.graph['areaCover']+=dA*R.graph['Ainv']
-	e[2]['c']=cf.routingCost(R,e,storeData=True)
-	#update_after_mod(e,R)
+	if len(P)<=1: return 0 #should work for this case as well
+	C=0
+	last=P[0]
+	for nTmp2 in P[1:]:
+		if nTmp2==last: continue #overlap between roads, skip
+		try:
+			d=R.get_edge_data(*(last, nTmp2))
+			C=C+d['weight']
+		except:
+			print "start point:", P[0], "endpoint:", P[-1]
+			raise Exception("SumWeights: something is wrong. Edge does not seem to exist:",(last, nTmp2))
+		last=nTmp2
+	return C
+def roadAreaCoverage(R):
+	"""
+	calculate the percentage of the area that is covered by roads.
+	"""
+	rA=0
+	for e in R.edges():
+		rA+=singleRoadSegmentCoverage(e,R)
+	return rA*R.Ainv
+
+def edgeLength(e):
+	"""
+	calculates length of edge
+	"""
+	return sqrt((e[0][0]-e[1][0])**2+(e[0][1]-e[1][1])**2) #pythagora's
+
+def singleRoadSegmentCoverage(e, R, add=False, remove=False):
+	"""
+	Computes the coverage (in m2, not percent) of the edge e.
+
+	With coverage we mean the area covered by the road, not the area reachable.
+	
+	only accurate for 90degree intersections.
+
+	add and remove is if the segment is intended to be added or removed. There is a difference regarding how
+	the total road area should be modified, related to overlaps.
+	"""
+	if add or remove:
+		modif=1 #count all parts of the road except overlap, that is already fully represented
+	else:
+		modif=0.5 #count half of the overlap, it is taken into consideration twice.
+	l=edgeLength(e)
+	A=l*R.roadWidth
+	for node, other in [(e[0], e[1]), (e[1], e[0])]:
+		for neigh in R.neighbors(node):
+			if neigh==other: continue #(node, neigh) is road e, identical road..
+			a=overLapA(e, (node, neigh), R)
+			A-=a*modif #compensate for overlap.
+	return A
+
+
 def get_angle(e1,e2):
 	"""
 	returns the angle between roads. angle<=pi, i.e. the smallest one is always chosen.
@@ -83,22 +94,24 @@ def get_angle(e1,e2):
 	th=abs(th)
 	if th>pi: th=2*pi-th
 	return th
-def overLapA(e1,e2, R):
+
+def overLapA(e1,e2, R=None):
 	"""
 	computes the overlapping area of two road segments. Does not handle the dictionary routines at all.
 
 	OBS:
 	-this function returns the whole overlap-area. In order to get a correct compensation, half of this area has to be used since it is counted twice.
-	-This function gives the overlap, it doesn't cont for the fact of "negative overlap", i.e. the area that should be a part of the road but is not counted.
+	-This function gives the overlap, it doesn't account for the fact of "negative overlap", i.e. the area that should be a part of the road but is not counted.
 	"""
+	assert R != None #must be given
 	e1=e1[0:2]
 	e2=e2[0:2]
 	#first, find out if this calculation has been performed before.
 	try:
-		overlap=R.graph['overlap']
+		overlap=R.overlap
 	except: #create dictionary
-		R.graph['overlap']={} 
-		overlap=R.graph['overlap']
+		R.overlap={} 
+		overlap=R.overlap
 	#The key structure ((from1, to1), (from2, to2)) gives us four alternatives. Simply try them all.
 	#room for optimization...
 	keylist=[((e1[0], e1[1]), (e2[0], e2[1])),
@@ -119,25 +132,10 @@ def overLapA(e1,e2, R):
 	if abs(angle-pi)<eps: return 0 #straight line-.. no overlaps
 	alpha=pi-angle #this is the angle that matters here...
 	#the following variables look like "mumbo-jumbo" It's all trigonometry but should be documented somewhere...
-	d=0.5*R.graph['w']
+	d=0.5*R.roadWidth
 	x=2*d*sin(alpha*0.5)
 	y=d*cos(alpha*0.5)
 	z=0.5*x/tan((pi-alpha)/2)
 	a=x*0.5*(y+z)
 	overlap[(e1,e2)]=a #save so we don't have to calculate next time
 	return a
-if __name__=='__main__':
-	#try the overlap thing.
-	G=nx.Graph()
-	nodes=[(0,0), (1,0), (1,1)]
-	for node in nodes:
-		G.add_node(node)
-	G.add_edge((0,0), (1,0), weight=1)
-	G.add_edge((1,0), (1,1), weight=1)
-	G.graph['w']=1
-	angle=get_angle(G.edges()[0], G.edges()[1]) #just test of the angle..
-	if angle-np.pi/2.>0.0001: raise Exception('either get_angle doesnt work or we are creating graph in the wrong way')
-	print overLapA(G.edges()[0], G.edges()[1], G)
-	
-	
-	

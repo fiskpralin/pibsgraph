@@ -54,6 +54,10 @@ class PMSimSeries(SimSeries):
 		for simplicity, the list is in the same order as the excel document. This increases speed, but
 		the drawback is that it slightly decreases the readability.
 		Readability is provided by the comments below.
+
+		For clarity, this is the data that is stored from a single simulation, e.g. productivity, queue-time etc.
+
+		The index in the list corresponds to the column.
 		"""
 		self.timeData=[]
 		t=self.timeData

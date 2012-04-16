@@ -110,19 +110,10 @@ def getAngle(r1, r2):
 	"""
 	ray1=np.array(r1)
 	ray2=np.array(r2)
-	print ray1,ray2
-	int,p=col.linesIntersect(ray1,ray2, getPoint=True)
-	if np.isnan(p[0]):
-		#lines have a common point or are 
-		for p in r1:
-			for p2 in r2:
-				if p==p2: return 0
-		raise Exception('imposible to find angle, lines are paralell and non intersecting (at least endpoints)')
-	if int:
+	inters,p=col.linesIntersect(ray1,ray2, getPoint=True)
+	if inters:
 		pts=[r1[0],r1[1], r2[0], r2[1]]
-		print pts
 		if not tuple(p) in pts: raise Exception('lines are intersecting and not incident, angle not defined')
-	print "point:", p
 	p=np.array(p)
 	points=[]
 	for ray in ray1,ray2:
@@ -140,6 +131,11 @@ def getAngle(r1, r2):
 		if th>2*pi: raise Exception('something is wrong with getAngle')
 		th=pi-th
 	return th
+def getPointBetween(p1,p2):
+	"""
+	returns the points between points p1 and p2
+	"""
+	return [(p1[0]+p2[0])*0.5, (p1[1]+p2[1])*0.5]
 def angleToXAxis(ray):
 	"""
 	returns the angle in relation to the xaxis.
