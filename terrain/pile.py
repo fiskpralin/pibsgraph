@@ -98,8 +98,10 @@ class Bundle(Pile):
 		return stumpXS+atFiveXS	
 
 	def twigCrackBundle(self,direction):
+		print 'biomass before',self.biomass
 		self.maxDiam = max([t.dbh for t in self.trees])
 		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
+		print 'biomass after',self.biomass
 		self.setNodes(direction)
 		
 	def draw(self, ax):

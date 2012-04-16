@@ -42,16 +42,16 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['noHarvTrees']=sum([len(b.trees) for b in G.terrain.piles])
 
 								#self.s.stats['noCraneCycles']
-								#self.s.stats['harvBiomass']
+								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #not twigcracked?
 								#self.s.stats['harvStemmass']
 								#self.s.stats['harvStemVol']
 								self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
 								self.s.stats['minBunPileMass']=min(b.biomass for b in G.terrain.piles)
 								self.s.stats['maxBunPileMass']=max(b.biomass for b in G.terrain.piles)
 								self.s.stats['totBunPileMass']=sum(b.biomass for b in G.terrain.piles)
-								self.s.stats['minBunPileVol']=min(b.vol for b in G.terrain.piles)
-								self.s.stats['maxBunPileVol']=max(b.vol for b in G.terrain.piles)
-								self.s.stats['totBunPileVol']=sum(b.vol for b in G.terrain.piles)
+								self.s.stats['minBunPileVol']=min(b.vol for b in G.terrain.piles) #defect
+								self.s.stats['maxBunPileVol']=max(b.vol for b in G.terrain.piles) #defect
+								#self.s.stats['totBunPileVol']=sum(b.vol for b in G.terrain.piles) #defect
 								#self.s.stats['noMainStops']
 								#self.s.stats['totTimeConsumed']
 								#self.s.stats['bundlingTime']
@@ -63,9 +63,9 @@ class tryDiffConfigThinningMachine(SimSeries):
 								
 								print self.s.stats
 								print 'simulation:', simNumber
-								print 'nCranes:', nCranes
 								print 'bundler:', bundler
 								print 'twigCracker:', twigCrack
+								print 'nCranes:', nCranes
 								print 'head:', head
 								print 'treeFile:', treeFile
 

@@ -92,8 +92,7 @@ class Bundler(Process,UsesDriver):
 		
 	def bundlerFilled(self):
 		"""
-		controls when the bundler runs and makes a bundle. This shoudl be updated to take in
-		tree.dstump and gvl_75 as well and take the criteria from the added cut stems!
+		controls when the bundler runs and makes a bundle.
 		"""
 		if self.currentBundle:
 			if self.forceBundler==True:
