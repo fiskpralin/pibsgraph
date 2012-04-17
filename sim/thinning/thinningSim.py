@@ -48,13 +48,13 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['minBunPileMass']=min([b.biomass for b in G.terrain.piles])
 								self.s.stats['maxBunPileMass']=max([b.biomass for b in G.terrain.piles])
 								self.s.stats['totBunPileMass']=sum([b.biomass for b in G.terrain.piles])
-								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles]) #defect
-								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles]) #defect
-								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles]) #defect
+								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
+								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
+								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
 								#self.s.stats['noMainStops']
-								#self.s.stats['totTimeConsumed']
+								self.s.stats['totTimeConsumed']=self.s.now()
 								#self.s.stats['bundlingTime']
-								#self.s.stats['driverActiveTime']
+								self.s.stats['work time']#operator active time
 								#self.s.stats['totCraneWaitTime']
 								#self.s.stats['oneCraneWaitTime']
 								#self.s.stats['twoCranesWaitTime']
@@ -62,6 +62,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 
 								
 								print self.s.stats
+								print self.s.stats['totTimeConsumed']
 								print '---------------------------------------------------------------------'
 
 
