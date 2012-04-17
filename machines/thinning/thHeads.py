@@ -104,11 +104,15 @@ class ThinningCraneHead(Process):
 			self.treeWeight=0
 			self.gripArea=0
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
+			print 'biomass before tc:',self.currentPile.biomass
 			c.extend(self.twigCrack())
+			print 'biomass after tc:',self.currentPile.biomass
+			print 'Mass of the trees before tc:', sum([tree.weight for tree in self.currentPile.trees])
 			if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
 				self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
 				print '*Saved a pile with',len(self.currentPile.trees),'trees at pos:', self.currentPile.pos
 				self.currentPile=None
+				print self.m.G.terrain.piles[-1].biomass#
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			return c
 
@@ -124,7 +128,7 @@ class ThinningCraneHead(Process):
 				b.currentBundle=Bundle(pos=b.pos)
 			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-				print "Bundler is to filled and forced to run"
+				print "Bundler is too filled and forced to run"
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
@@ -138,7 +142,10 @@ class ThinningCraneHead(Process):
 			self.treeWeight=0
 			self.gripArea=0
 			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
-			c.extend(self.twigCrack())#Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter
+			print 'biomass before tc:', b.currentBundle.biomass
+			c.extend(self.twigCrack()) #Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter
+			print 'biomass after tc:', b.currentBundle.biomass
+			print 'Mass of the trees before tc:', sum([tree.weight for tree in b.currentBundle.trees])
 
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			self.cmnd(c,time=self.setPos(self.getStartPos()), auto=self.automatic['moveArmOut'])#return to the start position
@@ -208,7 +215,7 @@ class ThinningCraneHead(Process):
 		"""
 		if self.twigCracker and self.currentPile:
 			self.currentPile.twigCrackPile(self.road.direction)
-			time=self.timeTwigCrack+self.timeCutAtHead
+			time = self.timeTwigCrack + self.timeCutAtHead
 			print 'Trees twigcracked'
 			return self.cmnd([], time, auto=self.automatic['twigCrack'])
 		

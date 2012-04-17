@@ -12,30 +12,32 @@ class Pile(Obstacle):
 	
 	def __init__(self, pos, biomass=None, diameter=None, radius=None, terrain=None , length=None, weight=None, logWeight=None, vol=None):
 		Obstacle.__init__(self, pos, isSpherical=False, radius=radius, terrain=terrain, color='brown')# '#5C3317'after debug
-		self.pos=pos
-		self.radius=radius #This Radius thingy is for collision detection, don't bother about it.
-		self.vol=vol
-		self.trees=[]
-		self.biomass=biomass
-		self.length=length
-		self.diameter=diameter
+		self.pos = pos
+		self.radius = radius #This Radius thingy is for collision detection, don't bother about it.
+		self.vol = vol
+		self.trees = []
+		self.biomass = biomass
+		self.length = length
+		self.diameter = diameter
 		self.name = "Pile"
-		self.nodes=None
+		self.nodes = None
+		self.ficDiameter = 0
 
 	def updatePile(self, direction=None):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
 		if not self.length:
 			self.length = max([t.h for t in self.trees])
 		self.maxDiam = max([t.dbh for t in self.trees])
-		if not self.diameter:
-			self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
-		if not self.biomass:
-			self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
+		
+		self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
+		self.oldBiomass=self.biomass
+		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
+		
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
 		self.setNodes(direction)
 
 	def twigCrackPile(self,direction):
-		self.length=5 #cut!
+		self.length = 5 #cut!
 		self.maxDiam = max([t.dbh for t in self.trees])
 		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
 		self.diameter = self.diameter*(1-((self.diameter*61.364-0.3318)/100)) #twigcrack!
@@ -74,12 +76,13 @@ class Bundle(Pile):
 		This should be updated such that it works for the bundler. Does only set som parameters
 		for the current bundle, does not execute the bundling, that is done in method in thBundler.py
 		"""
-		if direction is None: direction= pi/2 #is this really good? well I guess.
+		if direction is None: direction= pi/2
 		self.length = max([t.h for t in self.trees])
-		self.maxDiam = max([t.dbh for t in self.trees])#IS THIS NEEDED? 
-  		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses, SHOULD WE ADD TWIGCRACK FEATURES?
+		self.maxDiam = max([t.dbh for t in self.trees])
+  		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
 		self.xSection = sum([self.getXSection(tree=t) for t in self.trees])# This models what we compare with thresh in bundler
 		self.diameter = sqrt(self.xSection*4/pi)
+		self.ficDiameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10, only to be able to calculate the lost biomass at twig crack
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)
 		self.setNodes(direction)
 
@@ -98,10 +101,8 @@ class Bundle(Pile):
 		return stumpXS+atFiveXS	
 
 	def twigCrackBundle(self,direction):
-		print 'biomass before',self.biomass
 		self.maxDiam = max([t.dbh for t in self.trees])
-		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
-		print 'biomass after',self.biomass
+		self.biomass = self.biomass*(1-((self.ficDiameter*17.237-3.9036)/100))#with losses from twigcracking
 		self.setNodes(direction)
 		
 	def draw(self, ax):
