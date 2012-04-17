@@ -30,27 +30,26 @@ class tryDiffConfigThinningMachine(SimSeries):
 			self.G.terrain.readTrees()
 			for head in ['BC','convAcc']:
 				for nCranes in [1,2]:
-					for twigCrack in [False,True]:
-						for bundler in [False, True]:
+					for bundler in [False, True]:
+						for twigCrack in [False, True]:
 							for simNumber in range(1,it+1):
 								G=copy.deepcopy(self.G)
-								self.s=ThinningSim(G, False, False, head, nCranes, bundler, twigCrack)
-
+								self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack)
 								self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
 								self.s.stats['simNumber']=simNumber
 								self.s.stats['treeFile']=treeFile
 								self.s.stats['noHarvTrees']=sum([len(b.trees) for b in G.terrain.piles])
 
 								#self.s.stats['noCraneCycles']
-								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #not twigcracked?
+								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #total mass of the trees that were harvested, before tc?
 								#self.s.stats['harvStemmass']
 								#self.s.stats['harvStemVol']
 								self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
 								self.s.stats['minBunPileMass']=min(b.biomass for b in G.terrain.piles)
 								self.s.stats['maxBunPileMass']=max(b.biomass for b in G.terrain.piles)
 								self.s.stats['totBunPileMass']=sum(b.biomass for b in G.terrain.piles)
-								self.s.stats['minBunPileVol']=min(b.vol for b in G.terrain.piles) #defect
-								self.s.stats['maxBunPileVol']=max(b.vol for b in G.terrain.piles) #defect
+								#self.s.stats['minBunPileVol']=min(b.vol for b in G.terrain.piles) #defect
+								#self.s.stats['maxBunPileVol']=max(b.vol for b in G.terrain.piles) #defect
 								#self.s.stats['totBunPileVol']=sum(b.vol for b in G.terrain.piles) #defect
 								#self.s.stats['noMainStops']
 								#self.s.stats['totTimeConsumed']
@@ -60,19 +59,23 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['oneCraneWaitTime']
 								#self.s.stats['twoCranesWaitTime']
 								#self.s.stats['noCraneWaitings']=
+
+								print self.s.stats['harvBiomass']
+								print self.s.stats['totBunPileMass']
 								
-								print self.s.stats
+								#print self.s.stats
 								print 'simulation:', simNumber
 								print 'bundler:', bundler
 								print 'twigCracker:', twigCrack
 								print 'nCranes:', nCranes
 								print 'head:', head
 								print 'treeFile:', treeFile
+								print '---------------------------------------------------------------------'
 
 
 
 								
-		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
+		#print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
 		if nCranes==1: a='A'

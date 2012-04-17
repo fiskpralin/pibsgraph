@@ -64,7 +64,7 @@ class Bundler(Process,UsesDriver):
 		
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
 		self.m.G.terrain.addObstacle(cB)
-		print '*SAVED the bundle with',len(self.currentBundle.trees),'trees at pos:',cB.pos
+		print '*SAVED the bundle with',len(self.m.G.terrain.piles[-1].trees),'trees at pos:',cB.pos
 
 	def getBPos(self, direction=None):
 		"""
@@ -87,7 +87,7 @@ class Bundler(Process,UsesDriver):
 		cB=self.currentBundle
 		cB.length = 5 #cut in five meter long sections
 		cB.xSection=sum([cB.getXSection(tree=t) for t in cB.trees])
-  		cB.biomass = sum([t.weight for t in cB.trees])#initial weight no losses when doing the bundles
+  		#cB.biomass = sum([t.weight for t in cB.trees])#initial weight no losses when doing the bundles
    		cB.radius = sqrt(cB.length**2+(cB.diameter/2)**2)
 		
 	def bundlerFilled(self):
