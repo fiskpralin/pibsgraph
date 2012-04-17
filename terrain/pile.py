@@ -22,6 +22,7 @@ class Pile(Obstacle):
 		self.name = "Pile"
 		self.nodes = None
 		self.ficDiameter = 0
+		self.xSection=None
 
 	def updatePile(self, direction=None):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
@@ -30,7 +31,6 @@ class Pile(Obstacle):
 		self.maxDiam = max([t.dbh for t in self.trees])
 		
 		self.diameter = 0.1748 + 0.0345 * self.maxDiam*100 # This model is given by Ola and Dan 2012.03.10
-		self.oldBiomass=self.biomass
 		self.biomass = sum([t.weight for t in self.trees])#initial weight no losses
 		
 		self.radius = sqrt(self.length**2+(self.diameter/2)**2)

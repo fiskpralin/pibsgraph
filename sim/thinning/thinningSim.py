@@ -45,12 +45,12 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['harvStemmass']
 								#self.s.stats['harvStemVol']
 								self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
-								self.s.stats['minBunPileMass']=min(b.biomass for b in G.terrain.piles)
-								self.s.stats['maxBunPileMass']=max(b.biomass for b in G.terrain.piles)
-								self.s.stats['totBunPileMass']=sum(b.biomass for b in G.terrain.piles)
-								#self.s.stats['minBunPileVol']=min(b.vol for b in G.terrain.piles) #defect
-								#self.s.stats['maxBunPileVol']=max(b.vol for b in G.terrain.piles) #defect
-								#self.s.stats['totBunPileVol']=sum(b.vol for b in G.terrain.piles) #defect
+								self.s.stats['minBunPileMass']=min([b.biomass for b in G.terrain.piles])
+								self.s.stats['maxBunPileMass']=max([b.biomass for b in G.terrain.piles])
+								self.s.stats['totBunPileMass']=sum([b.biomass for b in G.terrain.piles])
+								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles]) #defect
+								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles]) #defect
+								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles]) #defect
 								#self.s.stats['noMainStops']
 								#self.s.stats['totTimeConsumed']
 								#self.s.stats['bundlingTime']
@@ -60,16 +60,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['twoCranesWaitTime']
 								#self.s.stats['noCraneWaitings']=
 
-								print self.s.stats['harvBiomass']
-								print self.s.stats['totBunPileMass']
 								
-								#print self.s.stats
-								print 'simulation:', simNumber
-								print 'bundler:', bundler
-								print 'twigCracker:', twigCrack
-								print 'nCranes:', nCranes
-								print 'head:', head
-								print 'treeFile:', treeFile
+								print self.s.stats
 								print '---------------------------------------------------------------------'
 
 
@@ -90,7 +82,13 @@ class tryDiffConfigThinningMachine(SimSeries):
 		elif bundler==True: c='j'
 		print a+b+c
 		return a+b+c
-	
+
+	def getVol(self,pile):
+		if pile.xSection:
+			pile.vol=pile.xSection*pile.length
+		else:
+			pile.vol=pile.length*pi*(pile.diameter/2.)**2
+		return pile.vol
 
 
 class varyAutomationThinningMachine(SimSeries):
