@@ -128,14 +128,15 @@ class ThinningCraneHead(Process):
 				b.currentBundle=Bundle(pos=b.pos)
 			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-				print "Bundler is too filled and forced to run"
+				print "Bundler is too filled and forced to run. Head still has trees:",len(self.trees)
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
 				tree.nodes=[[-0.1,1],[-0.1,0],[0.1,0],[0.1,-1]]
 				tree.pos=[5000,5000]
-				b.currentBundle.trees.append(tree)#adds the tree to the current bundler in bundler
+				b.currentBundle.trees.append(tree)#adds the tree to the current bundle in bundler
+				print 'added a tree to the bundler'
 				self.trees.remove(tree)
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')

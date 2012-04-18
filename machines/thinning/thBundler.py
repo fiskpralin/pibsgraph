@@ -46,6 +46,7 @@ class Bundler(Process,UsesDriver):
 			self.dumpBundle()
 			self.resetBundle()
 			self.forceBundler=False
+			print 'Bundler done'
 		
 	def dumpBundle(self, direction=None):
 		"""

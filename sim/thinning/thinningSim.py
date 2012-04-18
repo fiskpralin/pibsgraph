@@ -42,8 +42,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 
 								#self.s.stats['noCraneCycles']
 								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #total mass of the trees that were harvested, before tc?
-								#self.s.stats['harvStemmass']
-								#self.s.stats['harvStemVol']
+								self.s.stats['harvStemMass']=sum([t.logWeight for t in self.s.m.trees])# total weight of the stems of the trees that are harvested. Not what's in the bundles or piles, but rather what was in terrain before chop.
+								self.s.stats['harvStemVol']=sum([t.vol for t in self.s.m.trees])# total volume of the stems of the trees that are harvested. Not what's in the bundles or piles
 								self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
 								self.s.stats['minBunPileMass']=min([b.biomass for b in G.terrain.piles])
 								self.s.stats['maxBunPileMass']=max([b.biomass for b in G.terrain.piles])
@@ -51,7 +51,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
-								#self.s.stats['noMainStops']
+								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption
 								self.s.stats['totTimeConsumed']=self.s.now()
 								#self.s.stats['bundlingTime']
 								self.s.stats['work time']#operator active time
@@ -61,8 +61,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['noCraneWaitings']=
 
 								
-								print self.s.stats
-								print self.s.stats['totTimeConsumed']
+								print self.s.stats['noMainStops']# gives seven all the time. Is that good
 								print '---------------------------------------------------------------------'
 
 
@@ -81,7 +80,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 		
 		if bundler==False: c='i'
 		elif bundler==True: c='j'
-		print a+b+c
 		return a+b+c
 
 	def getVol(self,pile):

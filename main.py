@@ -102,8 +102,8 @@ if __name__=='__main__':
 	else:
 		import cProfile
 		from sim.planting.plantMTerrain import PlantMTerrain
-		seed=int(random.uniform(0,100000))
-		#seed=55874
+		#seed=int(random.uniform(0,100000))
+		seed=27336
 		random.seed(seed)
 		print "seed2:", seed
 		G=tools.globalVar()
