@@ -26,6 +26,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
 		self.G.terrain=Terrain(G=self.G)
 		for treeFile in self.G.terrain.thinningFiles:
+			treeFile=105
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
 			for head in ['BC','convAcc']:
@@ -51,9 +52,11 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
-								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption
+								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time..
 								self.s.stats['totTimeConsumed']=self.s.now()
-								#self.s.stats['bundlingTime']
+								if bundler==True:
+									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
+								else: self.s.stats['bundlingTime']=0
 								self.s.stats['work time']#operator active time
 								#self.s.stats['totCraneWaitTime']
 								#self.s.stats['oneCraneWaitTime']
@@ -61,7 +64,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['noCraneWaitings']=
 
 								
-								print self.s.stats['noMainStops']# gives seven all the time. Is that good
+								print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
 								print '---------------------------------------------------------------------'
 
 

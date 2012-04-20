@@ -130,6 +130,7 @@ class ThinningCraneHead(Process):
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
 				print "Bundler is too filled and forced to run. Head still has trees:",len(self.trees)
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+				#some sort of yieald waiatuntil here maybe
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False
