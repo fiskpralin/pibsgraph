@@ -19,6 +19,7 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
+		self.prio=10
 		self.color='#CD0000'
 		self.m=machine
 		self.s=self.m.G.simParam
@@ -40,11 +41,17 @@ class Bundler(Process,UsesDriver):
 			yield waituntil, self, self.bundlerFilled
 			print 'Bundler runs'
 			for c in self.startTheBundler(): yield c
+			print 'Bundler started'
+			self.s['restOfBundling']=False #only for debug this is a check what happens
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
+			print 'Bundler rest'
 			for c in self.releaseDriver(): yield c
 			self.bundleIt()
+			print 'Bundler bundled'
 			self.dumpBundle()
+			print 'Bundler dumped'
 			self.resetBundle()
+			print 'Bundler reset'
 			self.forceBundler=False
 			print 'Bundler done'
 			
@@ -113,11 +120,13 @@ class Bundler(Process,UsesDriver):
 
 		priority not added here. If you want that, see how it's implemented in the same
 		method for the planting machine.
+
+		Mattias added priority to see effects and if this can solve interaction problem...
 		"""
 		if self.usesDriver: #don't need to reserve driver..
 			commands.extend([(hold, self, time)])
 		else:
-			commands.extend([(request, self, self.driver), (hold, self, time)])
+			commands.extend([(request, self, self.driver, self.prio), (hold, self, time)])
 			self.usesDriver=True
 			switchTime=self.m.times['switchFocus']
 			if self.driver.isIdle(): #check for how long he's been idle
@@ -125,12 +134,11 @@ class Bundler(Process,UsesDriver):
 				if switchTime<0: switchTime=0
 			commands.extend([(hold, self, switchTime)]) #add time to switch focus
 			commands.extend([(hold, self, time)])
-			return commands
+		return commands
 
 	def draw(self,ax):
 		"""
-		This is the drawing of the actual bundler without any trees in it. Oh come on
-		you can do a nicer bundler than this!
+		This is the drawing of the actual bundler without any trees in it.
 		"""
 		cart=getCartesian
 		origin=self.pos

@@ -108,8 +108,8 @@ class Machine(Process, Obstacle):
 ####################################################
 class Operator(Resource,Process):
 	"""a machine operator. Both a resource and a process."""
-	def __init__(self,sim, restTime=1.5, activeTime=15, delay=1):
-		Resource.__init__(self,capacity=1, name='driver',qType=PriorityQ, monitored=True, monitorType=Monitor, sim=sim)
+	def __init__(self,sim, restTime=1.5, activeTime=15, delay=1, preemptable=0):
+		Resource.__init__(self,capacity=1, name='driver',qType=PriorityQ, monitored=True, monitorType=Monitor, sim=sim, preemptable=preemptable)
 		Process.__init__(self, name=self.name, sim=self.sim)
 		self.activeTime=activeTime #s
 		self.restTime=restTime
