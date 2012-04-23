@@ -24,8 +24,10 @@ class ThinningCraneHead(Process):
 		self.s=self.m.G.simParam
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
+			self.prio=1
 		elif len(self.m.heads)==1:
 			self.side='right'
+			self.prio=1
 		else: raise Exception('Heads only support one or two arms on machine.')
 		Process.__init__(self,name, sim)
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
@@ -36,6 +38,7 @@ class ThinningCraneHead(Process):
 		self.trees=[]
 		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
+		
 		
 	def treeChopable(self, t):
 		"""
@@ -129,8 +132,11 @@ class ThinningCraneHead(Process):
 			xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 			if  xSecHead + b.currentBundle.xSection > b.maxXSection:
 				print "Bundler is too filled and forced to run. Head still has trees:",len(self.trees)
+				
 				b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-				#some sort of yieald waiatuntil here maybe
+				#some sort of yield waituntil here maybe. or not but maybe something else....
+				#c.extend([waituntil, self, self.m.bundlerDone])
+
 				
 			for index, tree in enumerate(copy.copy(self.trees)):
 				tree.isSpherical=False

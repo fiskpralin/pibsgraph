@@ -19,7 +19,7 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-		self.prio=10
+		self.prio=5
 		self.color='#CD0000'
 		self.m=machine
 		self.s=self.m.G.simParam
@@ -42,7 +42,7 @@ class Bundler(Process,UsesDriver):
 			print 'Bundler runs'
 			for c in self.startTheBundler(): yield c
 			print 'Bundler started'
-			self.s['restOfBundling']=False #only for debug this is a check what happens
+			self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			print 'Bundler rest'
 			for c in self.releaseDriver(): yield c
