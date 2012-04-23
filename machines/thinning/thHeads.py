@@ -24,10 +24,10 @@ class ThinningCraneHead(Process):
 		self.s=self.m.G.simParam
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
-			self.prio=1
+			self.prio=0
 		elif len(self.m.heads)==1:
 			self.side='right'
-			self.prio=1
+			self.prio=0
 		else: raise Exception('Heads only support one or two arms on machine.')
 		Process.__init__(self,name, sim)
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
@@ -106,6 +106,8 @@ class ThinningCraneHead(Process):
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
 			self.gripArea=0
+			self.currentPile.craneCycles+=1#This should give cranecycles involved in this pile
+			print self.currentPile.craneCycles, 'cranecycles in this pile'
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
 			print 'biomass before tc:',self.currentPile.biomass
 			c.extend(self.twigCrack())
@@ -114,6 +116,7 @@ class ThinningCraneHead(Process):
 			if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
 				self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
 				print '*Saved a pile with',len(self.currentPile.trees),'trees at pos:', self.currentPile.pos
+				print self.m.G.terrain.piles[-1].craneCycles, 'cranecycles in the saved pile'
 				self.currentPile=None
 				print self.m.G.terrain.piles[-1].biomass#
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
@@ -149,6 +152,8 @@ class ThinningCraneHead(Process):
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
 			self.gripArea=0
+			b.currentBundle.craneCycles+=1
+			print b.currentBundle.craneCycles, 'cranecycles in this bundle'
 			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
 			print 'biomass before tc:', b.currentBundle.biomass
 			c.extend(self.twigCrack()) #Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter

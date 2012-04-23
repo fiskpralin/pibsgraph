@@ -19,7 +19,7 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-		self.prio=5
+		self.prio=0
 		self.color='#CD0000'
 		self.m=machine
 		self.s=self.m.G.simParam
@@ -74,6 +74,7 @@ class Bundler(Process,UsesDriver):
 		self.m.G.terrain.piles.append(cB)#adds the pile to the list of piles in terrain
 		self.m.G.terrain.addObstacle(cB)
 		print '*SAVED the bundle with',len(self.m.G.terrain.piles[-1].trees),'trees at pos:',cB.pos
+		print self.m.G.terrain.piles[-1].craneCycles, 'cranecycles in the saved bundle'
 
 	def getBPos(self, direction=None):
 		"""

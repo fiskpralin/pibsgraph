@@ -23,6 +23,7 @@ class Pile(Obstacle):
 		self.nodes = None
 		self.ficDiameter = 0
 		self.xSection=None
+		self.craneCycles=0
 
 	def updatePile(self, direction=None):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')

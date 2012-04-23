@@ -26,10 +26,11 @@ class tryDiffConfigThinningMachine(SimSeries):
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
 		self.G.terrain=Terrain(G=self.G)
 		for treeFile in self.G.terrain.thinningFiles:
-			treeFile=105
+			treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
 			for head in ['BC','convAcc']:
+				head='BC' #for debug only issues with not ending simulation- interaction after too filled or break
 				for nCranes in [1,2]:
 					for bundler in [False, True]:
 						for twigCrack in [False, True]:
@@ -41,7 +42,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['treeFile']=treeFile
 								self.s.stats['noHarvTrees']=sum([len(b.trees) for b in G.terrain.piles])
 
-								#self.s.stats['noCraneCycles']
+								self.s.stats['noCraneCycles']=sum([pb.craneCycles for pb in G.terrain.piles])
 								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #total mass of the trees that were harvested, before tc?
 								self.s.stats['harvStemMass']=sum([t.logWeight for t in self.s.m.trees])# total weight of the stems of the trees that are harvested. Not what's in the bundles or piles, but rather what was in terrain before chop.
 								self.s.stats['harvStemVol']=sum([t.vol for t in self.s.m.trees])# total volume of the stems of the trees that are harvested. Not what's in the bundles or piles
@@ -52,7 +53,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
-								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time..
+								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time.. should be len(self.s.m.positions)-1 maybe?
 								self.s.stats['totTimeConsumed']=self.s.now()
 								if bundler==True:
 									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
@@ -62,8 +63,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#self.s.stats['oneCraneWaitTime']
 								#self.s.stats['twoCranesWaitTime']
 								#self.s.stats['noCraneWaitings']=
-
-								
+								print self.s.stats['noBundlesOrPiles'], 'piles or bundles'
+								print self.s.stats['noCraneCycles'], 'was the number of crane cycles'
 								print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
 								print '---------------------------------------------------------------------'
 
