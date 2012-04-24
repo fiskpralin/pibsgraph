@@ -6,13 +6,14 @@ from machines.thinning.thMachine import ThinningMachine
 from machines.thinning.thRoad import ThinningRoad
 import functions as fun
 import plot
-
+from excel_io import ExcelOutput
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
 from math import *
 from string import *
 import time
+import datetime
 import random
 
 class tryDiffConfigThinningMachine(SimSeries):
@@ -25,10 +26,16 @@ class tryDiffConfigThinningMachine(SimSeries):
 		#self.G.plotDelay=500 #for debug only
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
 		self.G.terrain=Terrain(G=self.G)
+		self.folder='outputFiles/NewThinning_2012'
+		today=datetime.date.today()
+		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'.xls'
+		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)#this reads the wrong template!!!
+		e.save()
 		for treeFile in self.G.terrain.thinningFiles:
 			treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
+			
 			for head in ['BC','convAcc']:
 				head='BC' #for debug only issues with not ending simulation- interaction after too filled or break
 				for nCranes in [1,2]:

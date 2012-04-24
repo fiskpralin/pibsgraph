@@ -27,7 +27,7 @@ class ExcelOutput():
 
 	"""
 	def __init__(self, template='sim/planting/template.xls', out='test.xls' ):
-		self.rdbook = xlrd.open_workbook('sim/planting/template.xls', formatting_info=True)
+		self.rdbook = xlrd.open_workbook(template, formatting_info=True)
 		sheetx = 0 #default, try first sheet
 		self.wtbook, self.style_list = copy2(self.rdbook)
 		self.changeSheet(sheetx)
