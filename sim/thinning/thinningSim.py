@@ -74,7 +74,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 								print self.s.stats['noCraneCycles'], 'was the number of crane cycles'
 								print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
 								print '---------------------------------------------------------------------'
-
+								
+								"""This part here writes the data to the excel file"""
 								e.modify(self.Paramrow,0,self.s.stats['machineConfig'])
 								e.modify(self.Paramrow,1,self.s.stats['treeFile'])
 								e.modify(self.Paramrow,2,self.s.stats['simNumber'])
@@ -103,11 +104,11 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#e.modify(self.Paramrow,25,self.s.stats['totBunPileMass'])
 								#e.modify(self.Paramrow,26,self.s.stats['totBunPileMass'])
 								self.Paramrow+=1
-								e.save()#Be sure to saveafter each simulation, if something should go wrong
+								e.save()#To be sure to save after each simulation, if something should go wrong
 
 
 								
-		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_dateandtime.xls, to be found in tota/ouputFiles/NewThinning_2012.'
+		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
 		if nCranes==1: a='A'
