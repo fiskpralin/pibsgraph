@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 from math import *
-from string import *
+import string
 import time
 import datetime
 import random
@@ -28,7 +28,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 		self.G.terrain=Terrain(G=self.G)
 		self.folder='outputFiles/NewThinning_2012'
 		today=datetime.date.today()
-		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'.xls'
+		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'%s'%(string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))+'.xls'
 		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
 		self.Paramrow=1
 		for treeFile in self.G.terrain.thinningFiles:
@@ -103,11 +103,11 @@ class tryDiffConfigThinningMachine(SimSeries):
 								#e.modify(self.Paramrow,25,self.s.stats['totBunPileMass'])
 								#e.modify(self.Paramrow,26,self.s.stats['totBunPileMass'])
 								self.Paramrow+=1
-								e.save()#unsure wether it's possible to have this here!
+								e.save()#Be sure to saveafter each simulation, if something should go wrong
 
 
 								
-		#print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ********_dateoftoday.xls'
+		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_dateandtime.xls, to be found in tota/ouputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
 		if nCranes==1: a='A'
