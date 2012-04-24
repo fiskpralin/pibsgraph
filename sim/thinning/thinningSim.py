@@ -29,8 +29,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 		self.folder='outputFiles/NewThinning_2012'
 		today=datetime.date.today()
 		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'.xls'
-		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)#this reads the wrong template!!!
-		e.save()
+		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
+		self.Paramrow=1
 		for treeFile in self.G.terrain.thinningFiles:
 			treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
@@ -75,6 +75,20 @@ class tryDiffConfigThinningMachine(SimSeries):
 								print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
 								print '---------------------------------------------------------------------'
 
+								e.modify(self.Paramrow,0,self.s.stats['machineConfig'])
+								e.modify(self.Paramrow,1,self.s.stats['treeFile'])
+								e.modify(self.Paramrow,2,self.s.stats['simNumber'])
+								e.modify(self.Paramrow,3,self.s.stats['noHarvTrees'])
+								e.modify(self.Paramrow,4,self.s.stats['noCraneCycles'])
+								e.modify(self.Paramrow,5,self.s.stats['harvBiomass'])
+								e.modify(self.Paramrow,6,self.s.stats['harvStemMass'])
+								e.modify(self.Paramrow,7,self.s.stats['harvStemVol'])
+								e.modify(self.Paramrow,8,self.s.stats['noBundlesOrPiles'])
+								e.modify(self.Paramrow,9,self.s.stats['minBunPileMass'])#
+								e.modify(self.Paramrow,10,self.s.stats['maxBunPileMass'])
+								e.modify(self.Paramrow,11,self.s.stats['totBunPileMass'])#Correct the template to include this
+								self.Paramrow+=1
+								e.save()#unsure wether it's possible to have this here!
 
 
 								
