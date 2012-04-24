@@ -86,7 +86,22 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,8,self.s.stats['noBundlesOrPiles'])
 								e.modify(self.Paramrow,9,self.s.stats['minBunPileMass'])#
 								e.modify(self.Paramrow,10,self.s.stats['maxBunPileMass'])
-								e.modify(self.Paramrow,11,self.s.stats['totBunPileMass'])#Correct the template to include this
+								e.modify(self.Paramrow,11,self.s.stats['totBunPileMass'])
+								e.modify(self.Paramrow,12,self.s.stats['minBunPileVol'])
+								e.modify(self.Paramrow,13,self.s.stats['maxBunPileVol'])
+								e.modify(self.Paramrow,14,self.s.stats['totBunPileVol'])
+								e.modify(self.Paramrow,15,self.s.stats['noMainStops'])
+								e.modify(self.Paramrow,16,self.s.stats['totTimeConsumed'])
+								e.modify(self.Paramrow,17,self.s.stats['bundlingTime'])
+								e.modify(self.Paramrow,18,self.s.stats['work time'])
+								#e.modify(self.Paramrow,19,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,20,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,21,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,22,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,23,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,24,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,25,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,26,self.s.stats['totBunPileMass'])
 								self.Paramrow+=1
 								e.save()#unsure wether it's possible to have this here!
 
