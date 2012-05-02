@@ -1,4 +1,3 @@
-
 from SimPy.Simulation  import *
 
 from machines.basics import UsesDriver, Machine, Operator
@@ -28,7 +27,7 @@ class ThinningMachine(Machine, UsesDriver):
 	"""
 	def __init__(self, name, sim, G, head='BC', nCranes=2, startPos=[12.5, -4], bundler=False, twigCrack=False):
 		print "head:", head, "cranes:", nCranes, "bundler:", bundler, "twigcracker:", twigCrack
-		self.driver=Operator(sim,preemptable=0) #add driver
+		self.driver=Operator(sim,preemptable=1) #add driver
 		sim.activate(self.driver, self.driver.work())
 		Machine.__init__(self, name, sim, G=G, driver=self.driver, mass=21000)
 		s=self.G.simParam
@@ -46,6 +45,7 @@ class ThinningMachine(Machine, UsesDriver):
 		self.craneMinL=s['minCraneLength']#3
 		self.automaticMove=s['moveMachine']#False
 		self.hasBundler=bundler
+		self.prio=0
 		self.length=6.939
 		self.width=2.720
 		self.pos=startPos
