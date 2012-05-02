@@ -19,7 +19,7 @@ class Bundler(Process,UsesDriver):
 	def __init__(self, sim, driver, machine, name="Bundler"):
 		UsesDriver.__init__(self,driver)
 		Process.__init__(self, name, sim)
-		self.prio=5
+		self.prio=567
 		self.color='#CD0000'
 		self.m=machine
 		self.s=self.m.G.simParam
