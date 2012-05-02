@@ -20,7 +20,7 @@ from machines.basics import Machine
 from terrain.obstacle import Obstacle
 import functions as fun
 import collision as col
-from graph_alg import costFunc as cf
+from graph_alg import graph_operations as go
 
 class Forwarder(Machine):
 	"""
@@ -225,7 +225,7 @@ class Forwarder(Machine):
 			else:
 				second=shortest_path(self.roadNet, frm, road[1])
 			self.roadNet.add_edges_from([tuple(road)])
-			if cf.sumWeights(self.roadNet,first)<cf.sumWeights(self.roadNet,second):
+			if go.sumWeights(self.roadNet,first)<go.sumWeights(self.roadNet,second):
 				shortest=first
 				no2=second
 			else:

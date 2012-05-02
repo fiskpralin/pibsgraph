@@ -107,33 +107,46 @@ class Machine(Process, Obstacle):
 ## Operator
 ####################################################
 class Operator(Resource,Process):
-	"""a machine operator. Both a resource and a process."""
-	def __init__(self,sim, restTime=1.5, activeTime=15, delay=1, preemptable=0):
+	"""
+	a machine operator. Both a resource and a process.
+
+	supports resting if restingActivated is set.
+	"""
+	def __init__(self,sim, restTime=1.5, activeTime=15, delay=1, preemptable=0, restingActivated=False):
 		Resource.__init__(self,capacity=1, name='driver',qType=PriorityQ, monitored=True, monitorType=Monitor, sim=sim, preemptable=preemptable)
 		Process.__init__(self, name=self.name, sim=self.sim)
-		self.activeTime=activeTime #s
-		self.restTime=restTime
+		self.restingActivated=restingActivated
 		self.resting=False
-		self.delay=delay
-		self.lastRest=0
+		if restingActivated:
+			self.activeTime=activeTime #s
+			self.restTime=restTime
+			self.delay=delay
+			self.lastRest=0
 	def work(self):
-		"""The PEM of driver. Manages rests. """
+		"""
+		The PEM of driver. Manages rests.
+		if rest is not supported, just wait and use the resource properties
+		"""
 		prio=1000 #before anything else
 		while True:
-			yield hold, self, self.delay
-			if self.timeToRest():
-				print self.sim.now(), " operator takes a rest"
-				reqTime=self.sim.now() #requestTime
-				yield request, self, self, prio
-				self.resting=True
-				yield hold, self, self.restTime
-				self.resting=False
-				self.lastRest=self.sim.now()
-				self.fixMonitorAfterRest(reqTime)
-				yield release, self, self
-				yield hold, self, self.activeTime-self.delay #saves some computations
+			if not self.restingActivated:
+				yield hold, self, 1e10
+			else:
+				yield hold, self, self.delay
+				if self.timeToRest():
+					print self.sim.now(), " operator takes a rest"
+					reqTime=self.sim.now() #requestTime
+					yield request, self, self, prio
+					self.resting=True
+					yield hold, self, self.restTime
+					self.resting=False
+					self.lastRest=self.sim.now()
+					self.fixMonitorAfterRest(reqTime)
+					yield release, self, self
+					yield hold, self, self.activeTime-self.delay #saves some computations
 	def timeToRest(self):
 		"""determines if it is time to take a rest, based on the activeTime parameter and the monitor for recent use of driver."""
+		if not self.restingActivated: raise Exception('timeToRest method should not be called if resting isnt activated')
 		if self.n != 0:	return False #operator is not busy
 		time=self.sim.now()
 		if time-self.lastRest<=self.activeTime: return False #beginning of sim
