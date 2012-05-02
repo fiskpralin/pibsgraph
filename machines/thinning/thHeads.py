@@ -334,10 +334,54 @@ class BCHead(ThinningCraneHead, UsesDriver):
 					mainRoad=False
 					time=self.setPos(sPoint)
 					for c in self.cmnd([], time, auto=self.automatic['moveArmOut']): yield c
+					
 				while True:
+					choplist=[]
+					CC=self.chopConst#constant for felling,zero for BC head
+					t=self.getNextTree(self.road)
+					if not t:
+						col=self.road.color
+						self.road.color='r'
+						self.road.color=col
+						break
+		
+					elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
+						print "Goes back to DUMP trees", self.treeWeight, self.gripArea
+						if not self.m.hasBundler:
+							if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
+							else: time=self.setPos(self.road.startPoint)
+						else:
+							time=self.setPos(self.m.bundler.pos)
+						self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
+						for entries in choplist: yield entries
+						"""check here if possible to do the dumping!"""
+						for entries in self.dumpTrees(): yield entries#dumps them down
+		
+					elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
+						time=self.setPos(self.harvestPos(t))
+						self.cmnd(choplist, time, auto=self.automatic['moveArmOut'])
+						#determine choptime
+						cross_sec_area=t.dbh**2*pi
+						choptime=CC+cross_sec_area/self.velFell
+						self.cmnd(choplist, choptime, auto=self.automatic['chop'])
+						for entries in choplist: yield entries
+						t.pos=[5000, 5000] #far away, for visual reasons.
+						t.h-=0.5 #harvester is at least half a meter above ground
+						t.harvested=True
+						self.road.trees.remove(t)
+						self.road.harvestTrees-=1
+						self.trees.append(t)
+						self.treeWeight+=t.weight
+						self.gripArea+=t.dbh**2
+						self.m.trees.append(t)
+						self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
+					else: break
+
+					"""
 					cmd=self.chopNext()
 					if len(cmd)==0: break
 					for c in cmd: yield c
+					"""
 				#trees have been gathered. return.
 				if not self.m.hasBundler: 
 					time=self.setPos(sPoint)
@@ -345,6 +389,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				else:
 					time=self.setPos(self.m.bundler.pos)
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
+				"""checkhere and if , then do something other thing"""
 				for c in self.dumpTrees(): yield c #dumps them down.
 			for c in self.releaseDriver(): yield c
 			print "done at site", self.pos
