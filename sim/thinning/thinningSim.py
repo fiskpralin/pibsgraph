@@ -21,7 +21,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 	This class will make simulations of the different kinds of machine configurations that
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012
 	"""	
-	def __init__(self,it=10):
+	def __init__(self,it=1):
 		self.G=globalVar()
 		#self.G.plotDelay=500 #for debug only
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
