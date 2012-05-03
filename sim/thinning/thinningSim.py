@@ -21,7 +21,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 	This class will make simulations of the different kinds of machine configurations that
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012
 	"""	
-	def __init__(self,it=1):
+	def __init__(self,it=10):
 		self.G=globalVar()
 		#self.G.plotDelay=500 #for debug only
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
@@ -32,12 +32,12 @@ class tryDiffConfigThinningMachine(SimSeries):
 		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
 		self.Paramrow=1
 		for treeFile in self.G.terrain.thinningFiles:
-			treeFile=105 #for debug only
+			#treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
 			
 			for head in ['BC','convAcc']:
-				head='BC' #for debug only issues with not ending simulation- interaction after too filled or break
+				#head='BC' #for debug only issues with not ending simulation- interaction after too filled or break
 				for nCranes in [1,2]:
 					for bundler in [False, True]:
 						for twigCrack in [False, True]:
@@ -60,7 +60,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
 								self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
-								self.s.stats['noMainStops']=len(self.s.m.positions) #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time.. should be len(self.s.m.positions)-1 maybe?
+								self.s.stats['noMainStops']=len(self.s.m.positions)-1 #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time.. should be len(self.s.m.positions)-1 maybe?
 								self.s.stats['totTimeConsumed']=self.s.now()
 								if bundler==True:
 									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
@@ -439,8 +439,8 @@ class ThinningSim(SimExtend):
 		if not self.G.terrain:
 			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
 			self.G.terrain=Terrain(G=self.G)
-			#self.G.terrain.treeFile=105#for debug only
-			#self.G.terrain.readTrees()#for debug only
+			self.G.terrain.treeFile=210#for debug only
+			self.G.terrain.readTrees()#for debug only
 			self.G.terrain.readTrees(thinning=True)
 		craneMax=self.G.simParam['maxCraneLength']
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]

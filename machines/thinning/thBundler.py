@@ -41,7 +41,7 @@ class Bundler(Process,UsesDriver):
 			yield waituntil, self, self.bundlerFilled
 			print 'Bundler signaled: Threshold reached'
 			for c in self.startTheBundler(): yield c
-			print 'Bundler started'
+			print 'Bundler started', self.sim.now()
 			#self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			print 'Bundler rest'
@@ -108,7 +108,9 @@ class Bundler(Process,UsesDriver):
 		if self.currentBundle:
 			if self.forceBundler==True:
 				return True
-			elif self.currentBundle.xSection > self.xSectionThresh: return True
+			elif self.currentBundle.xSection > self.xSectionThresh:
+				self.forceBundler=True
+				return True
 			else: return False
 		else: return False
 

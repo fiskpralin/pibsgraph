@@ -95,7 +95,7 @@ if __name__=='__main__':
 		elif sys.argv[1]=='varyAll':
 			PM.varyAll(iterations)
 		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachine
-			TH.tryDiffConfigThinningMachine()
+			TH.tryDiffConfigThinningMachine(it=1)
 		else:
 			raise Exception('could not read input argument %s'%str(sys.argv[1]))
 		
@@ -103,8 +103,8 @@ if __name__=='__main__':
 		import cProfile
 		from sim.planting.plantMTerrain import PlantMTerrain
 		seed=int(random.uniform(0,100000))
-		#seed=51032
-		random.seed(seed)
+		seed=967983
+		#random.seed(seed)
 		print "seed2:", seed
 		G=tools.globalVar()
 		G.noMonitors=True
@@ -115,7 +115,7 @@ if __name__=='__main__':
 		#G.terrain=PlantMTerrain(G, ttype='5')
 		G.plotDelay=100
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
-		TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=True, twigCrack=True)
+		TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=1, bundler=True, twigCrack=False)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)
 		#cProfile.run('FW.ForwarderSim(vis=True, anim=anim, G=G)')

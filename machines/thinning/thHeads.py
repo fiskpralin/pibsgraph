@@ -140,7 +140,7 @@ class ThinningCraneHead(Process):
 				b.currentBundle.trees.append(tree)#adds the tree to the current bundle in bundler
 				i+=1
 				self.trees.remove(tree)
-			print 'added',i,' trees to the bundler'
+			print 'added',i,' trees to the bundler', self.sim.now()
 				
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
@@ -353,7 +353,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 							if not b.currentBundle is None:
 								xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 								if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-									print "Bundler is too filled and forced to run. Head still has trees:",len(self.trees)
+									print "Bundler is too filled and forced to run. from run 1: Head still has trees:",len(self.trees)
 									for c in self.releaseDriver(): yield c
 									b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 							yield waituntil, self, self.m.bundlerDone
@@ -391,6 +391,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c	
 				"""checkhere and if , then do something other thing"""
 				if self.m.hasBundler:
+					yield waituntil, self, self.m.bundlerDone
 					if not b.currentBundle is None:
 						xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 						if  xSecHead + b.currentBundle.xSection > b.maxXSection:
@@ -506,8 +507,11 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 					mainRoad=False
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
+					print "before moveArmOut"
 					for c in self.cmnd([], time, auto=self.automatic['moveArmOut']): yield c
-				while True:
+					print "has moved armed out"
+					
+				while True:#chopnext but with bundler is here
 					if self.m.hasBundler:
 						choplist=[]
 						CC=self.chopConst#constant for felling,zero for BC head
@@ -526,17 +530,17 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 								else: time=self.setPos(self.road.startPoint)
 							else:
 								time=self.setPos(self.m.bundler.pos)
-								self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
-								for entries in choplist: yield entries
-								"""check here if possible to do the dumping!"""
-								if not b.currentBundle is None:
-									xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
-									if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-										print "Bundler is too filled and forced to run, from run 1. Head still has trees:",len(self.trees)
-										for c in self.releaseDriver(): yield c
-										b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-								yield waituntil, self, self.m.bundlerDone
-								for entries in self.dumpTrees(): yield entries#dumps them down
+							self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
+							for entries in choplist: yield entries
+							"""check here if possible to do the dumping!"""
+							if not b.currentBundle is None:
+								xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
+								if  xSecHead + b.currentBundle.xSection > b.maxXSection:
+									print "Bundler is too filled and forced to run, from run 1. Head still has trees:",len(self.trees)
+									for c in self.releaseDriver(): yield c
+									b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+							yield waituntil, self, self.m.bundlerDone
+							for entries in self.dumpTrees(): yield entries#dumps them down
 		
 						elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 							time=self.setPos(self.harvestPos(t))
@@ -568,10 +572,14 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				else:
 					time=self.setPos(self.m.bundler.pos)#if bundler: always leave the trees there
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
+				print "halleluja"
 				"""
 				check here
 				"""
 				if self.m.hasBundler:
+					print "here"
+					yield waituntil, self, self.m.bundlerDone
+					print "but not to here?"
 					if not b.currentBundle is None:
 						xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 						if  xSecHead + b.currentBundle.xSection > b.maxXSection:
