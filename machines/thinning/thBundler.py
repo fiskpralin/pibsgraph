@@ -39,10 +39,10 @@ class Bundler(Process,UsesDriver):
 		"""
 		while True:
 			yield waituntil, self, self.bundlerFilled
-			print 'Bundler runs'
+			print 'Bundler signaled: Threshold reached'
 			for c in self.startTheBundler(): yield c
 			print 'Bundler started'
-			self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
+			#self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
 			print 'Bundler rest'
 			for c in self.releaseDriver(): yield c
@@ -54,6 +54,7 @@ class Bundler(Process,UsesDriver):
 			print 'Bundler reset'
 			self.forceBundler=False
 			print 'Bundler done'
+		for c in self.releaseDriver(): yield c
 			
 		
 	def dumpBundle(self, direction=None):
