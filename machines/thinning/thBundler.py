@@ -39,7 +39,7 @@ class Bundler(Process,UsesDriver):
 		"""
 		while True:
 			yield waituntil, self, self.bundlerFilled
-			print 'Bundler signaled: Threshold reached'
+			print 'Bundler signaled: Threshold reached', self.sim.now()
 			for c in self.startTheBundler(): yield c
 			print 'Bundler started', self.sim.now()
 			#self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
@@ -53,7 +53,8 @@ class Bundler(Process,UsesDriver):
 			self.resetBundle()
 			print 'Bundler reset'
 			self.forceBundler=False
-			print 'Bundler done'
+			self.prio=567
+			print 'Bundler done', self.sim.now()
 		for c in self.releaseDriver(): yield c
 			
 		
@@ -89,7 +90,10 @@ class Bundler(Process,UsesDriver):
 		"""
 		Adds the time it takes for the driver to push the "start bundling"-button.
 		"""
+		#self.s['startBundler']=True#Debug only should be removed
 		return self.cmnd([],self.s['timeStartBundler'], auto=self.s['startBundler'])
+		self.prio=0
+
 
 	def bundleIt(self):
 		"""
@@ -98,7 +102,6 @@ class Bundler(Process,UsesDriver):
 		cB=self.currentBundle
 		cB.length = 5 #cut in five meter long sections
 		cB.xSection=sum([cB.getXSection(tree=t) for t in cB.trees])
-  		#cB.biomass = sum([t.weight for t in cB.trees])#initial weight no losses when doing the bundles
    		cB.radius = sqrt(cB.length**2+(cB.diameter/2)**2)
 		
 	def bundlerFilled(self):

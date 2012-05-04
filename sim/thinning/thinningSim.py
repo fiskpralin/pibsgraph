@@ -441,7 +441,7 @@ class ThinningSim(SimExtend):
 			self.G.terrain=Terrain(G=self.G)
 			self.G.terrain.treeFile=210#for debug only
 			self.G.terrain.readTrees()#for debug only
-			self.G.terrain.readTrees(thinning=True)
+			#self.G.terrain.readTrees(thinning=True)
 		craneMax=self.G.simParam['maxCraneLength']
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]
 		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes,startPos=startPos, bundler=bundler,twigCrack=twigCrack)

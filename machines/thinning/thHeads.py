@@ -1,13 +1,10 @@
 from SimPy.Simulation  import *
-
 from machines.basics import UsesDriver, Operator
 from functions import getCartesian, getCylindrical, getDistance, getDistanceSq
-
 from math import pi, sin, asin, cos, sqrt
 import matplotlib as mpl
 import numpy as np
 import copy
-
 from terrain.pile import Pile, Bundle
 
 
@@ -16,7 +13,7 @@ from terrain.pile import Pile, Bundle
 ##################################################
 class ThinningCraneHead(Process):
 	"""
-	common stuff for craneheads. Some of the method must be overridden, thus class should only be used as a superclass.
+	common stuff for craneheads. Some of the method must be overridden, this class should only be used as a superclass.
 	"""
 	def __init__(self, sim, name=None, machine=None, twigCrack=False):
 		if not name: name='cranehead'
@@ -502,11 +499,12 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 			for road in roadList:
 				self.road=road
 				mainRoad=True
-				print "starts harvesting"
+				print "starts harvesting", self.sim.now()
 				if self.road != self.m.roads['main']:
 					mainRoad=False
 					sPoint=road.startPoint
 					time=self.setPos(sPoint)
+
 					print "before moveArmOut"
 					for c in self.cmnd([], time, auto=self.automatic['moveArmOut']): yield c
 					print "has moved armed out"
@@ -549,6 +547,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 							cross_sec_area=t.dbh**2*pi
 							choptime=CC+cross_sec_area/self.velFell
 							self.cmnd(choplist, choptime, auto=self.automatic['chop'])
+							print 'chopped a tree', self.sim.now()
 							for entries in choplist: yield entries
 							t.pos=[5000, 5000] #far away, for visual reasons.
 							t.h-=0.5 #harvester is at least half a meter above ground
@@ -578,6 +577,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				"""
 				if self.m.hasBundler:
 					print "here"
+					for c in self.releaseDriver(): yield c
 					yield waituntil, self, self.m.bundlerDone
 					print "but not to here?"
 					if not b.currentBundle is None:
