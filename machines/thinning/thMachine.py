@@ -27,7 +27,7 @@ class ThinningMachine(Machine, UsesDriver):
 	"""
 	def __init__(self, name, sim, G, head='BC', nCranes=2, startPos=[12.5, -4], bundler=False, twigCrack=False):
 		print "head:", head, "cranes:", nCranes, "bundler:", bundler, "twigcracker:", twigCrack
-		self.driver=Operator(sim,preemptable=0) #add driver
+		self.driver=Operator(sim,preemptable=1) #add driver
 		sim.activate(self.driver, self.driver.work())
 		Machine.__init__(self, name, sim, G=G, driver=self.driver, mass=21000)
 		s=self.G.simParam
@@ -53,6 +53,13 @@ class ThinningMachine(Machine, UsesDriver):
 		self.mainRoadTrees=[]
 		self.corridorTrees=[]
 		self.heads={} #dictionary with keys 'left', 'right'
+
+		#Here is the bundler initiation
+		if bundler == True:
+			self.bundler=Bundler(sim=self.sim, driver=self.driver, machine=self)
+			self.sim.activate(self.bundler,self.bundler.run())
+
+		#Here is the head initiation
 		if head=='BC':
 			for i in range(nCranes):
 				h=BCHead(sim=self.sim, driver=self.driver, machine=self, twigCrack=twigCrack) #adds to above list.
@@ -64,12 +71,6 @@ class ThinningMachine(Machine, UsesDriver):
 		for h in self.heads.values():
 			self.sim.activate(h, h.run())
 
-		####Here is the bundler initiation
-		if bundler == True:
-			self.bundler=Bundler(sim=self.sim, driver=self.driver, machine=self)
-			self.sim.activate(self.bundler,self.bundler.run())
-		####That was the initiaion of the bundler
-		
 		self.treeMoni=Monitor(name='trees harvested')
 		self.treeMoni.observe(len(self.trees), self.sim.now())
 		self.roadList=[] #simply a list of roads.
