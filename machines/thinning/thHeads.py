@@ -154,8 +154,7 @@ class ThinningCraneHead(Process):
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			self.cmnd(c,time=self.setPos(self.getStartPos()), auto=self.automatic['moveArmOut'])#return to the start position
 			return c
-	
-		
+			
 	def getStartPos(self):
 		if self.side=='left':
 			return self.m.getCartesian([self.m.craneMinL, 2*pi/3.])
@@ -211,6 +210,38 @@ class ThinningCraneHead(Process):
 			self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
 		return c
 
+	def chopNextWithBundler1(self):
+		choplist=[]
+		print self.side, "Goes back to DUMP trees", self.treeWeight, self.gripArea
+		if not self.m.hasBundler:
+			if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
+			else: time=self.setPos(self.road.startPoint)
+		else:
+			time=self.setPos(self.m.bundler.pos)
+		self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
+		return choplist
+
+	def chopNextWithBundler2(self,t,CC):
+		choplist=[]
+		time=self.setPos(self.harvestPos(t))
+		self.cmnd(choplist, time, auto=self.automatic['moveArmOut'])
+		#determine choptime
+		cross_sec_area=t.dbh**2*pi
+		choptime=CC+cross_sec_area/self.velFell
+		self.cmnd(choplist, choptime, auto=self.automatic['chop'])
+		print self.side, 'crane chopped a tree', self.sim.now()
+		t.pos=[5000, 5000] #far away, for visual reasons.
+		t.h-=0.5 #harvester is at least half a meter above ground
+		t.harvested=True
+		self.road.trees.remove(t)
+		self.road.harvestTrees-=1
+		self.trees.append(t)
+		self.treeWeight+=t.weight
+		self.gripArea+=t.dbh**2
+		self.m.trees.append(t)
+		self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
+		return choplist
+
 	def twigCrack(self):
 		"""
 		Changes the volume of the pile and its length according
@@ -250,6 +281,25 @@ class ThinningCraneHead(Process):
 		if not self.road or self.direction==pi/2.: #head is at "base" or with default direction
 			return(cart([cyl[0]-self.length/2., cyl[1]]))
 		return cart([0, -self.length/2], origin=self.pos, direction=self.direction, fromLocalCart=True)
+
+	def checkBundler(self):
+		c=[]
+		if self.m.hasBundler:
+			c.extend(self.releaseDriver())
+			print len(c)
+			c.append((waituntil, self, self.m.bundlerDone))
+			print len(c)
+			if not self.m.bundler.currentBundle is None:
+				xSecHead = sum([self.m.bundler.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
+				if  xSecHead + self.m.bundler.currentBundle.xSection > self.m.bundler.maxXSection:
+					print "Bundler would be too filled and is forced to run.", self.side,"head still has trees:",len(self.trees)
+					c.extend(self.releaseDriver())
+					self.m.bundler.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+			c.append((waituntil, self, self.m.bundlerDone))
+			print len(c)
+			if len(c)>4: raise Exception('something is wrong in checkbundler extend of release driver...')
+		return c
+
 
 	def cmndWithDriver(self, commands, time):
 		"""
@@ -346,14 +396,8 @@ class BCHead(ThinningCraneHead, UsesDriver):
 							self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
 							for entries in choplist: yield entries
 							"""check if it is possible to do the dumping!"""
-							if not b.currentBundle is None:
-								xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
-								if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-									print "Bundler would be too filled and is forced to run.", self.side, "head still has trees:",len(self.trees)
-									for c in self.releaseDriver(): yield c
-									b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-							yield waituntil, self, self.m.bundlerDone
-							for entries in self.dumpTrees(): yield entries#dumps them down
+							for c in self.checkBundler(): yield c
+							for c in self.dumpTrees(): yield c#dumps them down
 						elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 							time=self.setPos(self.harvestPos(t))
 							self.cmnd(choplist, time, auto=self.automatic['moveArmOut'])
@@ -386,16 +430,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				print self.side, "crane is in position ready to dump the trees"
 				"""check if it is possible to do the dumping!"""
-				if self.m.hasBundler:
-					for c in self.releaseDriver(): yield c
-					yield waituntil, self, self.m.bundlerDone
-					if not b.currentBundle is None:
-						xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
-						if  xSecHead + b.currentBundle.xSection > b.maxXSection:
-							print "Bundler would be too filled and is forced to run.", self.side,"Head still has trees:",len(self.trees)
-							for c in self.releaseDriver(): yield c
-							b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-					yield waituntil, self, self.m.bundlerDone
+				for c in self.checkBundler(): yield c #checks so there are space in bundler
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print self.side,"done at site", self.pos
