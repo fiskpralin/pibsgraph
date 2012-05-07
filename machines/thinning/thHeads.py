@@ -232,7 +232,6 @@ class ThinningCraneHead(Process):
 		cross_sec_area=t.dbh**2*pi
 		choptime=CC+cross_sec_area/self.velFell
 		self.cmnd(choplist, choptime, auto=self.automatic['chop'])
-		print self.side, 'crane chopped a tree', self.sim.now()
 		t.pos=[5000, 5000] #far away, for visual reasons.
 		t.h-=0.5 #harvester is at least half a meter above ground
 		t.harvested=True
