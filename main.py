@@ -103,7 +103,7 @@ if __name__=='__main__':
 		import cProfile
 		from sim.planting.plantMTerrain import PlantMTerrain
 		seed=int(random.uniform(0,100000))
-		seed=967983
+		seed=35342
 		#random.seed(seed)
 		print "seed2:", seed
 		G=tools.globalVar()
@@ -115,7 +115,7 @@ if __name__=='__main__':
 		#G.terrain=PlantMTerrain(G, ttype='5')
 		G.plotDelay=100
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
-		TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2, bundler=True, twigCrack=False)
+		TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2, bundler=True, twigCrack=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)
 		#cProfile.run('FW.ForwarderSim(vis=True, anim=anim, G=G)')

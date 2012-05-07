@@ -388,18 +388,25 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				"""check if it is possible to do the dumping!"""
 				if self.m.hasBundler:
 					for c in self.releaseDriver(): yield c
+					print 'hej'
 					yield waituntil, self, self.m.bundlerDone
+					print 'haj'
 					if not b.currentBundle is None:
 						xSecHead = sum([b.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 						if  xSecHead + b.currentBundle.xSection > b.maxXSection:
 							print "Bundler is too filled and forced to run.", self.side,"Head still has trees:",len(self.trees)
 							for c in self.releaseDriver(): yield c
 							b.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
+					print 'hoj'
 					yield waituntil, self, self.m.bundlerDone
+					print 'huj'
 				for c in self.dumpTrees(): yield c #dumps the trees
+				print 'hilla'
 			for c in self.releaseDriver(): yield c
 			print self.side,"done at site", self.pos
-			self.reset()					
+			self.reset()
+			print 'all'
+			print self.usesDriver
 			
 	def harvestPos(self,t):
 		"""harvest position of tree, along road. Overrides default, pos of tree"""

@@ -99,7 +99,7 @@ class ThinningMachine(Machine, UsesDriver):
 			#p is self.getNextPos()
 			for c in self.setPos(p, cmnd=True): yield c
 			if self.getNextPos()==self.pos:
-				if self.hasBundler==True:
+				if self.hasBundler==True and self.bundler.currentBundle is not None:
 					self.bundler.forceBundler=True
 					for c in self.releaseDriver(): yield c
 					yield waituntil, self, self.bundlerDone
