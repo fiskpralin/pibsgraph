@@ -37,7 +37,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 			self.G.terrain.readTrees()
 			
 			for head in ['BC','convAcc']:
-				#head='BC' #for debug only issues with not ending simulation- interaction after too filled or break
 				for nCranes in [1,2]:
 					for bundler in [False, True]:
 						for twigCrack in [False, True]:
@@ -95,13 +94,13 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,16,self.s.stats['totTimeConsumed'])
 								e.modify(self.Paramrow,17,self.s.stats['bundlingTime'])
 								e.modify(self.Paramrow,18,self.s.stats['work time'])
-								#e.modify(self.Paramrow,19,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,20,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,21,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,22,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,23,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,24,self.s.stats['totBunPileMass'])
-								#e.modify(self.Paramrow,25,self.s.stats['totBunPileMass'])
+								#e.modify(self.Paramrow,19,self.s.stats['-'])
+								#e.modify(self.Paramrow,20,self.s.stats['-'])
+								#e.modify(self.Paramrow,21,self.s.stats['-'])
+								#e.modify(self.Paramrow,22,self.s.stats['-'])
+								#e.modify(self.Paramrow,23,self.s.stats['-'])
+								#e.modify(self.Paramrow,24,self.s.stats['-'])
+								#e.modify(self.Paramrow,25,self.s.stats['-'])
 								#e.modify(self.Paramrow,26,self.s.stats['totBunPileMass'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong

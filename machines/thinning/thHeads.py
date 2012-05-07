@@ -18,6 +18,7 @@ class ThinningCraneHead(Process):
 	def __init__(self, sim, name=None, machine=None, twigCrack=False):
 		if not name: name='cranehead'
 		self.m=machine
+		if self.m.hasBundler is True: b=self.m.bundler
 		self.s=self.m.G.simParam
 		if not machine or len(self.m.heads)==0:
 			self.side='left' #default
@@ -28,6 +29,7 @@ class ThinningCraneHead(Process):
 		else: raise Exception('Heads only support one or two arms on machine.')
 		Process.__init__(self,name, sim)
 		#self.testVar=self.m.G.paramInput['BCfd2']['testVar']
+		self.color=self.m.color
 		self.timeTwigCrack=self.s['timeTwigCrack']
 		self.timeCutAtHead=self.s['timeCut']
 		self.treeWeight=0
@@ -35,6 +37,7 @@ class ThinningCraneHead(Process):
 		self.trees=[]
 		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
+		self.direction=pi/2.
 		
 		
 	def treeChopable(self, t):
@@ -286,9 +289,7 @@ class ThinningCraneHead(Process):
 		c=[]
 		if self.m.hasBundler:
 			c.extend(self.releaseDriver())
-			print len(c)
 			c.append((waituntil, self, self.m.bundlerDone))
-			print len(c)
 			if not self.m.bundler.currentBundle is None:
 				xSecHead = sum([self.m.bundler.currentBundle.getXSection(tree=t) for t in self.trees])#just a check of xsec in head
 				if  xSecHead + self.m.bundler.currentBundle.xSection > self.m.bundler.maxXSection:
@@ -296,8 +297,7 @@ class ThinningCraneHead(Process):
 					c.extend(self.releaseDriver())
 					self.m.bundler.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
 			c.append((waituntil, self, self.m.bundlerDone))
-			print len(c)
-			if len(c)>4: raise Exception('something is wrong in checkbundler extend of release driver...')
+			if len(c)>4: raise Exception('Something is wrong in checkbundler extend of release driver...')
 		return c
 
 
@@ -331,9 +331,7 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		self.road=None #the correct road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
-		self.color=self.m.color
 		self.reset()
-		self.direction=pi/2.
 		self.maxTreeWeight=self.s['maxWeightCD']#350 #kg
 		self.width=self.s['headWidthCD']#1.
 		self.corridorWidth=self.width
@@ -351,8 +349,6 @@ class BCHead(ThinningCraneHead, UsesDriver):
 		
 		
 	def run(self):
-		if self.m.hasBundler is True:
-			b=self.m.bundler
 		while True:
 			yield waituntil, self, self.roadAssigned
 			if self.road==self.m.roads['main']: 
@@ -378,45 +374,19 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				while True:#chopnext but with bundler is here
 					if self.m.hasBundler:
 						choplist=[]
-						CC=self.chopConst#constant for felling,zero for BC head
 						t=self.getNextTree(self.road)
-						b=self.m.bundler
 						if not t:
 							col=self.road.color
 							self.road.color='r'
 							self.road.color=col
 							break
 						elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
-							print self.side, "Goes back to DUMP trees", self.treeWeight, self.gripArea
-							if not self.m.hasBundler:
-								if self.road == self.m.roads['main']: time=self.setPos(self.m.getTreeDumpSpot(self.side))
-								else: time=self.setPos(self.road.startPoint)
-							else:
-								time=self.setPos(self.m.bundler.pos)
-							self.cmnd(choplist, time, auto=self.automatic['moveArmIn'])
-							for entries in choplist: yield entries
+							for c in self.chopNextWithBundler1(): yield c
 							"""check if it is possible to do the dumping!"""
 							for c in self.checkBundler(): yield c
 							for c in self.dumpTrees(): yield c#dumps them down
 						elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
-							time=self.setPos(self.harvestPos(t))
-							self.cmnd(choplist, time, auto=self.automatic['moveArmOut'])
-							#determine choptime
-							cross_sec_area=t.dbh**2*pi
-							choptime=CC+cross_sec_area/self.velFell
-							self.cmnd(choplist, choptime, auto=self.automatic['chop'])
-							print self.side, 'crane chopped a tree', self.sim.now()
-							for entries in choplist: yield entries
-							t.pos=[5000, 5000] #far away, for visual reasons.
-							t.h-=0.5 #harvester is at least half a meter above ground
-							t.harvested=True
-							self.road.trees.remove(t)
-							self.road.harvestTrees-=1
-							self.trees.append(t)
-							self.treeWeight+=t.weight
-							self.gripArea+=t.dbh**2
-							self.m.trees.append(t)
-							self.m.treeMoni.observe(len(self.m.trees), self.sim.now())
+							for c in self.chopNextWithBundler2(t,self.chopConst): yield c
 						else: break
 					else:#here you find the original chopnext, still valid when no bundler
 						cmd=self.chopNext()
@@ -495,10 +465,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 		self.road=None #the currect road will be stored here
 		self.pos=self.getStartPos()
 		self.m.heads[self.side]=self
-		self.color=self.m.color
-		self.trees=[]
 		self.reset()
-		self.direction=pi/2.
 		self.length=self.s['headWidthEF']#0.5 OBSERVE THAT THIS HEAD IS SET TO BE SQUARE
 		self.width=self.s['headWidthEF']#0.5
 		self.corridorWidth=self.s['corridorWidthEF']#2
