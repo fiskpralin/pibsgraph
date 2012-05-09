@@ -1,5 +1,5 @@
 from sim.tools import SimSeries, SimExtend, globalVar
-
+from sim.thinning.observer import Observer
 from terrain.terrain import Terrain
 #import machines
 from machines.thinning.thMachine import ThinningMachine
@@ -42,7 +42,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 						for twigCrack in [False, True]:
 							for simNumber in range(1,it+1):
 								G=copy.deepcopy(self.G)
-								self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack)
+								self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, observer=True)
 								self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
 								self.s.stats['simNumber']=simNumber
 								self.s.stats['treeFile']=treeFile
@@ -429,7 +429,7 @@ class ThinningSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a thinning machine
 	"""
-	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False):
+	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False, observer=False):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
 
 		#if no file to read the simulationsparameters from:
@@ -446,6 +446,9 @@ class ThinningSim(SimExtend):
 		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes,startPos=startPos, bundler=bundler,twigCrack=twigCrack)
 		self.treeStats() #do some statistics on the trees
 		self.activate(self.m,self.m.run())
+		if observer:
+			self.o=Observer(name="obsy", sim=self, G=self.G)
+			self.activate(self.o, self.o.run())#Must be terminated?
 		self.simulate(until=10000)
 		#some simulation information:
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
@@ -459,6 +462,7 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
+
 
 	def treeStats(self):
 		"""

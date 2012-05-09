@@ -28,7 +28,7 @@ class Bundler(Process,UsesDriver):
 		self.maxXSection=self.s['maxXSectionJ']
 		self.xSectionThresh=self.s['xSectionThreshJ']
 		self.currentBundle=None
-		self.forceBundler=False #Is set to true when bundler is filled or new pile from head does not fit
+		self.forceBundler=False #Is set to true when bundler is filled or new pile from head does not fit		
 		
 	def run(self):
 		"""

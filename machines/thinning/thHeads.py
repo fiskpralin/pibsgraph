@@ -37,8 +37,7 @@ class ThinningCraneHead(Process):
 		self.trees=[]
 		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
-		self.direction=pi/2.
-		
+		self.direction=pi/2.		
 		
 	def treeChopable(self, t):
 		"""
@@ -295,7 +294,7 @@ class ThinningCraneHead(Process):
 					print "Bundler would be too filled and is forced to run.", self.side,"head still has trees:",len(self.trees)
 					c.extend(self.releaseDriver())
 					self.m.bundler.forceBundler=True #Forces the bundler to run if the current pile won't fit in the bundler
-			c.append((waituntil, self, self.m.bundlerDone))
+			c.append((waituntil, self, self.m.bundlerDone))			
 			if len(c)>4: raise Exception('Something is wrong in checkbundler extend of release driver...')
 		return c
 
