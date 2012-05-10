@@ -448,9 +448,21 @@ class ThinningSim(SimExtend):
 		self.activate(self.m,self.m.run())
 		if observer:
 			self.o=Observer(name="obsy", sim=self, G=self.G)
-			self.activate(self.o, self.o.run())#Must be terminated?
+			self.activate(self.o, self.o.run())
 		self.simulate(until=10000)
 		#some simulation information:
+		if observer:
+			self.stats['noBundlesOrPiles']=len(self.G.terrain.piles)
+			if bundler==True:
+				self.stats['bundlingTime']=self.stats['noBundlesOrPiles']*self.m.bundler.timeBundle
+			else: self.stats['bundlingTime']=0
+			print self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]), 'active bundler time via monitor'
+			print self.stats['bundlingTime'], 'active bundler time via easy calculation'
+
+			print self.o.tstep*sum([c[1] for c in self.o.lAMoni]), 'left head active time via monitor'
+			if len(self.m.heads)==2:
+				print self.o.tstep*sum([c[1] for c in self.o.rAMoni]), 'right head active time via monitor'
+			print self.now()
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
 		self.stats['outTake']=100*len(self.m.trees)/float(len(self.G.terrain.trees))
 		self.stats['groundAreaRatio']=sum([t.dbh**2*pi*0.25 for t in self.m.trees])/max(1,sum([t.dbh**2*pi*0.25 for t in self.G.terrain.trees]))

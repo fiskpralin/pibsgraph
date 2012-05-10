@@ -53,6 +53,7 @@ class ThinningMachine(Machine, UsesDriver):
 		self.mainRoadTrees=[]
 		self.corridorTrees=[]
 		self.heads={} #dictionary with keys 'left', 'right'
+		self.nCranes=nCranes
 
 		#Here is the bundler initiation
 		if bundler == True:

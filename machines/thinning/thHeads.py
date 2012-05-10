@@ -37,7 +37,8 @@ class ThinningCraneHead(Process):
 		self.trees=[]
 		self.twigCracker=twigCrack #A twigCracker is a module on the head that twigcracks the trees and cuts them into 5m long pieces
 		self.currentPile=None
-		self.direction=pi/2.		
+		self.direction=pi/2.
+		self.waitingForBundler=0
 		
 	def treeChopable(self, t):
 		"""
@@ -382,7 +383,10 @@ class BCHead(ThinningCraneHead, UsesDriver):
 						elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
 							for c in self.chopNextWithBundler1(): yield c
 							"""check if it is possible to do the dumping!"""
+							
+							self.waitingForBundler=1
 							for c in self.checkBundler(): yield c
+							self.waitingForBundler=0
 							for c in self.dumpTrees(): yield c#dumps them down
 						elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 							for c in self.chopNextWithBundler2(t,self.chopConst): yield c
@@ -399,7 +403,9 @@ class BCHead(ThinningCraneHead, UsesDriver):
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				print self.side, "crane is in position ready to dump the trees"
 				"""check if it is possible to do the dumping!"""
+				self.waitingForBundler=1
 				for c in self.checkBundler(): yield c #checks so there are space in bundler
+				self.waitingForBundler=0
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print self.side,"done at site", self.pos
@@ -517,7 +523,9 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 						elif t.weight+self.treeWeight>self.maxTreeWeight or t.dbh**2+self.gripArea>self.maxGripArea: #go back and dump trees if the head cannot hold any more trees
 							for c in self.chopNextWithBundler1(): yield c
 							"""check if it is possible to do the dumping!"""
+							self.waitingForBundler=1
 							for c in self.checkBundler(): yield c
+							self.waitingForBundler=0
 							for c in self.dumpTrees(): yield c#dumps them down
 						elif not getDistance(t.pos , self.m.pos)>self.m.craneMaxL:
 							for c in self.chopNextWithBundler2(t,self.chopConst): yield c
@@ -534,7 +542,9 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 				for c in self.cmnd([], time, auto=self.automatic['moveArmIn']): yield c #
 				print self.side, "crane is in position ready to dump the trees"
 				"""check if it is possible to do the dumping!"""
+				self.waitingForBundler=1
 				for c in self.checkBundler(): yield c #checks so there are space in bundler
+				self.waitingForBundler=0
 				for c in self.dumpTrees(): yield c #dumps the trees
 			for c in self.releaseDriver(): yield c
 			print self.side,"done at site", self.pos
