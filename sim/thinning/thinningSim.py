@@ -460,8 +460,10 @@ class ThinningSim(SimExtend):
 			print self.stats['bundlingTime'], 'active bundler time via easy calculation'
 
 			print self.o.tstep*sum([c[1] for c in self.o.lAMoni]), 'left head active time via monitor'
+			print self.o.tstep*sum([c[1] for c in self.o.lWBMoni]), 'left head waiting for Bundler'
 			if len(self.m.heads)==2:
 				print self.o.tstep*sum([c[1] for c in self.o.rAMoni]), 'right head active time via monitor'
+				print self.o.tstep*sum([c[1] for c in self.o.rWBMoni]), 'right head waiting for Bundler'
 			print self.now()
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
 		self.stats['outTake']=100*len(self.m.trees)/float(len(self.G.terrain.trees))

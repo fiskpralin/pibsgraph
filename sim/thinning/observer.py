@@ -59,7 +59,7 @@ class Observer(Process):
 		if self.m.nCranes==2:
 			if self.m.heads['right'].queuing(self.m.driver)==True: waitingD=1
 			else: waitingD=0
-			if self.m.heads['left'].active()==True: rightActive=1
+			if self.m.heads['right'].active()==True: rightActive=1
 			else: rightActive=0
 			self.rWDMoni.observe(waitingD, self.sim.now())
 			self.rAMoni.observe(rightActive, self.sim.now())
