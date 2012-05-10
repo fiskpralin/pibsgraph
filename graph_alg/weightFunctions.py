@@ -37,4 +37,5 @@ def normalizedPitchDist(x,y,z):
 	if alpha>alim: return 1e15
 	d=fun.getDistance((x[0], y[0]), (x[-1], y[-1]))
 	w=d*(A+B*alpha/alim)
-	return w 
+	return w
+

@@ -1,6 +1,6 @@
 """
 this is an example of how it could work.
-just a script
+just a script. Not a part of the "software-code"..
 """
 import os, sys #insert /dev to path so we can import these modules.
 if __name__=='__main__':
@@ -21,6 +21,7 @@ import functions as fun
 import grid as gr
 import spider_grid as sg
 from algorithms.bruteForce import bruteForce
+from algorithms.simplified_bruteForce import simplified_bruteForce
 
 def testInterpolation():
 	globalOrigin=596673,6728492
@@ -60,7 +61,7 @@ def plotWorstRoad(R, ax1, ax2):
 	l=Line2D((worst[0][0], worst[1][0]), (worst[0][1], worst[1][1]), color='r', lw=5)
 	ax1.add_line(l)
 	#plot elevation curve.
-	x,y,z = R.getLineElevationCurve(worst[0], worst[1], points=max(5, int(fun.getDistance(worst[0], worst[1])/2)))
+	x,y,z = R.getLineElevationCurve(worst[0], worst[1], points=max(5, int(fun.getDistance(worst[0], worst[1])*5)))
 	x0,y0=worst[0]
 	d=np.sqrt((x-x0)**2+(y-y0)**2)
 	ax2.plot(d,z, lw=2)
@@ -95,8 +96,7 @@ def testAngles():
 	assert R.areaCover==a
 	print "you passed the test.."
 	G.draw(overlap=True)
-
-def compareAddAndDontAdd():
+def compareBruteAndSimpleBrute():
 	dx=random.uniform(-700, 700)
 	globalOrigin= 596250+dx, 6727996
 	
@@ -122,8 +122,77 @@ def compareAddAndDontAdd():
 			assert R.areaCover>0.19
 
 			R1=bruteForce(copy.deepcopy(R),aCap=aCap,add=False)
+			R1.cost=cf.totalCost(R1)
 			t+=time.clock()-tic
-			c+=cf.totalCost(R1)
+			c+=R1.cost
+		t1.append(t/float(it))
+		c1.append(c/float(it))
+		el.append(R.elements)
+
+		c=0
+		t=0
+		for itmp in range(it):
+			tic=time.clock()
+			print R.areaCover
+			assert R.areaCover>0.19
+			R2=simplified_bruteForce(copy.deepcopy(R),aCap=aCap)
+			R2.cost=cf.totalCost(R2)
+			t+=time.clock()-tic
+			c+=R2.cost
+		t2.append(t/float(it))
+		c2.append(c/float(it))
+
+	fig=plt.figure()
+	ax1=fig.add_subplot(121)
+	ax1.plot(el, t1, 'b')
+	ax1.plot(el, t2, 'r')
+	ax1.set_title('total time in seconds')
+	plt.legend(['bruteforce','simplified bf'])
+
+	ax2=fig.add_subplot(122)
+	ax2.plot(el, c1, 'b')
+	ax2.plot(el, c2, 'r')
+	ax2.set_title('road cost')
+
+	fig2=plt.figure()
+	ax=fig2.add_subplot(121,aspect='equal')
+	ax.set_title("bruteforce, cost: %f"%R1.cost)
+	R1.draw(ax)
+	ax2=fig2.add_subplot(122,aspect='equal')
+	ax2.set_title("simplified bf, cost: %f"%R2.cost)	
+	R2.draw(ax2)
+
+
+	
+def compareAddAndDontAdd():
+	dx=random.uniform(-700, 700)
+	globalOrigin= 596250+dx, 6727996
+	
+	ls=np.linspace(1.4,3,5)
+	t1=[]
+	t2=[]
+	c1=[]
+	c2=[]
+	el=[]
+
+	it=1
+	aCap=0.20
+	for i in ls:
+		areaPoly=list(i*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+		for itmp in range(len(areaPoly)): areaPoly[itmp]=tuple(areaPoly[itmp])
+		
+		R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+		c=0
+		t=0
+		for itmp in range(it):
+			tic=time.clock()
+			print R.areaCover
+			assert R.areaCover>0.19
+
+			R1=bruteForce(copy.deepcopy(R),aCap=aCap,add=False)
+			R1.cost=cf.totalCost(R1)
+			t+=time.clock()-tic
+			c+=R1.cost
 		t1.append(t/float(it))
 		c1.append(c/float(it))
 		el.append(R.elements)
@@ -154,32 +223,31 @@ def compareAddAndDontAdd():
 
 	fig2=plt.figure()
 	ax=fig2.add_subplot(121,aspect='equal')
-	ax.set_title("without add, areacover: %f"%R1.areaCover)
+	ax.set_title("without add, cost: %f"%R1.areaCover)
 	R1.draw(ax)
 	ax2=fig2.add_subplot(122,aspect='equal')
-	ax2.set_title("with add, areacover: %f"%R2.areaCover)	
+	ax2.set_title("with add, cost: %f"%R2.areaCover)	
 	R2.draw(ax2)
 def tmp():
 	dx=random.uniform(-700, 700)
 	globalOrigin= 596250+dx, 6727996
-	areaPoly=list(3*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+	areaPoly=list(2*np.array([(0,0),(48,0), (73, 105), (0,96)]))
 	for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	from algorithms.crazyIdea import crazyIdea
 	#R=crazyIdea(areaPoly=areaPoly)
 	#R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	#R=sg.SpiderGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
-	R=bruteForce(R,aCap=0.20,add=False)
+	R=simplified_bruteForce(R,aCap=0.2,add=False)
 	print "road area coverage:", go.roadAreaCoverage(R)
 	print "internal evaluation of above:", R.areaCover
 	print "total area:", fun.polygon_area(areaPoly)
 	print "used total area:", R.A, R.Ainv
 	fig=plt.figure()
-	ax=fig.add_subplot(121, aspect='equal')
-	#ax=fig.add_subplot(111, aspect='equal')
+	ax=fig.add_subplot(111, aspect='equal')
 	R.draw(ax)
-	ax2=fig.add_subplot(122)
-	plotWorstRoad(R, ax, ax2)
+	#ax2=fig.add_subplot(224)
+	#plotWorstRoad(R, ax, ax2)
 
 
 	
@@ -191,6 +259,7 @@ tic=time.clock()
 #cProfile.run('''tmp()''')
 #tmp()
 #testAngles()
-compareAddAndDontAdd()
+#compareAddAndDontAdd()
+compareBruteAndSimpleBrute()
 print "simulation took: ", time.clock()-tic, " seconds"
 plt.show()

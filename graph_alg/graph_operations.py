@@ -95,6 +95,27 @@ def get_angle(e1,e2):
 	if th>pi: th=2*pi-th
 	return th
 
+def shortestCycle(R,n):
+	"""
+	identifies the shortest cycle for undirected graphs
+	Returns it.
+
+	Should be able to do this faster without cycle_basis..
+
+	"""
+	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
+	#identify the shortest of them...
+	if len(cycles)==0: return None
+	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
+	m=min([len(c) for c in cycles])
+	cycles=[c for c in cycles if len(c)<1.5*m] #shortens list.
+	weights=[sumWeights(R,P) for P in cycles]
+	if min(weights)>=1e15: return None #infinite weight...
+	shortest=cycles[weights.index(min(weights))]
+	shortest.reverse()
+	shortest.append(shortest[0])
+	return shortest
+
 def overLapA(e1,e2, R=None):
 	"""
 	computes the overlapping area of two road segments. Does not handle the dictionary routines at all.
@@ -139,3 +160,5 @@ def overLapA(e1,e2, R=None):
 	a=x*0.5*(y+z)
 	overlap[(e1,e2)]=a #save so we don't have to calculate next time
 	return a
+
+

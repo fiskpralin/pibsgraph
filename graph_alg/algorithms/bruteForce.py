@@ -49,6 +49,7 @@ def warmUp(R):
 		for edge in R.edges(data=True):
 			modifyEdge(edge,R)
 			edge[2]['visits']=0 #zero up.
+
 def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 	"""
 	works with cycles instead of shortest paths
@@ -110,11 +111,12 @@ def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 		print "start"
 		first=True
 		e1=False
+		assert len([e for e in R.edges(data=True) if e[2]['weight']<0])==0
 		while first or e[0:2]!=e1[0:2]:
 			e1=remList[0] #takes the last item in the list.
 			e1[2]=R.get_edge_data(e1[0], e1[1]) #edgelist is a copy, this is not.
 			c=cf.routingCost(R, e1, storeData=True) #also updates e[2]['c']
-			assert len([e for e in R.edges(data=True) if e[2]['weight']<0 ])==0
+		
 			print "        c: ", c, " len:", len(remList), "visits:", e1[2]['visits']
 			#e1[2]=R.get_edge_data(e1[0], e1[1])
 			e1[2]['c']=c #-e1[2]['origin_dist']*0.1 #origin dist just to experiment.
