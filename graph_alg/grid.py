@@ -145,8 +145,35 @@ g
 			super(ExtendedGraph,self).add_edges_from(ebunch=[e], attr_dict=attr_dict, attr=kwargs)
 			dA=go.singleRoadSegmentCoverage((e[0],e[1]), self, add=True)
 			self.areaCover+=dA*self.Ainv
+	def edges_from_path_gen(self, path, data=False):
+		"""
+		a generator that steps through the edges between the nodes..
+		
+		e.g.:
+		path=[(1,1),(2,2)(3,3)]
+		edges=[((1,1),(2,2)), ((2,2),(3,3))]
+		
+		very handy..
+		if data=True, data for each edge is given as well.
+		Check if the edges exist if data=True
+
+
+		NOT tested
+		"""
+		assert len(path) != 1 #one node does not make an edge...
+		if len(path) != 0:
+			last=None
+			for node in path:
+				if last: #not first time..
+					if data:
+						d=self.get_edge_data(*(last,node))
+						yield (last, node, d) #with data. We also know that it exists.
+					else:
+						yield (last, node) #the edge.. we do not really check if it exists but..
+				last=node
+
 			
-	def draw(self, ax=None, overlap=False):
+	def draw(self, ax=None, overlap=False, weight=False, cost=False):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
 		"""
@@ -154,7 +181,7 @@ g
 		ax=GIS.plot2DContour(self.t_x,self.t_y,self.t_z,ax)
 		pol=Polygon(self.areaPoly, closed=True, color='none', ec='k',lw=3, ls='solid')
 		ax.add_patch(pol)
-		draw.draw_custom(G=self, ax=ax, road_color='b', road_width=5)
+		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight, road_color='b', road_width=5)
 		if overlap: draw.plot_coverage(self,ax, color='r')
 		return ax
 
@@ -175,7 +202,6 @@ class SqGridGraph(ExtendedGraph):
 		C=L/2.
 		self.C=C
 		self.L=L
-
 
 		if angle ==None: #find the longest edge, and use its angle
 			print "get the angle"

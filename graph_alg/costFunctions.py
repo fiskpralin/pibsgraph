@@ -7,33 +7,10 @@ import copy
 import graph_operations as go
 import functions as fun
 
-
-
-
-
-def shortestCycle(R,n):
-	"""
-	identifies the shortest cycle for undirected graphs
-	Returns it.
-
-	Should be able to do this faster without cycle_basis..
-
-	"""
-	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
-	#identify the shortest of them...
-	if len(cycles)==0: return None
-	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
-	m=min([len(c) for c in cycles])
-	cycles=[c for c in cycles if len(c)<1.5*m] #shortens list.
-	weights=[go.sumWeights(R,P) for P in cycles]
-	shortest=cycles[weights.index(min(weights))]
-	shortest.reverse()
-	shortest.append(shortest[0])
-	return shortest
-
 def sumPathsDiff(R,e,storeData=False, add=False):
 	"""
-	culculates the difference in the sum of the paths. May store the new paths as well.
+	culculates the difference in the sum of the paths from removing/adding edge e.
+	May store the new paths as well if storeData==True.
 
 	This function is a freaking mess.. clean up..
 	"""
@@ -53,26 +30,11 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 		#to origin is less than half that from e, remove
 		dtmp=fun.getDistance(e[0], R.origin)
 		lst=[n for n in R.nodes(data=True) if fun.getDistance(n[0], R.origin)>dtmp*0.5]#really slow, but necessary
-		#lst=R.nodes(data=True)
+		#lst=R.nodes(data=True) #old one, replaced to increase speed a bit..
 	else:
 		action1=R.remove_edges_from
 		action2=R.add_edges_from
 		lst=e[2]['visited_from_node'] #faster than above.
-		####################
-		####################
-		#remove when you are back, and remember not to use swedish letters in this code ;).
-		######
-		listTmp=[n for n in lst if go.sumWeights(R,n[1]['shortest_path'])>=go.sumWeights(R,n[1]['second_shortest'])]
-		if len(listTmp)>0:
-			print "len", len(listTmp), " of ", len(lst)
-			print listTmp[0][0]
-			print go.sumWeights(R,listTmp[0][1]['shortest_path']), listTmp[0][1]['shortest_path']
-			print go.sumWeights(R,listTmp[0][1]['second_shortest']), listTmp[0][1]['second_shortest']
-			R.draw()
-			plt.show()
-		assert len([n for n in lst if go.sumWeights(R,n[1]['shortest_path'])>=go.sumWeights(R,n[1]['second_shortest'])])==0
-		####################
-		####################
 	action1([etpl])
 	if not nx.is_connected(R): #probably remove in this case. Not allowed since graph looses connectivity
 		action2([etpl])
@@ -101,10 +63,9 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 		if C<inf: #road back calculated, now road there.
 			eTmp=[P21[0], P21[1]] #minus, since reveresed. Look above
 			eTmp.append(R.get_edge_data(eTmp[0], eTmp[1]))
-
 			P21W=go.sumWeights(R,P21) #needs to be calculated before eTmp is removed
 			R.remove_edges_from([tuple(eTmp)]) #temporary remove to get loop
-			cycle=shortestCycle(R,nTmp[0])
+			cycle=go.shortestCycle(R,nTmp[0])
 			alternative=False
 			altW=inf
 			W22=None
@@ -172,13 +133,19 @@ def routingCost(R,e,storeData=False, add=False):
 	if not add and not R.has_edge(e[0],e[1]):
 		print e[0:2]
 		raise Exception('e is not in R, if e should be added "add=True" should be set.')
-	a=sumPathsDiff(R,e,storeData, add)/R.density
+	c=sumPathsDiff(R,e,storeData, add)
 	if not add:
-		print a
-		assert a>=0 #should always be.. right?
+		try:
+			assert c>=0 #should always be.. right?
+		except:
+			print e[0:2]
+			R.draw()
+			plt.show()
+			raw_input('df')
+			raise Exception('dfsd')
 		e[2]=R.get_edge_data(e[0], e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
-	return a
+	return c
 
 def roadFuncEval():
 	"""
