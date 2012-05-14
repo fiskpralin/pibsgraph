@@ -54,10 +54,12 @@ class Observer(Process):
 		else: leftActive=0
 		if self.m.heads['left'].queuing(self.m.driver)==True: waitingD=1
 		else: waitingD=0
+		
 		self.bundlerActiveMoni.observe(bundlerActive, self.sim.now())
 		self.lAMoni.observe(leftActive, self.sim.now())
 		self.lWDMoni.observe(self.m.heads['left'].queuing(self.m.driver), self.sim.now())
 		self.lWBMoni.observe(self.m.heads['left'].waitingForBundler, self.sim.now())
+
 		if leftActive==1 and waitingD==1: raise Exception('Some error in active-waiting interaction of left head')
 		
 		if self.m.nCranes==2:

@@ -62,12 +62,12 @@ class tryDiffConfigThinningMachine(SimSeries):
 								self.s.stats['noMainStops']=len(self.s.m.positions)-1 #Here I assume what is meant is number of stops on the mainroad for harvesting. Not number of places with piles close by. Is this a good assumption. Gives seven all the time.. should be len(self.s.m.positions)-1 maybe?
 								self.s.stats['totTimeConsumed']=self.s.now()
 								if bundler==True:
+									#self.s.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]) can be used instead, but does not give exact result as expected.see below
 									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
 								else: self.s.stats['bundlingTime']=0
 								self.s.stats['work time']#operator active time
-								#self.s.stats['totCraneWaitTime']
-								#self.s.stats['oneCraneWaitTime']
-								#self.s.stats['twoCranesWaitTime']
+								self.timeStats()
+								
 								#self.s.stats['noCraneWaitings']=
 								print self.s.stats['noBundlesOrPiles'], 'piles or bundles'
 								print self.s.stats['noCraneCycles'], 'was the number of crane cycles'
@@ -94,19 +94,15 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,16,self.s.stats['totTimeConsumed'])
 								e.modify(self.Paramrow,17,self.s.stats['bundlingTime'])
 								e.modify(self.Paramrow,18,self.s.stats['work time'])
-								#e.modify(self.Paramrow,19,self.s.stats['-'])
-								#e.modify(self.Paramrow,20,self.s.stats['-'])
-								#e.modify(self.Paramrow,21,self.s.stats['-'])
-								#e.modify(self.Paramrow,22,self.s.stats['-'])
-								#e.modify(self.Paramrow,23,self.s.stats['-'])
-								#e.modify(self.Paramrow,24,self.s.stats['-'])
-								#e.modify(self.Paramrow,25,self.s.stats['-'])
-								#e.modify(self.Paramrow,26,self.s.stats['totBunPileMass'])
+								e.modify(self.Paramrow,19,self.s.stats['oneCraneWorkTime'])
+								e.modify(self.Paramrow,20,self.s.stats['twoCranesWorkTime'])
+								e.modify(self.Paramrow,21,self.s.stats['oneCraneWaitDriverTime'])
+								e.modify(self.Paramrow,22,self.s.stats['twoCranesWaitDriverTime'])
+								e.modify(self.Paramrow,23,self.s.stats['oneCraneWaitBundlerTime'])
+								e.modify(self.Paramrow,24,self.s.stats['twoCanesWaitBundlerTime'])
+								#e.modify(self.Paramrow,25,self.s.stats['noCraneWaitings'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
-
-
-								
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
@@ -129,6 +125,55 @@ class tryDiffConfigThinningMachine(SimSeries):
 			pile.vol=pile.length*pi*(pile.diameter/2.)**2
 		return pile.vol
 
+	def timeStats(self):
+		""" observe that this method performs the statcalculations on the
+		times and sets the values to self.s.stats"""
+
+		if self.m.hasBundler:
+			self.s.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]), 'active bundler time via monitor'
+		else: self.s.stats['bundlingTime']=0
+		if len(self.m.heads)==1:
+			self.s.stats['oneCraneWorkTime']=self.o.tstep*sum(self.o.lAMoni)[1]
+			self.s.stats['oneCraneWaitDriverTime']=self.o.tstep*sum(self.o.lWDMoni)[1]
+			self.s.stats['oneCraneWaitBundlerTime']=self.o.tstep*sum(self.o.lWBMoni)[1]
+			self.s.stats['twoCranesWorkTime']=0
+			self.s.stats['twoCranesWaitDriverTime']=0
+			self.s.stats['twoCranesWaitBundlerTime']=0
+			
+		elif len(self.m.heads)==2:
+			lAMoni=np.array(self.o.lAMoni)
+			rAMoni=np.array(self.o.rAMoni)
+			#t=lAMoni[:,[0]]#takes the times into one array
+			addedActivity=lAMoni[:,[1]]+rAMoni[:,[1]]
+			addedActivityTwo=addedActivity
+			for i in range(len(addedActivity)):
+				if addedActivity[i]==2:	addedActivity[i]=0
+				if addedActivityTwo[i]==1: addedActivityTwo[i]=0
+				elif addedActivityTwo[i]==2: addedActivityTwo[i]=1
+			self.s.stats['oneCraneWorkTime']=self.o.tstep*sum(addedActivity)
+			self.s.stats['twoCranesWorkTime']=self.o.tstep*sum(addedActivityTwo)
+			lWDMoni=np.array(self.o.lWDMoni)
+			rWDMoni=np.array(self.o.rWDMoni)
+			addedWD=lWDMoni[:,[1]]+rWDMoni[:,[1]]
+			addedWDTwo=addedWD
+			for i in range(len(addedWD)):
+				if addedWD[i]==2: addedWD[i]=0
+				if addedWDTwo[i]==1: addedWDTwo[i]=0
+				elif addedWDTwo[i]==2: addedWDTwo[i]=1
+			self.s.stats['oneCranesWaitDriverTime']=self.o.step*sum(addedWD)
+			self.s.stats['twoCranesWaitDriverTime']=self.o.step*sum(addedWDTwo)
+			lWBMoni=np.array(self.o.lWBMoni)
+			rWBMoni=np.array(self.o.rWBMoni)
+			addedWB=lWBMoni[:,[1]]+rWBMoni[:,[1]]
+			addedWBTwo=addedWB
+			for i in range(len(addedWB)):
+				if addedWB[i]==2: addedWB[i]=0
+				if addedWBTwo[i]==1: addedWBTwo[i]=0
+				elif addedWBTwo[i]==2: addedWBTwo[i]=1
+			self.s.stats['oneCranesWaitBundlerTime']=self.o.step*sum(addedWB)
+			self.s.stats['twoCranesWaitBundlerTime']=self.o.step*sum(addedWBTwo)	
+		else: raise Exception('Some error in number of heads in timeStats()')
+		
 
 class varyAutomationThinningMachine(SimSeries):
 	"""
