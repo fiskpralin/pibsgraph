@@ -99,7 +99,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,21,self.s.stats['oneCraneWaitDriverTime'])
 								e.modify(self.Paramrow,22,self.s.stats['twoCranesWaitDriverTime'])
 								e.modify(self.Paramrow,23,self.s.stats['oneCraneWaitBundlerTime'])
-								e.modify(self.Paramrow,24,self.s.stats['twoCanesWaitBundlerTime'])
+								e.modify(self.Paramrow,24,self.s.stats['twoCranesWaitBundlerTime'])
 								#e.modify(self.Paramrow,25,self.s.stats['noCraneWaitings'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
@@ -129,20 +129,20 @@ class tryDiffConfigThinningMachine(SimSeries):
 		""" observe that this method performs the statcalculations on the
 		times and sets the values to self.s.stats"""
 
-		if self.m.hasBundler:
-			self.s.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]), 'active bundler time via monitor'
+		if self.s.m.hasBundler:
+			self.s.stats['bundlingTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.bundlerActiveMoni])# 'active bundler time via monitor'
 		else: self.s.stats['bundlingTime']=0
-		if len(self.m.heads)==1:
-			self.s.stats['oneCraneWorkTime']=self.o.tstep*sum(self.o.lAMoni)[1]
-			self.s.stats['oneCraneWaitDriverTime']=self.o.tstep*sum(self.o.lWDMoni)[1]
-			self.s.stats['oneCraneWaitBundlerTime']=self.o.tstep*sum(self.o.lWBMoni)[1]
+		if len(self.s.m.heads)==1:
+			self.s.stats['oneCraneWorkTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lAMoni])
+			self.s.stats['oneCraneWaitDriverTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lWDMoni])
+			self.s.stats['oneCraneWaitBundlerTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lWBMoni])
 			self.s.stats['twoCranesWorkTime']=0
 			self.s.stats['twoCranesWaitDriverTime']=0
 			self.s.stats['twoCranesWaitBundlerTime']=0
 			
-		elif len(self.m.heads)==2:
-			lAMoni=np.array(self.o.lAMoni)
-			rAMoni=np.array(self.o.rAMoni)
+		elif len(self.s.m.heads)==2:
+			lAMoni=np.array(self.s.o.lAMoni)
+			rAMoni=np.array(self.s.o.rAMoni)
 			#t=lAMoni[:,[0]]#takes the times into one array
 			addedActivity=lAMoni[:,[1]]+rAMoni[:,[1]]
 			addedActivityTwo=addedActivity
@@ -150,28 +150,28 @@ class tryDiffConfigThinningMachine(SimSeries):
 				if addedActivity[i]==2:	addedActivity[i]=0
 				if addedActivityTwo[i]==1: addedActivityTwo[i]=0
 				elif addedActivityTwo[i]==2: addedActivityTwo[i]=1
-			self.s.stats['oneCraneWorkTime']=self.o.tstep*sum(addedActivity)
-			self.s.stats['twoCranesWorkTime']=self.o.tstep*sum(addedActivityTwo)
-			lWDMoni=np.array(self.o.lWDMoni)
-			rWDMoni=np.array(self.o.rWDMoni)
+			self.s.stats['oneCraneWorkTime']=float(self.s.o.tstep*sum(addedActivity))
+			self.s.stats['twoCranesWorkTime']=float(self.s.o.tstep*sum(addedActivityTwo))
+			lWDMoni=np.array(self.s.o.lWDMoni)
+			rWDMoni=np.array(self.s.o.rWDMoni)
 			addedWD=lWDMoni[:,[1]]+rWDMoni[:,[1]]
 			addedWDTwo=addedWD
 			for i in range(len(addedWD)):
 				if addedWD[i]==2: addedWD[i]=0
 				if addedWDTwo[i]==1: addedWDTwo[i]=0
 				elif addedWDTwo[i]==2: addedWDTwo[i]=1
-			self.s.stats['oneCranesWaitDriverTime']=self.o.step*sum(addedWD)
-			self.s.stats['twoCranesWaitDriverTime']=self.o.step*sum(addedWDTwo)
-			lWBMoni=np.array(self.o.lWBMoni)
-			rWBMoni=np.array(self.o.rWBMoni)
+			self.s.stats['oneCraneWaitDriverTime']=float(self.s.o.tstep*sum(addedWD))
+			self.s.stats['twoCranesWaitDriverTime']=float(self.s.o.tstep*sum(addedWDTwo))
+			lWBMoni=np.array(self.s.o.lWBMoni)
+			rWBMoni=np.array(self.s.o.rWBMoni)
 			addedWB=lWBMoni[:,[1]]+rWBMoni[:,[1]]
 			addedWBTwo=addedWB
 			for i in range(len(addedWB)):
 				if addedWB[i]==2: addedWB[i]=0
 				if addedWBTwo[i]==1: addedWBTwo[i]=0
 				elif addedWBTwo[i]==2: addedWBTwo[i]=1
-			self.s.stats['oneCranesWaitBundlerTime']=self.o.step*sum(addedWB)
-			self.s.stats['twoCranesWaitBundlerTime']=self.o.step*sum(addedWBTwo)	
+			self.s.stats['oneCraneWaitBundlerTime']=float(self.s.o.tstep*sum(addedWB))
+			self.s.stats['twoCranesWaitBundlerTime']=float(self.s.o.tstep*sum(addedWBTwo))
 		else: raise Exception('Some error in number of heads in timeStats()')
 		
 

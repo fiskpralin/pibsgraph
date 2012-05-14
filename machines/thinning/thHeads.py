@@ -39,7 +39,7 @@ class ThinningCraneHead(Process):
 		self.currentPile=None
 		self.direction=pi/2.
 		self.waitingForBundler=0
-		self.active=0
+		#self.active=0
 		
 	def treeChopable(self, t):
 		"""
