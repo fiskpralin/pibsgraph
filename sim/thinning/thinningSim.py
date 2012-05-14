@@ -66,7 +66,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
 								else: self.s.stats['bundlingTime']=0
 								self.s.stats['work time']#operator active time
-								self.timeStats()
+								#self.timeStats()
 								
 								#self.s.stats['noCraneWaitings']=
 								print self.s.stats['noBundlesOrPiles'], 'piles or bundles'
@@ -124,55 +124,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 		else:
 			pile.vol=pile.length*pi*(pile.diameter/2.)**2
 		return pile.vol
-
-	def timeStats(self):
-		""" observe that this method performs the statcalculations on the
-		times and sets the values to self.s.stats"""
-
-		if self.s.m.hasBundler:
-			self.s.stats['bundlingTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.bundlerActiveMoni])# 'active bundler time via monitor'
-		else: self.s.stats['bundlingTime']=0
-		if len(self.s.m.heads)==1:
-			self.s.stats['oneCraneWorkTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lAMoni])
-			self.s.stats['oneCraneWaitDriverTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lWDMoni])
-			self.s.stats['oneCraneWaitBundlerTime']=self.s.o.tstep*sum([c[1] for c in self.s.o.lWBMoni])
-			self.s.stats['twoCranesWorkTime']=0
-			self.s.stats['twoCranesWaitDriverTime']=0
-			self.s.stats['twoCranesWaitBundlerTime']=0
-			
-		elif len(self.s.m.heads)==2:
-			lAMoni=np.array(self.s.o.lAMoni)
-			rAMoni=np.array(self.s.o.rAMoni)
-			#t=lAMoni[:,[0]]#takes the times into one array
-			addedActivity=lAMoni[:,[1]]+rAMoni[:,[1]]
-			addedActivityTwo=addedActivity
-			for i in range(len(addedActivity)):
-				if addedActivity[i]==2:	addedActivity[i]=0
-				if addedActivityTwo[i]==1: addedActivityTwo[i]=0
-				elif addedActivityTwo[i]==2: addedActivityTwo[i]=1
-			self.s.stats['oneCraneWorkTime']=float(self.s.o.tstep*sum(addedActivity))
-			self.s.stats['twoCranesWorkTime']=float(self.s.o.tstep*sum(addedActivityTwo))
-			lWDMoni=np.array(self.s.o.lWDMoni)
-			rWDMoni=np.array(self.s.o.rWDMoni)
-			addedWD=lWDMoni[:,[1]]+rWDMoni[:,[1]]
-			addedWDTwo=addedWD
-			for i in range(len(addedWD)):
-				if addedWD[i]==2: addedWD[i]=0
-				if addedWDTwo[i]==1: addedWDTwo[i]=0
-				elif addedWDTwo[i]==2: addedWDTwo[i]=1
-			self.s.stats['oneCraneWaitDriverTime']=float(self.s.o.tstep*sum(addedWD))
-			self.s.stats['twoCranesWaitDriverTime']=float(self.s.o.tstep*sum(addedWDTwo))
-			lWBMoni=np.array(self.s.o.lWBMoni)
-			rWBMoni=np.array(self.s.o.rWBMoni)
-			addedWB=lWBMoni[:,[1]]+rWBMoni[:,[1]]
-			addedWBTwo=addedWB
-			for i in range(len(addedWB)):
-				if addedWB[i]==2: addedWB[i]=0
-				if addedWBTwo[i]==1: addedWBTwo[i]=0
-				elif addedWBTwo[i]==2: addedWBTwo[i]=1
-			self.s.stats['oneCraneWaitBundlerTime']=float(self.s.o.tstep*sum(addedWB))
-			self.s.stats['twoCranesWaitBundlerTime']=float(self.s.o.tstep*sum(addedWBTwo))
-		else: raise Exception('Some error in number of heads in timeStats()')
 		
 
 class varyAutomationThinningMachine(SimSeries):
@@ -497,19 +448,21 @@ class ThinningSim(SimExtend):
 		self.simulate(until=10000)
 		#some simulation information:
 		if observer:
-			self.stats['noBundlesOrPiles']=len(self.G.terrain.piles)
-			if bundler==True:
-				self.stats['bundlingTime']=self.stats['noBundlesOrPiles']*self.m.bundler.timeBundle
-			else: self.stats['bundlingTime']=0
-			print self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]), 'active bundler time via monitor'
-			print self.stats['bundlingTime'], 'active bundler time via easy calculation'
-
+			self.timeStats()
 			print self.o.tstep*sum([c[1] for c in self.o.lAMoni]), 'left head active time via monitor'
 			print self.o.tstep*sum([c[1] for c in self.o.lWBMoni]), 'left head waiting for Bundler'
+			print self.stats['oneCraneWorkTime']
+			print self.stats['oneCraneWaitDriverTime']
+			if self.m.hasBundler:
+				print self.stats['oneCraneWaitBundlerTime']
 			if len(self.m.heads)==2:
 				print self.o.tstep*sum([c[1] for c in self.o.rAMoni]), 'right head active time via monitor'
 				print self.o.tstep*sum([c[1] for c in self.o.rWBMoni]), 'right head waiting for Bundler'
-			print self.now()
+				print self.stats['twoCranesWorkTime']
+				print self.stats['twoCranesWaitDriverTime']
+				if self.m.hasBundler:
+					print self.stats['twoCranesWaitBundlerTime']
+				
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
 		self.stats['outTake']=100*len(self.m.trees)/float(len(self.G.terrain.trees))
 		self.stats['groundAreaRatio']=sum([t.dbh**2*pi*0.25 for t in self.m.trees])/max(1,sum([t.dbh**2*pi*0.25 for t in self.G.terrain.trees]))
@@ -521,6 +474,56 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
+
+	def timeStats(self):
+		""" observe that this method performs the statcalculations on the
+		times and sets the values to self.s.stats"""
+
+		if self.m.hasBundler:
+			self.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni])# 'active bundler time via monitor'
+		else: self.stats['bundlingTime']=0
+		if len(self.m.heads)==1:
+			self.stats['oneCraneWorkTime']=self.o.tstep*sum([c[1] for c in self.o.lAMoni])
+			self.stats['oneCraneWaitDriverTime']=self.o.tstep*sum([c[1] for c in self.o.lWDMoni])
+			self.stats['oneCraneWaitBundlerTime']=self.o.tstep*sum([c[1] for c in self.o.lWBMoni])
+			self.stats['twoCranesWorkTime']=0
+			self.stats['twoCranesWaitDriverTime']=0
+			self.stats['twoCranesWaitBundlerTime']=0
+			
+		elif len(self.m.heads)==2:
+			lAMoni=np.array(self.o.lAMoni)
+			rAMoni=np.array(self.o.rAMoni)
+			#t=lAMoni[:,[0]]#takes the times into one array
+			addedActivity=lAMoni[:,[1]]+rAMoni[:,[1]]
+			addedActivityTwo=addedActivity
+			for i in range(len(addedActivity)):
+				if addedActivity[i]==2:	addedActivity[i]=0
+				if addedActivityTwo[i]==1: addedActivityTwo[i]=0
+				elif addedActivityTwo[i]==2: addedActivityTwo[i]=1
+			self.stats['oneCraneWorkTime']=float(self.o.tstep*sum(addedActivity))
+			self.stats['twoCranesWorkTime']=float(self.o.tstep*sum(addedActivityTwo))
+			lWDMoni=np.array(self.o.lWDMoni)
+			rWDMoni=np.array(self.o.rWDMoni)
+			addedWD=lWDMoni[:,[1]]+rWDMoni[:,[1]]
+			addedWDTwo=addedWD
+			for i in range(len(addedWD)):
+				if addedWD[i]==2: addedWD[i]=0
+				if addedWDTwo[i]==1: addedWDTwo[i]=0
+				elif addedWDTwo[i]==2: addedWDTwo[i]=1
+			self.stats['oneCraneWaitDriverTime']=float(self.o.tstep*sum(addedWD))
+			self.stats['twoCranesWaitDriverTime']=float(self.o.tstep*sum(addedWDTwo))
+			lWBMoni=np.array(self.o.lWBMoni)
+			rWBMoni=np.array(self.o.rWBMoni)
+			addedWB=lWBMoni[:,[1]]+rWBMoni[:,[1]]
+			addedWBTwo=addedWB
+			for i in range(len(addedWB)):
+				if addedWB[i]==2: addedWB[i]=0
+				if addedWBTwo[i]==1: addedWBTwo[i]=0
+				elif addedWBTwo[i]==2: addedWBTwo[i]=1
+			self.stats['oneCraneWaitBundlerTime']=float(self.o.tstep*sum(addedWB))
+			self.stats['twoCranesWaitBundlerTime']=float(self.o.tstep*sum(addedWBTwo))
+		else: raise Exception('Some error in number of heads in timeStats()')
+
 
 
 	def treeStats(self):
