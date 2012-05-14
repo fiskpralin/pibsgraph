@@ -451,18 +451,18 @@ class ThinningSim(SimExtend):
 			self.timeStats()
 			print self.o.tstep*sum([c[1] for c in self.o.lAMoni]), 'left head active time via monitor'
 			print self.o.tstep*sum([c[1] for c in self.o.lWBMoni]), 'left head waiting for Bundler'
-			print self.stats['oneCraneWorkTime']
-			print self.stats['oneCraneWaitDriverTime']
+			print self.stats['oneCraneWorkTime'], 'one crane work time'
+			print self.stats['oneCraneWaitDriverTime'], 'one crane wait for driver time'
 			if self.m.hasBundler:
-				print self.stats['oneCraneWaitBundlerTime']
+				print self.stats['oneCraneWaitBundlerTime'], 'one crane wait for bundler time'
 			if len(self.m.heads)==2:
 				print self.o.tstep*sum([c[1] for c in self.o.rAMoni]), 'right head active time via monitor'
 				print self.o.tstep*sum([c[1] for c in self.o.rWBMoni]), 'right head waiting for Bundler'
-				print self.stats['twoCranesWorkTime']
-				print self.stats['twoCranesWaitDriverTime']
+				print self.stats['twoCranesWorkTime'], 'two cranes work time'
+				print self.stats['twoCranesWaitDriverTime'], 'two cranes wait for driver time'
 				if self.m.hasBundler:
-					print self.stats['twoCranesWaitBundlerTime']
-				
+					print self.stats['twoCranesWaitBundlerTime'], 'two cranes wait for bundler time'
+		print self.now()		
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
 		self.stats['outTake']=100*len(self.m.trees)/float(len(self.G.terrain.trees))
 		self.stats['groundAreaRatio']=sum([t.dbh**2*pi*0.25 for t in self.m.trees])/max(1,sum([t.dbh**2*pi*0.25 for t in self.G.terrain.trees]))
@@ -495,7 +495,7 @@ class ThinningSim(SimExtend):
 			rAMoni=np.array(self.o.rAMoni)
 			#t=lAMoni[:,[0]]#takes the times into one array
 			addedActivity=lAMoni[:,[1]]+rAMoni[:,[1]]
-			addedActivityTwo=addedActivity
+			addedActivityTwo=copy.deepcopy(addedActivity)
 			for i in range(len(addedActivity)):
 				if addedActivity[i]==2:	addedActivity[i]=0
 				if addedActivityTwo[i]==1: addedActivityTwo[i]=0
@@ -505,7 +505,7 @@ class ThinningSim(SimExtend):
 			lWDMoni=np.array(self.o.lWDMoni)
 			rWDMoni=np.array(self.o.rWDMoni)
 			addedWD=lWDMoni[:,[1]]+rWDMoni[:,[1]]
-			addedWDTwo=addedWD
+			addedWDTwo=copy.deepcopy(addedWD)
 			for i in range(len(addedWD)):
 				if addedWD[i]==2: addedWD[i]=0
 				if addedWDTwo[i]==1: addedWDTwo[i]=0
@@ -515,7 +515,7 @@ class ThinningSim(SimExtend):
 			lWBMoni=np.array(self.o.lWBMoni)
 			rWBMoni=np.array(self.o.rWBMoni)
 			addedWB=lWBMoni[:,[1]]+rWBMoni[:,[1]]
-			addedWBTwo=addedWB
+			addedWBTwo=copy.deepcopy(addedWB)
 			for i in range(len(addedWB)):
 				if addedWB[i]==2: addedWB[i]=0
 				if addedWBTwo[i]==1: addedWBTwo[i]=0
