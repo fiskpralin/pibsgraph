@@ -100,7 +100,8 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,22,self.s.stats['twoCranesWaitDriverTime'])
 								e.modify(self.Paramrow,23,self.s.stats['oneCraneWaitBundlerTime'])
 								e.modify(self.Paramrow,24,self.s.stats['twoCranesWaitBundlerTime'])
-								#e.modify(self.Paramrow,25,self.s.stats['noCraneWaitings'])
+								e.modify(self.Paramrow,25,self.s.stats['noCraneWaitings'])
+								e.modify(self.Paramrow,26,self.s.stats['noCraneWaitingsTwo'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
@@ -478,7 +479,8 @@ class ThinningSim(SimExtend):
 	def timeStats(self):
 		""" observe that this method performs the statcalculations on the
 		times and sets the values to self.s.stats"""
-
+		noCWforBundler=0
+		noCWforBundlerTwo=0
 		if self.m.hasBundler:
 			self.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni])# 'active bundler time via monitor'
 		else: self.stats['bundlingTime']=0
@@ -489,8 +491,16 @@ class ThinningSim(SimExtend):
 			self.stats['twoCranesWorkTime']=0
 			self.stats['twoCranesWaitDriverTime']=0
 			self.stats['twoCranesWaitBundlerTime']=0
+			for i in range(len(self.o.lWBMoni)-1):
+				if self.o.lWBMoni[i][1]==0 and self.o.lWBMoni[i+1][1]==1: noCWforBundler+=1
+			self.stats['noCraneWaitings']=noCWforBundler
+			self.stats['noCraneWaitingsTwo']=noCWforBundlerTwo
 			
 		elif len(self.m.heads)==2:
+			for i in range(len(self.o.lWBMoni)-1):
+				if self.o.lWBMoni[i][1]==0 and self.o.lWBMoni[i+1][1]==1: noCWforBundler+=1
+				if self.o.rWBMoni[i][1]==0 and self.o.rWBMoni[i+1][1]==1: noCWforBundler+=1
+			self.stats['noCraneWaitings']=noCWforBundler
 			lAMoni=np.array(self.o.lAMoni)
 			rAMoni=np.array(self.o.rAMoni)
 			#t=lAMoni[:,[0]]#takes the times into one array
@@ -520,6 +530,9 @@ class ThinningSim(SimExtend):
 				if addedWB[i]==2: addedWB[i]=0
 				if addedWBTwo[i]==1: addedWBTwo[i]=0
 				elif addedWBTwo[i]==2: addedWBTwo[i]=1
+			for i in range(len(addedWBTwo)-1):
+				if addedWBTwo[i]==0 and addedWBTwo[i+1]==1: noCWforBundlerTwo+=1
+			self.stats['noCraneWaitingsTwo']=noCWforBundlerTwo
 			self.stats['oneCraneWaitBundlerTime']=float(self.o.tstep*sum(addedWB))
 			self.stats['twoCranesWaitBundlerTime']=float(self.o.tstep*sum(addedWBTwo))
 		else: raise Exception('Some error in number of heads in timeStats()')
