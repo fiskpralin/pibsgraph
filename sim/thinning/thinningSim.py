@@ -346,8 +346,8 @@ def setDefaultThinningParams(simParam={}):
 	#OVERALL
 	s['maxCraneLength']=11 #[m]
 	s['minCraneLength']=3 #[m]
-	s['corridorWidthEF']=1 #[m]
-	s['corridorWidthCD']=2 #[m]
+	s['corridorWidthEF']=2 #[m]
+	s['corridorWidthCD']=1 #[m]
 	s['noCorridorsPerSideCD']=5 #Number of corridors per side
 	s['noCorridorsPerSideEF']=3 #Number of corridors per side
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
@@ -360,14 +360,12 @@ def setDefaultThinningParams(simParam={}):
 	s['radialVelocityOfCrane']=2.5#[m/s]
 	s['moveCraneConst']=1.5#[s]
 	s['angularVelocityOfCrane']=0.35#[rad/s]
-	s['maxPower']=150 #[kW] Maximum powerthe machine can operate at
 	s['minAngleForward']=15#[degrees] Minimum angle for cranes to striproad without machine tipping... Necessary?
-	s['powToMove']=100 #[kW]The power it takes to have the machine moving
 	
 	#AUTOMATION
 	s['moveMachine']=False#
 	s['chooseCorridor']=False#
-	s['moveArmOutCD']=False#
+	s['moveArmOutCD']=True#
 	s['fellTreesCD']=True#
 	s['moveArmInCD']=True#
 	s['dropTreesCD']=False#
@@ -375,12 +373,12 @@ def setDefaultThinningParams(simParam={}):
 	s['twigCrackD']=False#
 	s['moveArmOutEF']=False#
 	s['fellTreesEF']=False#
-	s['moveArmInEF']=False#
+	s['moveArmInEF']=True#
 	s['dropTreesEF']=False#
 	s['cuttingF']=False#
 	s['twigCrackF']=False#
 	s['restOfBundling']=True# Should the rest of the bundling process be automatic?
-	s['startBundler']=False# Need the dirver push a button or is it made automatically?
+	s['startBundler']=False# Need the driver push a button or is it made automatically?
 	
 	#HEADS C,D,E,F
 	s['headWidthCD']=1
@@ -397,24 +395,14 @@ def setDefaultThinningParams(simParam={}):
 	s['maxWeightEF']=350#[kg] Maximum weight load.
 	s['maxGripAreaCD']=0.3#[m2] Maximum grip area for the head. This controls how much it can accumulate C and D
 	s['maxGripAreaEF']=0.3#[m2]-----------"---------------------------- E and F
-	s['powMoveCraneCD']=20#[kW] The power it takes to move the crane, N.B. larger than for EF due to moving cutting blade
-	s['powMoveCraneEF']=15#[kW] The power it takes to move the crane
-	s['powHoldLoadCD']=1#[kW/kg] The power it takes for the crane to hold a load of 1 kg
-	s['powHoldLoadAtDistCD']=1#[kW/m] the power it takes for the crane to hold a load per meter from machine
-	s['powHoldLoadEF']=1#
-	s['powHoldLoadAtDistEF']=1#
-	s['powTwigCrack']=5#[kW] power demanded to twig crack the trees at the head
-	s['powCut']=1# [kW] power demanded to cut trees at the head
 
 	#BUNDLER J
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
 	s['timeBundle']=60#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
 	s['timeStartBundler']=1#[s] The time it takes to get the bundler going. (Push the button)
-	s['powBundleJ']=1#[kW] Power it takes to make a bundle at the bundler J
 	s['maxXSectionJ']=0.5#[m2] Maximum cross section of "stored" trees in bundler
 	s['xSectionThreshJ']=0.4#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
-	#PRIORITIES
-	#--
+
 
 
 	
