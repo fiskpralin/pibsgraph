@@ -43,6 +43,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 							for simNumber in range(1,it+1):
 								G=copy.deepcopy(self.G)
 								self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, observer=True)
+								
 								self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
 								self.s.stats['simNumber']=simNumber
 								self.s.stats['treeFile']=treeFile
@@ -104,6 +105,7 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,26,self.s.stats['noCraneWaitingsTwo'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
+								
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
@@ -463,6 +465,8 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
+	def __del__(self):
+		print "Garbage collection took care of that other thingy"
 
 	def timeStats(self):
 		""" observe that this method performs the statcalculations on the
