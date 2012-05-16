@@ -68,7 +68,9 @@ def sortRemList(R,list):
 
 def simplified_bruteForce(R, ax=None, aCap=0.25, beta=1.5, add=True):
 	"""
-	
+	a simplified algorithm. Still a little bit complex dock, but this is as simple as it gets I think.
+
+	Does not add any edges, only removal. No stochastic elements are involved.
 	"""
 	R.beta=beta	
 	inf = 1e15
@@ -131,6 +133,7 @@ def simplified_bruteForce(R, ax=None, aCap=0.25, beta=1.5, add=True):
 		if e_data['c']>=inf: break #if last in remList and infinite cost..
 		remList.remove(e)
 		e_data['c']=cost(R,e,storeData=True) #in order to store the new path..
+		assert e_data['c']<inf
 		#we are outside... will we go over the areaLimit if we remove e?
 		if e_data['c']>eps and R.areaCover-go.singleRoadSegmentCoverage(e, R, remove=True)*R.Ainv<aCap:
 			assert abs(R.areaCover-go.roadAreaCoverage(R))<eps #compare internal and actual.
@@ -163,7 +166,6 @@ def update_after_mod(ein,R):
 
 		for path, diff in (P11, -1), (P12, -1), (P21, 1), (P22,1):
 			#1 means add to visits, -1 means subtract
-			assert path[0]==nTmp[0]
 			for eTmp in R.edges_from_path_gen(path, data=False):
 				if eTmp==e or eTmp==(e[1],e[0]): continue #this is the removed edge.
 				assert R.has_edge(*eTmp)
@@ -173,10 +175,13 @@ def update_after_mod(ein,R):
 				else: #if not nTmp in d['visited_from_node']:
 					d['visited_from_node'].append(nTmp)
 		#update shortest path info
+		assert P21 != None
+		assert P22 != None #otherwise cost should be inf.
 		nTmp[1]['shortest_path']=P21
 		nTmp[1]['second_shortest']=P22
 		nTmp[1]['new_shortest_path']=None #to avoid hard-found bugs..
 		nTmp[1]['new_second_shortest']=None
+
 def remove_edge(ein, R):
 	"""
 	removes edge e from R and updates related statistics
@@ -239,6 +244,7 @@ def pathsDiff(R,e,storeData=False, add=False):
 
 		P21,P22=get_shortest_and_second(R, nTmp)
 		if P21==None or P22==None:
+			print "infinite cost for edge: ", e[0:2]
 			C=inf
 			break
 		w21=go.sumWeights(R,P21)
@@ -248,10 +254,12 @@ def pathsDiff(R,e,storeData=False, add=False):
 		
 		C+=(w21+beta*w22)-(w11+beta*w12)
 		if storeData: #store so we don't have to do this all again when/if removing edge
+			assert P21!=None and P22!=None
 			nTmp[1]['new_shortest_path']=P21
 			nTmp[1]['new_second_shortest']=P22
 		e[2]['weight']=wstore
 	if C>=inf: e[2]['weight']=wstore #we broke out without adding..
+	print C, storeData
 	return C
 	
 	

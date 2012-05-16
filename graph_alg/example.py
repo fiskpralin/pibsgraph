@@ -14,7 +14,7 @@ import numpy as np
 import random
 import copy
 
-from draw import draw_custom
+from draw import draw_custom, draw_road
 import graph_operations as go
 import costFunctions as cf
 import functions as fun
@@ -231,7 +231,7 @@ def compareAddAndDontAdd():
 def tmp():
 	dx=random.uniform(-700, 700)
 	globalOrigin= 596250+dx, 6727996
-	areaPoly=list(2*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+	areaPoly=list(5*np.array([(0,0),(48,0), (73, 105), (0,96)]))
 	for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	from algorithms.crazyIdea import crazyIdea
@@ -248,7 +248,7 @@ def tmp():
 	R.draw(ax)
 	#ax2=fig.add_subplot(224)
 	#plotWorstRoad(R, ax, ax2)
-
+	
 
 	
 import cProfile
@@ -257,9 +257,10 @@ import random
 random.seed(1)
 tic=time.clock()
 #cProfile.run('''tmp()''')
-#tmp()
+tmp()
+
 #testAngles()
 #compareAddAndDontAdd()
-compareBruteAndSimpleBrute()
+#compareBruteAndSimpleBrute()
 print "simulation took: ", time.clock()-tic, " seconds"
 plt.show()
