@@ -22,6 +22,8 @@ if __name__=='__main__':
 	elif len(sys.argv)>2:
 		a=eval(sys.argv[2])
 		iterations=a
+		nCranes=eval(sys.argv[3])
+		
 	if not anim and len(sys.argv)>1:
 		if sys.argv[1] == 'findBugs':
 			sim.tools.findBugs()
@@ -95,6 +97,8 @@ if __name__=='__main__':
 			PM.varyAll(iterations)
 		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachine
 			TH.tryDiffConfigThinningMachine(it=100)
+		elif sys.argv[1]=='btDCTM':#bashtryDiffConfigThinningMachine
+			TH.bashTryDiffConfigThinningMachine(it=iterations, nCranes=nCranes)
 		else:
 			raise Exception('could not read input argument %s'%str(sys.argv[1]))
 		

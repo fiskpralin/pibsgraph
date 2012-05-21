@@ -22,20 +22,20 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012. Called from
 	a bash-script in order not to run out of memory...
 	"""	
-	def __init__(self,it=1 head='BC', nCranes=1, bundler=False, twigCrack=False, simnumber=simnumber, rownumber=rownumber):
+	def __init__(self,it=1, head='BC', nCranes=1, bundler=False, twigCrack=False, simNumber=1, rownumber=1):
+		self.G=globalVar()
+		#self.G.plotDelay=500 #for debug only
+		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
+		self.G.terrain=Terrain(G=self.G)
+		self.folder='outputFiles/NewThinning_2012'
+		today=datetime.date.today()
+		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'%s'%(string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))+'.xls'
+		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
+		self.Paramrow=1
+
 		for treeFile in self.G.terrain.thinningFiles:
-			#treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
-			self.G=globalVar()
-			#self.G.plotDelay=500 #for debug only
-			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
-			self.G.terrain=Terrain(G=self.G)
-			self.folder='outputFiles/NewThinning_2012'
-			today=datetime.date.today()
-			self.filename=self.folder+'/'+'ThinningWawoBundler_'+'%s'%(string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))+'.xls'
-			e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
-			self.Paramrow=rownumber
 			G=copy.deepcopy(self.G)
 			self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, observer=True)						
 			self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
