@@ -22,7 +22,7 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012. Called from
 	a bash-script in order not to run out of memory...
 	"""	
-	def __init__(self,it=1, head='BC', nCranes=1, bundler=False, twigCrack=False, simNumber=1, rownumber=1):
+	def __init__(self,it=1, head='BC', nCranes=1, bundler=False, twigCrack=False, simNumber=1, rowNumber=1):
 		self.G=globalVar()
 		#self.G.plotDelay=500 #for debug only
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
@@ -31,7 +31,7 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 		today=datetime.date.today()
 		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'%s'%(string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))+'.xls'
 		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
-		self.Paramrow=1
+		self.Paramrow=rowNumber
 
 		for treeFile in self.G.terrain.thinningFiles:
 			self.G.terrain.treeFile=treeFile
