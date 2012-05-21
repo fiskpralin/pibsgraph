@@ -22,7 +22,7 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012. Called from
 	a bash-script in order not to run out of memory...
 	"""	
-	def __init__(self,it=1,treefile=treefile, head='BC', nCranes=1, bundler=False, twigCrack=False, simnumber=simnumber, rownumber=rownumber):
+	def __init__(self,it=1 head='BC', nCranes=1, bundler=False, twigCrack=False, simnumber=simnumber, rownumber=rownumber):
 		for treeFile in self.G.terrain.thinningFiles:
 			#treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
