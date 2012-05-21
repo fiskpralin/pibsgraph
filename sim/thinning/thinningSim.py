@@ -105,7 +105,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,26,self.s.stats['noCraneWaitingsTwo'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
-								
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
@@ -145,7 +144,7 @@ class varyAutomationThinningMachine(SimSeries):
 		a3={'move': False, 'moveArmIn': True, 'moveArmOut': False, 'dumpTrees': True, 'switchFocus': False, 'chop':False}
 	   	a4={'move': False, 'moveArmIn': True, 'moveArmOut': True, 'dumpTrees': True, 'switchFocus': False, 'chop':False}
 		a5={'move': False, 'moveArmIn': True, 'moveArmOut': True, 'dumpTrees': True, 'switchFocus': False, 'chop':True}
-		outpfolder='outputFiles/'+self.__class__.__name__+join([strip(a) for a in split(time.ctime(time.time()))], "_")
+		outpfolder='outputFiles/'+self.__class__.__name__+string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_")
 		summary={'1a':{}, '2a':{}}			
 		for head in ['BC', 'conv']: #just take the regular 1-arm cases first..
 			p=np.array([])
