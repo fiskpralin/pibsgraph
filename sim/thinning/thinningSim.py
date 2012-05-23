@@ -513,8 +513,8 @@ def setDefaultThinningParams(simParam={}):
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
 	s['timeBundle']=60#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
 	s['timeStartBundler']=1#[s] The time it takes to get the bundler going. (Push the button)
-	s['maxXSectionJ']=0.5#[m2] Maximum cross section of "stored" trees in bundler
-	s['xSectionThreshJ']=0.4#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+	s['maxXSectionJ']=0.23#[m2] Maximum cross section of "stored" trees in bundler
+	s['xSectionThreshJ']=0.13#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 
 
 
