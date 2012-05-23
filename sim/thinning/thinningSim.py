@@ -21,6 +21,8 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 	This class will make simulations of the different kinds of machine configurations that
 	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012. Called from
 	a bash-script in order not to run out of memory...
+	make sure the template is a file that already exists and that you have named it the way
+	you want it. It should be a bopy of the template used.
 	"""	
 	def __init__(self,it=1, head='BC', nCranes=1, bundler=False, twigCrack=False, simNumber=1, rowNumber=1, treeFile=210):
 		if bundler==1: bundler=False
@@ -35,8 +37,8 @@ class bashTryDiffConfigThinningMachine(SimSeries):
 		self.G.terrain=Terrain(G=self.G)
 		self.folder='outputFiles/NewThinning_2012'
 		today=datetime.date.today()
-		self.filename=self.folder+'/'+'ThinningWawoBundler_'+'%s'%(string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))+'.xls'
-		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
+		self.filename=self.folder+'/'+'ThinningWawoBundler.xls'
+		e=ExcelOutput(template='outputFiles/NewThinning_2012/ThinningWawoBundler.xls', out=self.filename)
 		self.Paramrow=rowNumber
 
 		self.G.terrain.treeFile=treeFile
