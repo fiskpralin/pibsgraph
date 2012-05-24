@@ -17,6 +17,115 @@ import time
 import datetime
 import random
 
+class bashTryDiffConfigThinningMachine(SimSeries):
+	"""
+	This class will make simulations of the different kinds of machine configurations that
+	we are interested in, in Mattias project for Dan, Urban and Ola spring 2012. Called from
+	a bash-script in order not to run out of memory...
+	make sure the template is a file that already exists and that you have named it the way
+	you want it. It should be a bopy of the template used.
+	"""	
+	def __init__(self,it=1, head='BC', nCranes=1, bundler=False, twigCrack=False, simNumber=1, rowNumber=1, treeFile=210):
+		if bundler==1: bundler=False
+		elif bundler==2: bundler=True
+		else: raise Exception('bundler should be 1 or 2 from bash')
+		if twigCrack==1: twigCrack=False
+		elif twigCrack==2: twigCrack=True
+		else: raise Exception('twigCrack should be 1 or 2 from bash')
+		self.G=globalVar()
+		#self.G.plotDelay=500 #for debug only
+		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
+		self.G.terrain=Terrain(G=self.G)
+		self.folder='outputFiles/NewThinning_2012'
+		today=datetime.date.today()
+		self.filename=self.folder+'/'+'ThinningWawoBundler.xls'
+		e=ExcelOutput(template='outputFiles/NewThinning_2012/ThinningWawoBundler.xls', out=self.filename)
+		self.Paramrow=rowNumber
+
+		self.G.terrain.treeFile=treeFile
+		self.G.terrain.readTrees()
+		G=copy.deepcopy(self.G)
+		self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, observer=True)						
+		self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
+		self.s.stats['simNumber']=simNumber
+		self.s.stats['treeFile']=treeFile
+		self.s.stats['noHarvTrees']=sum([len(b.trees) for b in G.terrain.piles])
+		self.s.stats['noCraneCycles']=sum([pb.craneCycles for pb in G.terrain.piles])
+		self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #total mass of the trees that were harvested, before tc?
+		self.s.stats['harvStemMass']=sum([t.logWeight for t in self.s.m.trees])# total weight of the stems of the trees that are harvested. Not what's in the bundles or piles, but rather what was in terrain before chop.
+		self.s.stats['harvStemVol']=sum([t.vol for t in self.s.m.trees])# total volume of the stems of the trees that are harvested. Not what's in the bundles or piles
+		self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
+		self.s.stats['minBunPileMass']=min([b.biomass for b in G.terrain.piles])
+		self.s.stats['maxBunPileMass']=max([b.biomass for b in G.terrain.piles])
+		self.s.stats['totBunPileMass']=sum([b.biomass for b in G.terrain.piles])
+		self.s.stats['minBunPileVol']=min([self.getVol(b) for b in G.terrain.piles])
+		self.s.stats['maxBunPileVol']=max([self.getVol(b) for b in G.terrain.piles])
+		self.s.stats['totBunPileVol']=sum([self.getVol(b) for b in G.terrain.piles])
+		self.s.stats['noMainStops']=len(self.s.m.positions)-1 #Here I assume what is meant is number of stops on the mainroad for harvesting.
+		self.s.stats['totTimeConsumed']=self.s.now()
+		if bundler==True:
+			#self.s.stats['bundlingTime']=self.o.tstep*sum([c[1] for c in self.o.bundlerActiveMoni]) could be used instead, but does not give exact result as expected. Deviates by some 5%
+			self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
+		else: self.s.stats['bundlingTime']=0
+		self.s.stats['work time']#operator active time
+		print self.s.stats['noBundlesOrPiles'], 'piles or bundles'
+		print self.s.stats['noCraneCycles'], 'was the number of crane cycles'
+		print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
+		print '---------------------------------------------------------------------'
+		
+		"""This part here writes the data to the excel file"""
+		e.modify(self.Paramrow,0,self.s.stats['machineConfig'])
+		e.modify(self.Paramrow,1,self.s.stats['treeFile'])
+		e.modify(self.Paramrow,2,self.s.stats['simNumber'])
+		e.modify(self.Paramrow,3,self.s.stats['noHarvTrees'])
+		e.modify(self.Paramrow,4,self.s.stats['noCraneCycles'])
+		e.modify(self.Paramrow,5,self.s.stats['harvBiomass'])
+		e.modify(self.Paramrow,6,self.s.stats['harvStemMass'])
+		e.modify(self.Paramrow,7,self.s.stats['harvStemVol'])
+		e.modify(self.Paramrow,8,self.s.stats['noBundlesOrPiles'])
+		e.modify(self.Paramrow,9,self.s.stats['minBunPileMass'])#
+		e.modify(self.Paramrow,10,self.s.stats['maxBunPileMass'])
+		e.modify(self.Paramrow,11,self.s.stats['totBunPileMass'])
+		e.modify(self.Paramrow,12,self.s.stats['minBunPileVol'])
+		e.modify(self.Paramrow,13,self.s.stats['maxBunPileVol'])
+		e.modify(self.Paramrow,14,self.s.stats['totBunPileVol'])
+		e.modify(self.Paramrow,15,self.s.stats['noMainStops'])
+		e.modify(self.Paramrow,16,self.s.stats['totTimeConsumed'])
+		e.modify(self.Paramrow,17,self.s.stats['bundlingTime'])
+		e.modify(self.Paramrow,18,self.s.stats['work time'])
+		e.modify(self.Paramrow,19,self.s.stats['oneCraneWorkTime'])
+		e.modify(self.Paramrow,20,self.s.stats['twoCranesWorkTime'])
+		e.modify(self.Paramrow,21,self.s.stats['oneCraneWaitDriverTime'])
+		e.modify(self.Paramrow,22,self.s.stats['twoCranesWaitDriverTime'])
+		e.modify(self.Paramrow,23,self.s.stats['oneCraneWaitBundlerTime'])
+		e.modify(self.Paramrow,24,self.s.stats['twoCranesWaitBundlerTime'])
+		e.modify(self.Paramrow,25,self.s.stats['noCraneWaitings'])
+		e.modify(self.Paramrow,26,self.s.stats['noCraneWaitingsTwo'])
+		e.save()#To be sure to save after each simulation, if something should go wrong
+	#print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
+
+	def getConfig(self,head,nCranes,twigCrack,bundler):
+		if nCranes==1: a='A'
+		else: a='B'
+
+		if head=='BC' and twigCrack==False: b='c'
+		elif head=='BC' and twigCrack==True: b='d'
+		elif head=='convAcc' and twigCrack==False: b='e'
+		elif head=='convAcc' and twigCrack==True: b='f'
+		
+		if bundler==False: c='i'
+		elif bundler==True: c='j'
+		return a+b+c
+
+	def getVol(self,pile):
+		if pile.xSection:
+			pile.vol=pile.xSection*pile.length
+		else:
+			pile.vol=pile.length*pi*(pile.diameter/2.)**2
+		return pile.vol
+
+
+
 class tryDiffConfigThinningMachine(SimSeries):
 	"""
 	This class will make simulations of the different kinds of machine configurations that
@@ -24,7 +133,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 	"""	
 	def __init__(self,it=1):
 		self.G=globalVar()
-		#self.G.plotDelay=500 #for debug only
 		self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)]
 		self.G.terrain=Terrain(G=self.G)
 		self.folder='outputFiles/NewThinning_2012'
@@ -33,7 +141,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 		e=ExcelOutput(template='sim/thinning/template.xls', out=self.filename)
 		self.Paramrow=1
 		for treeFile in self.G.terrain.thinningFiles:
-			#treeFile=105 #for debug only
 			self.G.terrain.treeFile=treeFile
 			self.G.terrain.readTrees()
 			
@@ -44,15 +151,13 @@ class tryDiffConfigThinningMachine(SimSeries):
 							for simNumber in range(1,it+1):
 								G=copy.deepcopy(self.G)
 								self.s=ThinningSim(G=G, vis=False, anim=False, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, observer=True)
-								
 								self.s.stats['machineConfig']=self.getConfig(head,nCranes,twigCrack,bundler)
 								self.s.stats['simNumber']=simNumber
 								self.s.stats['treeFile']=treeFile
 								self.s.stats['noHarvTrees']=sum([len(b.trees) for b in G.terrain.piles])
-
 								self.s.stats['noCraneCycles']=sum([pb.craneCycles for pb in G.terrain.piles])
 								self.s.stats['harvBiomass']=sum([b.weight for b in self.s.m.trees]) #total mass of the trees that were harvested, before tc?
-								self.s.stats['harvStemMass']=sum([t.logWeight for t in self.s.m.trees])# total weight of the stems of the trees that are harvested. Not what's in the bundles or piles, but rather what was in terrain before chop.
+								self.s.stats['harvStemMass']=sum([t.logWeight for t in self.s.m.trees])#total weight of the stems of the trees that are harvested. Not what's in the bundles or piles, but rather what was in terrain before chop.
 								self.s.stats['harvStemVol']=sum([t.vol for t in self.s.m.trees])# total volume of the stems of the trees that are harvested. Not what's in the bundles or piles
 								self.s.stats['noBundlesOrPiles']=len(G.terrain.piles)
 								self.s.stats['minBunPileMass']=min([b.biomass for b in G.terrain.piles])
@@ -68,9 +173,6 @@ class tryDiffConfigThinningMachine(SimSeries):
 									self.s.stats['bundlingTime']=self.s.stats['noBundlesOrPiles']*self.s.m.bundler.timeBundle
 								else: self.s.stats['bundlingTime']=0
 								self.s.stats['work time']#operator active time
-								#self.timeStats()
-								
-								#self.s.stats['noCraneWaitings']=
 								print self.s.stats['noBundlesOrPiles'], 'piles or bundles'
 								print self.s.stats['noCraneCycles'], 'was the number of crane cycles'
 								print self.s.stats['bundlingTime'], self.s.stats['totTimeConsumed']
@@ -106,18 +208,15 @@ class tryDiffConfigThinningMachine(SimSeries):
 								e.modify(self.Paramrow,26,self.s.stats['noCraneWaitingsTwo'])
 								self.Paramrow+=1
 								e.save()#To be sure to save after each simulation, if something should go wrong
-								
 		print 'Congratulations, all your simulations has been run and the data has successfully been stored in the excel-file named ThinningWawoBundler_date and time.xls, to be found in tota/outputFiles/NewThinning_2012.'
 
 	def getConfig(self,head,nCranes,twigCrack,bundler):
 		if nCranes==1: a='A'
 		else: a='B'
-
 		if head=='BC' and twigCrack==False: b='c'
 		elif head=='BC' and twigCrack==True: b='d'
 		elif head=='convAcc' and twigCrack==False: b='e'
 		elif head=='convAcc' and twigCrack==True: b='f'
-		
 		if bundler==False: c='i'
 		elif bundler==True: c='j'
 		return a+b+c
@@ -146,7 +245,7 @@ class varyAutomationThinningMachine(SimSeries):
 		a3={'move': False, 'moveArmIn': True, 'moveArmOut': False, 'dumpTrees': True, 'switchFocus': False, 'chop':False}
 	   	a4={'move': False, 'moveArmIn': True, 'moveArmOut': True, 'dumpTrees': True, 'switchFocus': False, 'chop':False}
 		a5={'move': False, 'moveArmIn': True, 'moveArmOut': True, 'dumpTrees': True, 'switchFocus': False, 'chop':True}
-		outpfolder='outputFiles/'+self.__class__.__name__+join([strip(a) for a in split(time.ctime(time.time()))], "_")
+		outpfolder='outputFiles/'+self.__class__.__name__+string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_")
 		summary={'1a':{}, '2a':{}}			
 		for head in ['BC', 'conv']: #just take the regular 1-arm cases first..
 			p=np.array([])
@@ -355,7 +454,7 @@ def setDefaultThinningParams(simParam={}):
 	s['noCorridorsPerSideEF']=3 #Number of corridors per side
 	s['maxCorridorAngle']=45#[deg] angle of the corridor in relation to the strip road
 	s['switchFocusTime']=3#Time to switch focus from one thing to another
-	s['noIter']=100#number of iterations per configuration
+	#s['noIter']=100#number of iterations per configuration. Should be given from main or in bash
 
 	#MACHINES A,B
 	s['moveConst']=5#[s]
@@ -403,47 +502,29 @@ def setDefaultThinningParams(simParam={}):
 	s['dropPosJ']=3#[m] At what position the cranes should drop the trees. Given is distance in front of crane center
 	s['timeBundle']=60#[s] Time it takes to finish bundling of trees in the bundler, when no twig cracking at heads
 	s['timeStartBundler']=1#[s] The time it takes to get the bundler going. (Push the button)
-	s['maxXSectionJ']=0.5#[m2] Maximum cross section of "stored" trees in bundler
-	s['xSectionThreshJ']=0.4#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
-
-
-
-def testMemory():
-	print "remove this function"
-	it=1e5
-	for i in range(int(it)):
-		s=ThinningSim(vis=False)
-		if i%(it/10)==0:
-			print "sim i:", i
-	raw_input('should be deleted by now')
-
-
+	s['maxXSectionJ']=0.23#[m2] Maximum cross section of "stored" trees in bundler
+	s['xSectionThreshJ']=0.13#[m2] Cross section for which the bundler makes a bundle without waiting for a new load from a head.
 
 ###############################
-# Thinning sim
+#Thinning sim
 ###############################
 class ThinningSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a thinning machine
 	"""
-	def	__init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False, observer=False):
+	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False, observer=False):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
-		self.testvar=range(30000000)
-		self.initialize()
+
 		#if no file to read the simulationsparameters from:
 		setDefaultThinningParams(self.G.simParam) #sets the parameters to default values
 			
 		if not self.G.terrain:
 			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
 			self.G.terrain=Terrain(G=self.G)
-			#self.G.terrain.treeFile=210#for debug only
-			#self.G.terrain.readTrees()#for debug only
 			self.G.terrain.readTrees(thinning=True)
 		craneMax=self.G.simParam['maxCraneLength']
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]
 		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes,startPos=startPos, bundler=bundler,twigCrack=twigCrack)
-		self.activate(self.m,self.m.run())
-		self.simulate(until=10000)
 		self.treeStats() #do some statistics on the trees
 		self.activate(self.m,self.m.run())
 		if observer:
@@ -453,6 +534,7 @@ class ThinningSim(SimExtend):
 		#some simulation information:
 		if observer:
 			self.timeStats()
+			"""
 			print self.o.tstep*sum([c[1] for c in self.o.lAMoni]), 'left head active time via monitor'
 			print self.o.tstep*sum([c[1] for c in self.o.lWBMoni]), 'left head waiting for Bundler'
 			print self.stats['oneCraneWorkTime'], 'one crane work time'
@@ -466,7 +548,7 @@ class ThinningSim(SimExtend):
 				print self.stats['twoCranesWaitDriverTime'], 'two cranes wait for driver time'
 				if self.m.hasBundler:
 					print self.stats['twoCranesWaitBundlerTime'], 'two cranes wait for bundler time'
-		print self.now()		
+			"""
 		self.stats['productivity']=len(self.m.trees)/self.now()*3600
 		self.stats['outTake']=100*len(self.m.trees)/float(len(self.G.terrain.trees))
 		self.stats['groundAreaRatio']=sum([t.dbh**2*pi*0.25 for t in self.m.trees])/max(1,sum([t.dbh**2*pi*0.25 for t in self.G.terrain.trees]))
@@ -478,6 +560,7 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
+
 	def timeStats(self):
 		""" observe that this method performs the statcalculations on the
 		times and sets the values to self.s.stats"""
@@ -538,9 +621,7 @@ class ThinningSim(SimExtend):
 			self.stats['oneCraneWaitBundlerTime']=float(self.o.tstep*sum(addedWB))
 			self.stats['twoCranesWaitBundlerTime']=float(self.o.tstep*sum(addedWBTwo))
 		else: raise Exception('Some error in number of heads in timeStats()')
-
-
-
+		
 	def treeStats(self):
 		"""
 		calculates some statistics.. should maybe be done in terrain class instead?

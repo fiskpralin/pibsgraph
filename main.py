@@ -5,7 +5,6 @@ import sim.planting.PM as PM
 import sim.forwarder.forwSim as FW
 import sim.tools as tools
 import functions as fun
-
 from math import *
 import random
 import copy
@@ -23,6 +22,15 @@ if __name__=='__main__':
 	elif len(sys.argv)>2:
 		a=eval(sys.argv[2])
 		iterations=a
+		if len(sys.argv)>3:#this should be only for the bashscript
+			head=str(sys.argv[3])
+			nCranes=eval(sys.argv[4])
+			bundler=eval(sys.argv[5])
+			twigCrack=eval(sys.argv[6])
+			simNumber=eval(sys.argv[7])
+			rowNumber=eval(sys.argv[8])
+			treeFile=eval(sys.argv[9])
+		
 	if not anim and len(sys.argv)>1:
 		if sys.argv[1] == 'findBugs':
 			sim.tools.findBugs()
@@ -95,7 +103,9 @@ if __name__=='__main__':
 		elif sys.argv[1]=='varyAll':
 			PM.varyAll(iterations)
 		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachine
-			TH.tryDiffConfigThinningMachine(it=iterations)
+			TH.tryDiffConfigThinningMachine(it=100)
+		elif sys.argv[1]=='btDCTM':#bashtryDiffConfigThinningMachine
+			TH.bashTryDiffConfigThinningMachine(it=iterations, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, simNumber=simNumber, rowNumber=rowNumber, treeFile=treeFile)
 		else:
 			raise Exception('could not read input argument %s'%str(sys.argv[1]))
 		
