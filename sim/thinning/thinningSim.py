@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from sim.tools import SimSeries, SimExtend, globalVar
 from sim.thinning.observer import Observer
 from terrain.terrain import Terrain
@@ -407,7 +408,16 @@ def setDefaultThinningParams(simParam={}):
 
 
 
-	
+def testMemory():
+	print "remove this function"
+	it=1e5
+	for i in range(int(it)):
+		s=ThinningSim(vis=False)
+		if i%(it/10)==0:
+			print "sim i:", i
+	raw_input('should be deleted by now')
+
+
 
 ###############################
 # Thinning sim
@@ -416,9 +426,10 @@ class ThinningSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a thinning machine
 	"""
-	def __init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False, observer=False):
+	def	__init__(self, G=None, vis=True, anim=False, head='BC',nCranes=2,series=None, bundler=False, twigCrack=False, observer=False):
 		SimExtend.__init__(self,G, vis, anim, animDelay=1.2,series=series) #does some common stuff, e.g. seed
-
+		self.testvar=range(30000000)
+		self.initialize()
 		#if no file to read the simulationsparameters from:
 		setDefaultThinningParams(self.G.simParam) #sets the parameters to default values
 			
@@ -431,6 +442,8 @@ class ThinningSim(SimExtend):
 		craneMax=self.G.simParam['maxCraneLength']
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]
 		self.m=ThinningMachine(name="thinny", sim=self, G=self.G, head=head, nCranes=nCranes,startPos=startPos, bundler=bundler,twigCrack=twigCrack)
+		self.activate(self.m,self.m.run())
+		self.simulate(until=10000)
 		self.treeStats() #do some statistics on the trees
 		self.activate(self.m,self.m.run())
 		if observer:
@@ -465,9 +478,6 @@ class ThinningSim(SimExtend):
 		if self.p: #plot
 			self.p.terminate()
 			if vis: plt.show()
-	def __del__(self):
-		print "Garbage collection took care of that other thingy"
-
 	def timeStats(self):
 		""" observe that this method performs the statcalculations on the
 		times and sets the values to self.s.stats"""

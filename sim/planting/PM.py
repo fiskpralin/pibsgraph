@@ -147,7 +147,7 @@ class PMSimSeries(SimSeries):
 		if not e: #start a new instance.
 			if not s:
 				raise Exception('simulation instance has to be provided at first call for _storeData')
-			e=ExcelOutput(template='sim/planting/template.py', out=self.filename)
+			e=ExcelOutput(template='sim/planting/template.xls', out=self.filename)
 			self.excelOut=e
 			e.changeSheet(0)
 			#set all the parameters
@@ -579,7 +579,16 @@ def findBugs():
 			print G.automatic, G.craneLim, G.terrain.ttype, "switching:", s.m.timeConsumption['switchFocus']
 			raw_input('plantmachine seems to be stuck..Check it..')
 			raise Exception('plantmachine seems to be stuck..Check it..')
-	
+
+def testMemory():
+	print "remove this function"
+	it=1e5
+	for i in range(int(it)):
+		s=PlantmSim(vis=False)
+		if i%(it/10)==0:
+			print "sim i:", i
+	raw_input('should be deleted by now')
+
 
 #########################################
 #plantmSim - a single simulation
@@ -587,9 +596,12 @@ def findBugs():
 class PlantmSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a plantmachine
-	286"""
+	286
+	"""
 	def __init__(self, G=None, vis=True, anim=False, mtype='2a', ttype='random'):
 		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
+		self.testvar=range(30000000)
+		self.initialize()
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(G=self.G, ttype=ttype)
@@ -599,9 +611,13 @@ class PlantmSim(SimExtend):
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
 			else:
 				self.G.automatic={'mound': True, 'plant': True, 'automove': True, 'micrositeSelection': False, 'moveToMicro': False, 'haltMound':True, 'clearForOtherHead': True}
+		#self.test=testProcess1(name='sdf', sim=self)
+		#self.activate(self.test, self.test.run())
+		#self.simulate(until=5000)
 		self.m=PlantMachine(name="planter", sim=self, G=self.G, mtype=mtype)
 		self.activate(self.m,self.m.run())
 		self.simulate(until=self.G.maxtime)
+		return None
 		#postprocessing
 		self.productivity=len(self.m.treesPlanted)/(self.now()/3600.) #trees/hour
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
@@ -657,3 +673,4 @@ class PlantmSim(SimExtend):
 				ax.set_ylabel('trees planted')
 		return ax
 				
+

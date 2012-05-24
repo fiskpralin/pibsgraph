@@ -109,6 +109,7 @@ if __name__=='__main__':
 		G=tools.globalVar()
 		G.noMonitors=True
 		G.seed=seed
+		TH.testMemory()
 		#G.terrain=PlantMTerrain(G, ttype='0')
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
