@@ -145,9 +145,13 @@ def plot_coverage(G=None, ax=None, color='#666677'):
 	return ax
 
 def draw_road(p, ax, color='c'):
+	assert ax
 	last=None
 	for node in p:
 		if last:
 			ax.plot((last[0], node[0]), (last[1], node[1]), color, linewidth=3)
 		last=node
+	return ax
 	
+
+

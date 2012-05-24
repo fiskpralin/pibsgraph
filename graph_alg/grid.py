@@ -154,14 +154,12 @@ g
 		edges=[((1,1),(2,2)), ((2,2),(3,3))]
 		
 		very handy..
-		if data=True, data for each edge is given as well.
+		if data=True, data for each edge is given as well as edge[2].
 		Check if the edges exist if data=True
 
-
-		NOT tested
 		"""
-		assert len(path) != 1 #one node does not make an edge...
-		if len(path) != 0:
+		if path and len(path) != 0:
+			assert len(path) != 1 #one node does not make an edge...
 			last=None
 			for node in path:
 				if last: #not first time..
