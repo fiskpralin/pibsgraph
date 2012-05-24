@@ -9,7 +9,7 @@ import copy
 from terrain.pile import Pile, Bundle
 
 
-###################################################
+##################################################
 # Bundler
 ##################################################
 class Bundler(Process,UsesDriver):
@@ -42,16 +42,11 @@ class Bundler(Process,UsesDriver):
 			print 'Bundler signaled: Threshold reached', self.sim.now()
 			for c in self.startTheBundler(): yield c
 			print 'Bundler started', self.sim.now()
-			#self.s['restOfBundling']=False #only for debug this is a check what happens. it should be true and this line removed
 			for c in self.cmnd([],self.s['timeBundle']-self.s['timeStartBundler'],auto=self.s['restOfBundling']): yield c
-			print 'Bundler rest'
 			for c in self.releaseDriver(): yield c
 			self.bundleIt()
-			print 'Bundler bundled'
 			self.dumpBundle()
-			print 'Bundler dumped'
 			self.resetBundle()
-			print 'Bundler reset'
 			self.forceBundler=False
 			self.prio=567
 			print 'Bundler done', self.sim.now()
@@ -90,7 +85,6 @@ class Bundler(Process,UsesDriver):
 		"""
 		Adds the time it takes for the driver to push the "start bundling"-button.
 		"""
-		#self.s['startBundler']=True#Debug only should be removed
 		return self.cmnd([],self.s['timeStartBundler'], auto=self.s['startBundler'])
 		self.prio=0
 

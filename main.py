@@ -15,7 +15,6 @@ import numpy as np
 ## MAIN FUNCTION
 ##########################################################
 if __name__=='__main__':
-	#print sys.argv
 	anim=False
 	iterations=2 #default
 	if len(sys.argv)>1 and sys.argv[1] == 'anim':

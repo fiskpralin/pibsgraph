@@ -1,5 +1,4 @@
 from SimPy.Simulation  import *
-
 from machines.basics import UsesDriver, Machine, Operator
 from thHeads import ThinningCraneHead, BCHead, ConventionalHeadAcc
 from thRoad import ThinningRoad
@@ -129,7 +128,7 @@ class ThinningMachine(Machine, UsesDriver):
 		"""
 		Sets up 
 		Note:
-		this is a very inefficient way of doing it, using an iterative method.
+		this is a VERY (indeed...=) inefficient way of doing it, using an iterative method.
 		However, it is sufficient for current use and can be improved if needed.
 		"""
 		#main road

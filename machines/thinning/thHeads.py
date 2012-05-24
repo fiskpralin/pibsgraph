@@ -107,18 +107,12 @@ class ThinningCraneHead(Process):
 			self.treeWeight=0
 			self.gripArea=0
 			self.currentPile.craneCycles+=1#This should give cranecycles involved in this pile
-			#print self.currentPile.craneCycles, 'cranecycles in this pile'
 			self.currentPile.updatePile(direction)#sets pile parameters in a nice way
-			#print 'biomass before tc:',self.currentPile.biomass
 			c.extend(self.twigCrack())
-			#print 'biomass after tc:',self.currentPile.biomass
-			#print 'Mass of the trees before tc:', sum([tree.weight for tree in self.currentPile.trees])
 			if not t or getDistance(t.pos , self.m.pos)>self.m.craneMaxL: #check if more trees in this corridor or within reach in mainroad
 				self.m.G.terrain.piles.append(self.currentPile)#adds the pile to the list of piles in terrain
 				print '*Saved a pile with',len(self.currentPile.trees),'trees at pos:', self.currentPile.pos
-				#print self.m.G.terrain.piles[-1].craneCycles, 'cranecycles in the saved pile'
 				self.currentPile=None
-				#print self.m.G.terrain.piles[-1].biomass#
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			return c
 
@@ -141,19 +135,13 @@ class ThinningCraneHead(Process):
 				i+=1
 				self.trees.remove(tree)
 			print 'added',i,' trees to the bundler', self.sim.now()
-				
 
 			if len(self.trees)!=0: raise Exception('dumptrees does not remove the trees..')
 			self.treeWeight=0
 			self.gripArea=0
 			b.currentBundle.craneCycles+=1
-			#print b.currentBundle.craneCycles, 'cranecycles in this bundle'
 			b.currentBundle.updatePile(direction)#sets pile parameters in a nice way
-			#print 'biomass before tc:', b.currentBundle.biomass
 			c.extend(self.twigCrack()) #Yes this one comes after the trees have been dumped to the bundler. It's a code thing and doesn't matter
-			#print 'biomass after tc:', b.currentBundle.biomass
-			#print 'Mass of the trees before tc:', sum([tree.weight for tree in b.currentBundle.trees])
-
 			self.cmnd(c, time=self.timeDropTrees, auto=self.automatic['dumpTrees'])
 			self.cmnd(c,time=self.setPos(self.getStartPos()), auto=self.automatic['moveArmOut'])#return to the start position
 			return c

@@ -16,29 +16,17 @@ class Observer(Process):
 			if head=='left':
 				#Activity monitor
 				self.lAMoni=Monitor(name='leftyActMon')
-				print 'Made a monitor named', self.lAMoni.name
-				
 				#Waiting for bundler monitor
 				self.lWBMoni=Monitor(name='leftyWaitForBundlerMon')
-				print 'Made a monitor named', self.lWBMoni.name
-
 				#Waiting for driver monitor
 				self.lWDMoni=Monitor(name='leftyWaitForDriverMon')
-				print 'Made a monitor named', self.lWDMoni.name
-				
 			if head=='right':
 				#Activity monitor
 				self.rAMoni=Monitor(name='rightyActMon')
-				print 'Made a monitor named', self.rAMoni.name
-
 				#Waiting for bundler monitor
 				self.rWBMoni=Monitor(name='rightyWaitForBundlerMon')
-				print 'Made a monitor named', self.rWBMoni.name
-
 				#Waiting for driver monitor
 				self.rWDMoni=Monitor(name='rightyWaitForDriverMon')
-				print 'Made a monitor named', self.rWDMoni.name
-
 		self.bundlerActiveMoni=Monitor(name='bundlerActMon')#this is for debug but can maybe be used?
 
 	def run(self):
@@ -54,7 +42,7 @@ class Observer(Process):
 		else: leftActive=0
 		if self.m.heads['left'].queuing(self.m.driver)==True: waitingD=1
 		else: waitingD=0
-		
+
 		self.bundlerActiveMoni.observe(bundlerActive, self.sim.now())
 		self.lAMoni.observe(leftActive, self.sim.now())
 		self.lWDMoni.observe(self.m.heads['left'].queuing(self.m.driver), self.sim.now())
