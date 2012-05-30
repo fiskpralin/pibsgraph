@@ -22,6 +22,19 @@ import grid as gr
 import spider_grid as sg
 from algorithms.bruteForce import bruteForce
 from algorithms.simplified_bruteForce import simplified_bruteForce
+from algorithms.stochastic import stochastic, stochastic_several, ProbListGen
+
+
+
+###############
+# This is just a bunch of Linus' scripts.. not a part of the "program/software"
+#################
+
+
+
+
+
+
 
 def testInterpolation():
 	globalOrigin=596673,6728492
@@ -228,39 +241,107 @@ def compareAddAndDontAdd():
 	ax2=fig2.add_subplot(122,aspect='equal')
 	ax2.set_title("with add, cost: %f"%R2.areaCover)	
 	R2.draw(ax2)
-def tmp():
-	dx=random.uniform(-700, 700)
-	globalOrigin= 596250+dx, 6727996
-	areaPoly=list(5*np.array([(0,0),(48,0), (73, 105), (0,96)]))
-	for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
+
+def tryP0(areaPoly=None, t=60):
+	lst=[0.5,0.6,0.7, 0.8]
+	fig=plt.figure()
+	data=[]
+	best=None
+	globalOrigin= 596250, 6727996
+	Rini=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+	R=copy.deepcopy(Rini)
+	ref=simplified_bruteForce(R)
+	for index,p0 in enumerate(lst):
+		R=copy.deepcopy(Rini)
+		R, tries=stochastic_several(R, t=t/float(len(lst)), probListGen=ProbListGen(p0,15))
+		if not best or R.cost<best.cost:
+			best=R
+		data.append(tries)
+	mi=min([min(tries) for tries in data]+[ref.cost])
+	ma=max([max(tries) for tries in data]+[ref.cost])
+	for index,p0 in enumerate(lst):
+		ax=fig.add_subplot('%d1%d'%(len(lst), index+1))
+		ax.plot(data[index], 'o')
+		ax.plot([0, len(data[index])], [ref.cost, ref.cost], 'r') #reference
+		ax.set_title('p0=%.1f'%p0)
+		ax.set_ylabel('cost')
+		ax.set_ylim(mi-10,ma+10)
+		ax.set_xticklabels([])
+	fig=plt.figure()
+	ax=fig.add_subplot(111)
+	print "best cost:", best.cost
+	best.draw(ax=ax)
+def best(areaPoly=None,t=60):
+	"""
+	time - how long we should look for a better solution
+	"""
+	globalOrigin= 596250, 6727996
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
-	from algorithms.crazyIdea import crazyIdea
-	#R=crazyIdea(areaPoly=areaPoly)
-	#R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
-	#R=sg.SpiderGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
-	R=simplified_bruteForce(R,aCap=0.2,add=False)
+	#R=simplified_bruteForce(R,aCap=0.2, anim=True)
+	R, tries=stochastic_several(R, t=t)
+	fig=plt.figure()
+	ax=fig.add_subplot(111)
+	print "best cost:", R.cost
+	R.draw(ax=ax)
+	fig=plt.figure()
+	ax=fig.add_subplot(111)
+	ax.plot(tries, 'o')
+	ax.set_ylim(0,max(tries)+100)
+
+	
+def tmp(areaPoly=None):
+	globalOrigin= 596250, 6727996
+	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+	R=simplified_bruteForce(R,aCap=0.2, anim=False)
+	#R=stochastic(R,aCap=0.2)
 	print "road area coverage:", go.roadAreaCoverage(R)
 	print "internal evaluation of above:", R.areaCover
 	print "total area:", fun.polygon_area(areaPoly)
 	print "used total area:", R.A, R.Ainv
+	print "total cost:", cf.totalCost(R)
 	fig=plt.figure()
 	ax=fig.add_subplot(111, aspect='equal')
 	R.draw(ax)
 	#ax2=fig.add_subplot(224)
 	#plotWorstRoad(R, ax, ax2)
-	
+
+def findBugs(algList):
+	"""
+	algorithms is a list of algorithms that should be tested
+	"""
+	while True:
+		seed=int(random.uniform(0,1000000))
+		print "seed:", seed
+		random.seed(seed)
+		alg=random.choice(algList)
+		print "chosen algorithm:", alg
+		dx=random.uniform(-700, 700)
+		globalOrigin= 596250+dx, 6727996
+		areaPoly=list(random.uniform(2,3)*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+		for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
+		R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+		R=alg(R,aCap=0.2, anim=False)
+	print "road area coverage:", go.roadAreaCoverage(R)
+	print "internal evaluation of above:", R.areaCover
+	print "total area:", fun.polygon_area(areaPoly)
+	print "used total area:", R.A, R.Ainv
+	print "total cost:", cf.totalCost(R)
 
 	
 import cProfile
 import time
 import random
-random.seed(1)
 tic=time.clock()
-#cProfile.run('''tmp()''')
-tmp()
+areaPoly=list(3*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
+tmp(areaPoly)
+#cProfile.run('''best(t=60,areaPoly)''')
+#best(areaPoly,60)
+#ryP0(areaPoly, t=60 )
+#findBugs([simplified_bruteForce, stochastic])
 
 #testAngles()
 #compareAddAndDontAdd()
 #compareBruteAndSimpleBrute()
-print "simulation took: ", time.clock()-tic, " seconds"
+print "program took: ", time.clock()-tic, " seconds"
 plt.show()
