@@ -4,13 +4,13 @@
 
 heads="BC convAcc"
 rowNumber=1
-iterations=2
+iterations=100
 for treeFile in 210 102 103 403 105 304;do
 	for head in $heads;do
 		for nCranes in {1..2};do
 			for bundler in {1..2};do
 				for twigCrack in {1..2};do
-					for simNumber in {1..2};do #here it is relevant to set the number of iterations for each machine and tree configuration
+					for simNumber in {1..100};do #here it is relevant to set the number of iterations for each machine and tree configuration
 						#echo btDCTM $iterations $head $nCranes $bundler $twigCrack $simNumber $rowNumber $treeFile
 						python main.py btDCTM $iterations $head $nCranes $bundler $twigCrack $simNumber $rowNumber $treeFile
 						rowNumber=`echo $rowNumber+1 | bc`
