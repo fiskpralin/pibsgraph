@@ -6,5 +6,5 @@ Not really complete, something may be missing. In that case, add it.
 * Simpy
 * SciPy
 * NetworkX
-* GDAL?
 * xlrd, xlwt
+* matplotlib
