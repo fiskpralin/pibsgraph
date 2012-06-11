@@ -95,12 +95,14 @@ def get_angle(e1,e2):
 	if th>pi: th=2*pi-th
 	return th
 
-def shortestCycle(R,n):
+def shortestCycle(R,n, debug=False):
 	"""
 	identifies the shortest cycle for undirected graphs
 	Returns it.
 
 	Should be able to do this faster without cycle_basis..
+
+	NOT tested
 
 	"""
 	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
@@ -108,12 +110,18 @@ def shortestCycle(R,n):
 	if len(cycles)==0: return None
 	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
 	m=min([len(c) for c in cycles])
-	cycles=[c for c in cycles if len(c)<1.5*m] #shortens list.
+	#cycles=[c for c in cycles if len(c)<3*m] #shortens list.
+	if debug:
+		for c in cycles:
+			cost=sumWeights(R,c)
+			print "c:", c, cost
+	for c in cycles:
+		c.reverse()
+		c.append(c[0])
+
 	weights=[sumWeights(R,P) for P in cycles]
 	if min(weights)>=1e15: return None #infinite weight...
 	shortest=cycles[weights.index(min(weights))]
-	shortest.reverse()
-	shortest.append(shortest[0])
 	return shortest
 
 def overLapA(e1,e2, R=None):

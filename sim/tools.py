@@ -86,6 +86,7 @@ class SimExtend(Simulation):
 	Adds some common stuff. Also handles the case of not implementing plotMoni
 	"""
 	def __init__(self, G, vis=True, anim=False, animDelay=1, series=None):
+		self.initialize() #must be there says SimPy standards
 		if not G: G=globalVar()
 		self.G=G
 		if G.seed: self.seed=G.seed
@@ -94,7 +95,6 @@ class SimExtend(Simulation):
 		print "seed: ", self.seed
 		random.seed(self.seed)
 		self.machines=[] #all machines are put here in their Machine.__init__ method
-		self.initialize() #must be there says SimPy standards
 		self.stats={} #preferably, store all stats here..
 		self.series=series #we might support references to the simseries, if given
 		self._generalStatistics={} #..the idea is to automatically save all this data.

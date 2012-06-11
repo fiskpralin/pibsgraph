@@ -1,11 +1,14 @@
 #!/usr/bin/env python
-import networkx as nx
-import numpy as np
 from math import *
 import random
-import sys
+import os, sys,shutil
+
+import networkx as nx
+import numpy as np
 from scipy.interpolate import RectBivariateSpline 
 from matplotlib.patches import Polygon
+from matplotlib.lines import Line2D
+import matplotlib.pyplot as plt
 
 import GIS.GIS as GIS
 import graph_operations as go
@@ -60,6 +63,8 @@ class ExtendedGraph(nx.Graph):
 		self.overlap={} #will later be filled. A speedup thing
 		self.weightFunction=normalizedPitchDist #reference to exter
 		self.areaCover=go.roadAreaCoverage(self)
+		self.moviefig=None #may be used for movies later
+		self.cmdfolder=os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""
 		interpolates from the terrain data and returns line coordinates.
@@ -93,6 +98,7 @@ g
 		reason for using self.weightFunction is that several externa functions can be tested..
 		"""
 		d=fun.getDistance(p1,p2)
+		#return d
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
@@ -147,7 +153,7 @@ g
 			self.areaCover+=dA*self.Ainv
 	def edges_from_path_gen(self, path, data=False):
 		"""
-		a generator that steps through the edges between the nodes..
+		returns a generator that steps through the edges between the nodes..
 		
 		e.g.:
 		path=[(1,1),(2,2)(3,3)]
@@ -157,6 +163,7 @@ g
 		if data=True, data for each edge is given as well as edge[2].
 		Check if the edges exist if data=True
 
+		It is a class method in order to be able to provide data
 		"""
 		if path and len(path) != 0:
 			assert len(path) != 1 #one node does not make an edge...
@@ -170,16 +177,52 @@ g
 						yield (last, node) #the edge.. we do not really check if it exists but..
 				last=node
 
-			
+	def movieFlush(self,final=False, fps=3):
+		"""
+		used to create movie. Call for every frame. To finally produce movie, give final=True
+		First time, first=True has to be set.
+
+		Creates a folder animtemp that is not deleted, so that the frames can be used.
+
+		However, the content is deleted next time the movie-function is used.
+
+		The fps input value is only used when final=True
+		"""
+		folder=os.path.join(self.cmdfolder, 'animtemp')
+		if not self.moviefig: #first one..
+			self.moviefig=plt.figure()
+			self._plot_i=0
+			if os.path.exists(folder):
+				shutil.rmtree(folder)
+			os.makedirs(folder)
+		if not os.path.exists(folder):
+			raise Exception('Need to give first=True first time movieFlush is called.')
+		if final: #no more recording, this is the last one..
+			name=os.path.join(self.cmdfolder,'animation.avi')
+			os.system("mencoder 'mf://%s/_tmp*.png' -mf type=png:fps=%d -ovc lavc -lavcopts vcodec=wmv2 -oac copy -o %s"%(folder,fps, name)) #only works if mencoder is installed and on linux. Maybe mac as well.. not sure.
+		else:
+			ax=self.moviefig.add_subplot('111')
+			ax=self.draw(ax=ax)
+			self.moviefig.savefig(os.path.join(folder,'_tmp%06d.png'%round(self._plot_i)))
+			self.moviefig.clear() #saves some memory and we can re-draw next time.
+			self._plot_i+=1
+
 	def draw(self, ax=None, overlap=False, weight=False, cost=False):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
 		"""
-		ax=GIS.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
-		ax=GIS.plot2DContour(self.t_x,self.t_y,self.t_z,ax)
-		pol=Polygon(self.areaPoly, closed=True, color='none', ec='k',lw=3, ls='solid')
-		ax.add_patch(pol)
-		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight, road_color='b', road_width=5)
+		if not ax: #add a new one.. 
+			fig=plt.figure()
+			ax=fig.add_subplot(111)
+		ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
+		ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
+		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight, road_color='#01243B', road_width=4, poly=False)
+		#bug in matplotlib always plots patch in back.. do line instead
+		vertices=self.areaPoly+[self.areaPoly[0]] #closed
+		x=[v[0] for v in vertices]
+		y=[v[1] for v in vertices]
+		l=Line2D(x,y, color='k', linewidth=4)
+		ax.add_line(l)
 		if overlap: draw.plot_coverage(self,ax, color='r')
 		return ax
 

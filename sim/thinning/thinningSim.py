@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from sim.tools import SimSeries, SimExtend, globalVar
 from sim.thinning.observer import Observer
 from terrain.terrain import Terrain

@@ -117,11 +117,9 @@ def totalCost(R):
 	prototype, just to get a hint of how good it is..
 	"""
 	C=0
-	cmax=1e8
-	for e in R.edges(data=True):
-		c=routingCost(R,list(e), add=False)
-		if c>cmax: c=0
-		C+=c
+	for n in R.nodes(data=True):
+		C+=R.beta*go.sumWeights(R,n[1]['shortest_path'])
+		C+=go.sumWeights(R,n[1]['second_shortest'])
 	return C
 		
 def routingCost(R,e,storeData=False, add=False):
