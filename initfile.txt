@@ -15,12 +15,9 @@ maxCraneLength	11	[m]	How far the crane can reach
 minCraneLength	3	[m]	How close to the fasteningpoint the head on the crane can come
 corridorWidthEF	2	[m]	Width of the corridors for the conventional head 
 corridorWidthCD	1	[m]	Width of the corridors for the continuous head
-noCorridorsPerSideCD	3	[-]	Number of corridors per side for continuous head
-noCorridorsPerSideEF	5	[-]	Number of corridors per side for conventional head
-maxCorridorAngle	45	[deg]	angle of the corridor in relation to the strip road
+noCorridorsPerSideCD	5	[-]	Number of corridors per side for continuous head
+noCorridorsPerSideEF	3	[-]	Number of corridors per side for conventional head
 switchFocusTime	3	[s]	time to switch focus
-noIter	100	[-]	number of iterations per configuration
-levelOfThinning	50	[%]
 
 			#MACHINES A,B
 moveConst	5	[s]	  The time it takes to start to move the machine
@@ -28,22 +25,19 @@ velocityOfMachine	1	[m/s]
 radialVelocityOfCrane	2.5	[m/s]
 moveCraneConst	1.5	[s]	The time it takes to start to move the crane
 angularVelocityOfCrane	0.35	[rad/s]
-maxPower	150	[kW]	Maximum power the machine can operate at (Power of the engine)
-minAngleForward	15	[degrees]	Minimum angle for cranes to striproad without machine tipping over.
-powToMove	100	[kW]	The power it takes to have the machine moving
 
 			#AUTOMATION (True below means that it is automatic and does not require drivers attention)
 moveMachine	False
 chooseCorridor	False
-moveArmOutCD	False
+moveArmOutCD	True
 fellTreesCD	True
-moveArmInCD	False
+moveArmInCD	True
 dropTreesCD	False
 cuttingD	False
 twigCrackD	False
 moveArmOutEF	False
 fellTreesEF	False
-moveArmInEF	False
+moveArmInEF	True
 dropTreesEF	False
 cuttingF	False
 twigCrackF	False
@@ -65,19 +59,11 @@ maxWeightCD	350	[kg]	Maximum weight load.
 maxWeightEF	350	[kg]	Maximum weight load.
 maxGripAreaCD	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate
 maxGripAreaEF	0.3	[m2]	Maximum grip area for the head. This controls how much it can accumulate
-powMoveCraneCD	20	[kW]	The power it takes to move the crane, N.B. larger than for EF due to moving cutting blade
-powMoveCraneEF	15	[kW]	The power it takes to move the crane
-powHoldLoadCD	1	[kW/kg]	The power it takes for the crane to hold a load of 1 kg
-powHoldLoadAtDistCD	1	[kW/m]	the power it takes for the crane to hold a load per meter from machine
-powHoldLoadEF	1	[kW/kg]
-powHoldLoadAtDistEF	1	[kW/m]
-powTwigCrack	5	[kW]	power demanded to twig crack the trees at the head
-powCut	1	[kW]	power demanded to cut trees at the head
 
 			#BUNDLER J
 dropPosJ	3	[m]	At what position the cranes should drop the trees. Given is distance in front of crane center
 timeBundle	10	[s]	Time it takes to finish bundling of trees in the bundler.
 timeStartBundler	1	[s]	 The time it takes to get the bundler going.
 powBundleJ	1	[kW]	Power it takes to make a bundle at the bundler J
-maxXSectionJ	0.5	[m2]	Maximum cross section of "stored" trees in bundler
-xSectionThreshJ	0.4	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
+maxXSectionJ	0.23	[m2]	Maximum cross section of "stored" trees in bundler
+xSectionThreshJ	0.13	[m2]	Cross section for which the bundler makes a bundle without waiting for a new load from a head.
