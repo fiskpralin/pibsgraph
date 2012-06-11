@@ -197,9 +197,11 @@ def pathsDiff(R,e,storeData=False):
 		#print w11, w12, w11+w12
 		if w22+w21<w11+w12: #new route should be longer or equal
 			print w22+w21, w11+w12
-			print e
+			print e[0:2]
 			ax=R.draw()
+			P21.reverse()
 			draw_road(P21+P22, ax, 'r')
+			P11.reverse()
 			draw_road(P11+P12, ax, 'b')
 			plt.show()
 			

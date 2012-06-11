@@ -43,6 +43,7 @@ def testInterpolation():
 	g=gr.ExtendedGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	fig=plt.figure()
 	ax=fig.add_subplot(121, aspect='equal')
+	print g
 	g.draw(ax=ax)
 	#now, get the interpolation line
 	from random import uniform as un
@@ -242,15 +243,16 @@ def compareAddAndDontAdd():
 	ax2.set_title("with add, cost: %f"%R2.areaCover)	
 	R2.draw(ax2)
 
-def tryP0(areaPoly=None, t=60):
-	lst=[0.5,0.6,0.7, 0.8]
+def tryP0(areaPoly=None, t=60 ):
 	fig=plt.figure()
+	lst=[0.5,0.6,0.7, 0.8]
 	data=[]
 	best=None
-	globalOrigin= 596250, 6727996
+	globalOrigin=( 596250, 6727996)
 	Rini=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	R=copy.deepcopy(Rini)
 	ref=simplified_bruteForce(R)
+	print "cost:", cf.totalCost(ref)
 	for index,p0 in enumerate(lst):
 		R=copy.deepcopy(Rini)
 		R, tries=stochastic_several(R, t=t/float(len(lst)), probListGen=ProbListGen(p0,15))
@@ -292,16 +294,26 @@ def best(areaPoly=None,t=60):
 def tmp(areaPoly=None):
 	globalOrigin= 596250, 6727996
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+	simplified_bruteForce(R,aCap=0.2, anim=False)
+	c=None
+	for i in range(5):
+		Rt=copy.deepcopy(R)
+		Rt=simplified_bruteForce(Rt,aCap=0.2, anim=False)
+		if c: assert c==Rt.cost
+		c=Rt.cost
+	
 	R=simplified_bruteForce(R,aCap=0.2, anim=False)
 	#R=stochastic(R,aCap=0.2)
+	fig=plt.figure()
+	ax=fig.add_subplot(111, aspect='equal')
+	R.draw(ax)
+
 	print "road area coverage:", go.roadAreaCoverage(R)
 	print "internal evaluation of above:", R.areaCover
 	print "total area:", fun.polygon_area(areaPoly)
 	print "used total area:", R.A, R.Ainv
 	print "total cost:", cf.totalCost(R)
-	fig=plt.figure()
-	ax=fig.add_subplot(111, aspect='equal')
-	R.draw(ax)
+
 	#ax2=fig.add_subplot(224)
 	#plotWorstRoad(R, ax, ax2)
 
@@ -334,10 +346,11 @@ import random
 tic=time.clock()
 areaPoly=list(3*np.array([(0,0),(48,0), (73, 105), (0,96)]))
 for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
-tmp(areaPoly)
-#cProfile.run('''best(t=60,areaPoly)''')
-#best(areaPoly,60)
-#ryP0(areaPoly, t=60 )
+#tmp(areaPoly)
+#cProfile.run('''best(t=60,areaPoly=areaPoly)''')
+testInterpolation()
+#best(areaPoly,60*3)
+#tryP0(areaPoly, t=60)
 #findBugs([simplified_bruteForce, stochastic])
 
 #testAngles()

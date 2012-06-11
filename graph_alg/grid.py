@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from math import *
-import random
 import os, sys,shutil
 
 import networkx as nx
@@ -98,7 +97,7 @@ g
 		reason for using self.weightFunction is that several externa functions can be tested..
 		"""
 		d=fun.getDistance(p1,p2)
-		#return d
+		#return d #remove! just temporary...
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
@@ -231,13 +230,13 @@ g
 
 class SqGridGraph(ExtendedGraph):
 	"""
-	A square grid graph with dx=dy=L. Umin and umax is the boundaries for the edge uniform distribution.
+	A square grid graph with dx=dy=L.
 	xyRatio =0 creates a square area. xyRatio>1 creates an "x>y" rectangle.
 	angle is how the grid is turned in radians. 0=default
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
 	"""
 	
-	def __init__(self,L=24, umin=0, umax=0, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None):
+	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None):
 		
 		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='sqGridGraph')
 		C=L/2.
@@ -321,7 +320,7 @@ class TriGridGraph(ExtendedGraph):
 	"""
 	A triangular grid. Extends from ExtendedGraph
 	"""
-	def __init__(self,L=24, umin=0, umax=0, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
+	def __init__(self,L=24, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
 		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='triGridGraph')
 		
 		digits=3 #used later..
@@ -371,12 +370,12 @@ class TriGridGraph(ExtendedGraph):
 						if index != 0:
 							neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
 							neig=round(neig[0],digits), round(neig[1],digits)
-							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L+ random.uniform(umin,umax), visits=0, visited_from_node=[],c=0)
+							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
 							neig=tuple(cart([xloc+dx/2., yloc-dy,digits], origin=(0,0), direction=direction, fromLocalCart=True))
 							neig=round(neig[0],digits), round(neig[1],digits)
-							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L+ random.uniform(umin,umax), visits=0, visited_from_node=[],c=0)
+							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
 					if index != 0:
-						self.add_edge(tuple([x,round(y,digits)]),tuple([x-dx, round(y,digits)]), weight=L+random.uniform(umin,umax), visits=0, visited_from_node=[],c=0)
+						self.add_edge(tuple([x,round(y,digits)]),tuple([x-dx, round(y,digits)]), weight=L, visits=0, visited_from_node=[],c=0)
 		rem=True
 		while rem:
 			rem=False

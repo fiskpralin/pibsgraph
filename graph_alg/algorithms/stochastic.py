@@ -36,8 +36,10 @@ class ProbListGen:
 
 	It is usually used with the method getList(N) which
 	returns a list of length N based on the pdf above (dependent on N)
+
+	It may seem pretty strange to solve all this with creating a class, instead of using arbitrary lists. But I do actually like this implementation, a lot less fuss in the code where the stuff really happens.. 
 	"""
-	def __init__(self,p0=0.5, Nmax=15):
+	def __init__(self,p0=0.6, Nmax=15):
 		self.p0=p0
 		self.Nmax=Nmax
 		ls=p0**(np.array(range(Nmax))+1)
@@ -64,6 +66,7 @@ class ProbListGen:
 			if i==0: continue
 			ls[i]=ls[i-1]+ls[i]
 		return ls
+	
 def stochastic_several(R, aCap=0.20, beta=1.5, t=60, probListGen=None):
 	"""
 	runs simulations until we have reached the time above (seconds).
