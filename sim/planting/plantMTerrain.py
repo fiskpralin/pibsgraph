@@ -80,6 +80,7 @@ class PlantMTerrain(Terrain):
 		if self.stumpFile=='undefined': #default..
 			self.stumpFile='554'
 		if self.stumpFile: self.readStumps()
+		#here, visible boulders should be added.
 		print "Terrain is initialized. Ttype: %s"%ttype
 if __name__=="__main__":
 	"""example code:"""

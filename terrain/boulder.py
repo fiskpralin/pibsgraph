@@ -17,6 +17,4 @@ class Boulder(Obstacle):
 		self.radius=radius
 		self.volume=pow(radius,3)*pi*4.0/3.0
 		self.area=(radius**2)*pi #area projected to the surface
-		if radius>z:
-			visible=True
 		self.name="boulder"

@@ -100,17 +100,6 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	if C>=inf: R.add_edges_from([tuple(e)]) #we broke out without adding again..
 	return C
 
-def refinedCost(R,  e, storeData=False):
-	"""
-	* cost of removing edge e in road net R, does not modify R but saves some shortest
-	  path information to save future computations, if storeData is set to True
-	* Does not work for directed graphs right now.
-	* Only works for "single origin" right now.
-	* Needs testing and verification
-	"""
-	C=sumPathsDiff(R,e,storeData)
-	C2=R.cr*go.singleRoadSegmentCoverage(e)
-	return R.cd*C/R.density-C2
 
 def totalCost(R):
 	"""
@@ -144,63 +133,3 @@ def routingCost(R,e,storeData=False, add=False):
 		e[2]=R.get_edge_data(e[0], e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
 	return c
-
-def roadFuncEval():
-	"""
-	examines how the road cost function varies with area. It is supposed to be independent of area.
-	old stuff, not updated.
-	"""
-	variable='cr' #options: 'A', 'cr'
-	C1=[]
-	C2=[]
-	Ctot=[]
-	A=[]
-	crlist=[]
-	x=[]
-	L=1
-	origin=(0,0)
-	elements=50 #standard
-	cr=50
-	it=100
-	list=[]
-	if variable=='A': #vary elements instead of A
-		pv=A
-		el=np.linspace(50, 700, it)
-		for elements in el:
-			list.append((elements, cr))
-	elif variable=='cr':
-		pv=crlist
-		crl= np.logspace(0, 27, it, base=np.e-1) #up to e^17
-		for cr in crl:
-			list.append((elements, cr))
-	else: raise Exception('roadFuncEval: variable %s is not valid'%str(variable))
-	for elements, cr  in list:
-		G=sqGridGraph(elements, L, umin=0, umax=0.00001)
-		G.origin=origin
-		G.graph['beta']=1.25
-		G.graph['cd']=1
-		G.graph['cr']=cr
-		R=copy.deepcopy(G)
-		bruteForce(G,R)
-		r=roadCost(R)
-		Ctot.append(r[0])
-		C1.append(r[1])
-		C2.append(r[2])
-		A.append(G.graph['A'])
-		crlist.append(G.graph['cr'])
-		print elements, cr
-	fig1=plt.figure()
-	ax2=alg.draw_custom(R, edge_visits=True)
-	alg.plot_coverage(R,ax2)
-	fig=plt.figure()
-	ax=fig.add_subplot(111)
-	if variable != 'cr': plist=[(C1,'b'),(C2,'c'),(Ctot,'r')]
-	else:
-		plist= [(C1,'b')]
-		pv=np.log(np.array(pv)) #logplot
-		variable='log(cr)'
-	for C, color in plist:
-		ax.plot(pv,C,color)
-	ax.set_xlabel(variable)
-	ax.set_ylabel('C')
-	
