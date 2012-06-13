@@ -11,7 +11,7 @@ from obstacle import *
 class Pile(Obstacle):
 	
 	def __init__(self, pos, biomass=None, diameter=None, radius=None, terrain=None , length=None, weight=None, logWeight=None, vol=None):
-		Obstacle.__init__(self, pos, isSpherical=False, radius=radius, terrain=terrain, color='brown')# '#5C3317'after debug
+		Obstacle.__init__(self, pos, isSpherical=False, radius=radius, terrain=terrain, color='#5C3317')
 		self.pos = pos
 		self.radius = radius #This Radius thingy is for collision detection, don't bother about it.
 		self.vol = vol
@@ -23,7 +23,7 @@ class Pile(Obstacle):
 		self.nodes = None
 		self.ficDiameter = 0
 		self.xSection=None
-		self.craneCycles=0
+		self.craneCycles=0#This is for simulation statistics
 
 	def updatePile(self, direction=None):
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
