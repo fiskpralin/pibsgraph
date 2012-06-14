@@ -81,8 +81,6 @@ class ThinningMachine(Machine, UsesDriver):
 		"""
 		PEM of thinning machine
 		"""
-		while True:
-			yield hold, self, 100
 		#first, take the trees in the main road:
 		while True:
 			r=self.roads['main']

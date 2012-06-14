@@ -33,7 +33,6 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		Machine.__init__(self, name, sim, G=G, mass=21000)
 		self.driver=Operator(sim=self.sim, delay=10000) #does not go on breaks..
 		self.sim.activate(self.driver, self.driver.work())
-		return None
 		self.type=mtype
 		if self.type=='1a2h' or self.type=='2a4h':
 			self.headType='Mplanter'
@@ -109,8 +108,6 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 			raise Exception('could not identify head type') #safety first..
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
-		while True:
-			yield hold,self,1e5
 		distance=self.craneMaxL #not exact, half circle may overlap more or less than this.
 		time=self.timeConstants['machine']+distance/self.velocities['machine']
 		yield request, self, self.driver

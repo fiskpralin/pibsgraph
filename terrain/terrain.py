@@ -30,8 +30,9 @@ class Terrain():
 		plantMinDist - the minimum distance between plants. If seedlings are not implemented you can skip this.
 	    areaPol - a polygon that defines the stand. Points are expected to be counterclockwise
 		"""
-	def __init__(self,G=None, generate=False, dens=1, dbh_mean=0.5, dbh_std=0.1):
-		if not G: raise Exception('by design, you need G for terrain to work. (globalVar(), see sim.tools.py)')
+	def __init__(self,G=None, generate=False, areaPoly=None, dens=1, dbh_mean=0.5, dbh_std=0.1):
+		if not areaPoly: #create from A, square
+			raise Exception('got too little information about the area, need areaPoly polygon. ')
 		self.G=G
 		self.trees=[]
 		self.stumps=[]
@@ -45,10 +46,8 @@ class Terrain():
 		self.boulderFreq=0
 		self.meanBoulderV=0
 		#the following stuff are only used when the stand files are used. should maybe be separated.
-		if not G.areaPoly: #create from A, square
-			raise Exception('got too little information about the area, need areaPoly polygon. ')
-		self.areaPoly=G.areaPoly
-		self.area=polygon_area(G.areaPoly)
+		self.areaPoly=areaPoly
+		self.area=polygon_area(self.areaPoly)
 		lim=fun.polygonLim(self.areaPoly)
 		self.xlim=list(lim[0:2])
 		self.ylim=list(lim[2:4])

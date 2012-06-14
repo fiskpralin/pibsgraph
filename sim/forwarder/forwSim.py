@@ -32,8 +32,8 @@ def setupDefaultRoadNet(G):
 		e[2]['r']=Road(endPoints=e[0:2])
 def setUpTerrain(G=None):
 	"""setups the default terrain with roads"""
-	if not G.areaPoly: G.areaPoly=[(0,-12), (96,-12), (96,82),(0,82) ]
-	t=Terrain(G=G,generate=True, dens=0.1)
+	areaPoly=[(0,-12), (96,-12), (96,82),(0,82) ]
+	t=Terrain(G=G,areaPoly=areaPoly,generate=True, dens=0.1)
 	if not G.roadNet:
 		setupDefaultRoadNet(G)
 		G.roadNet.graph['origin']=(12,0)

@@ -580,15 +580,6 @@ def findBugs():
 			raw_input('plantmachine seems to be stuck..Check it..')
 			raise Exception('plantmachine seems to be stuck..Check it..')
 
-def testMemory():
-	print "remove this function"
-	it=1e5
-	for i in range(int(it)):
-		s=PlantmSim(vis=False)
-		if i%(it/10)==0:
-			print "sim i:", i
-	raw_input('should be deleted by now')
-
 
 #########################################
 #plantmSim - a single simulation
@@ -600,24 +591,19 @@ class PlantmSim(SimExtend):
 	"""
 	def __init__(self, G=None, vis=True, anim=False, mtype='2a', ttype='random'):
 		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
-		self.testvar=range(30000000)
+		#self.REMOVE_THIS=range(50000000)
 		self.initialize()
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
-			self.G.terrain=PlantMTerrain(G=self.G, ttype=ttype)
-		tic=time.clock()
+			self.G.terrain=PlantMTerrain(ttype=ttype)
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
 			else:
 				self.G.automatic={'mound': True, 'plant': True, 'automove': True, 'micrositeSelection': False, 'moveToMicro': False, 'haltMound':True, 'clearForOtherHead': True}
-		#self.test=testProcess1(name='sdf', sim=self)
-		#self.activate(self.test, self.test.run())
-		#self.simulate(until=5000)
 		self.m=PlantMachine(name="planter", sim=self, G=self.G, mtype=mtype)
 		self.activate(self.m,self.m.run())
 		self.simulate(until=self.G.maxtime)
-		return None
 		#postprocessing
 		self.productivity=len(self.m.treesPlanted)/(self.now()/3600.) #trees/hour
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
