@@ -519,8 +519,8 @@ class ThinningSim(SimExtend):
 		setDefaultThinningParams(self.G.simParam) #sets the parameters to default values
 			
 		if not self.G.terrain:
-			self.G.areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
-			self.G.terrain=Terrain(G=self.G)
+			areaPoly=[(0,0), (25,0), (25,40), (0,40)] #default for thinning files.
+			self.G.terrain=Terrain(areaPoly=areaPoly)
 			self.G.terrain.readTrees(thinning=True)
 		craneMax=self.G.simParam['maxCraneLength']
 		startPos=[random.uniform(craneMax, 25-craneMax), -4]

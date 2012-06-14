@@ -37,7 +37,9 @@ if __name__=='__main__':
 		elif sys.argv[1] == 'tryItAll': #tests for all simulations so far. See if they throw exception
 			for i in range(4):
 				s=PM.PlantmSim(vis=False,anim=anim,mtype=random.choice(['1a1h', '1a2h', '2a2h', '2a4h']))
-				TH.ThinningSim(vis=False,anim=anim, head=random.choice(['convAcc', 'BC']), nCranes=random.choice([1,2]), bundler=random.choice([True, False]), twigCrack=random.choice([True, False]))
+				assert s.productivity>10
+				s=TH.ThinningSim(vis=False,anim=anim, head=random.choice(['convAcc', 'BC']), nCranes=random.choice([1,2]), bundler=random.choice([True, False]), twigCrack=random.choice([True, False]))
+				assert s.stats['productivity']>10
 				FW.ForwarderSim(vis=False, anim=anim)
 			print "--------------"
 			print "you passed the test. Feel free to commit."

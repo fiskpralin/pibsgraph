@@ -20,9 +20,9 @@ class PlantMTerrain(Terrain):
 
 	"""
 	def __init__(self, G=None, ttype=None, areaPoly=None):
-		if not G.areaPoly:
-			G.areaPoly=[(0,0), (50,0), (50, 40), (0,40)] #default for stump-files.
-		Terrain.__init__(self,G) 
+		if not areaPoly:
+			areaPoly=[(0,0), (50,0), (50, 40), (0,40)] #default for stump-files.
+		Terrain.__init__(self,G, areaPoly=areaPoly) 
 		self.stumpFile='undefined'
 		self.treeFile='undefined'
 		if str(ttype)=='random':
