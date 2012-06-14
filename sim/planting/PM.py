@@ -884,12 +884,6 @@ class PlantmSim(SimExtend):
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
 			else:
 				self.G.automatic={'mound': True, 'plant': True, 'automove': True, 'micrositeSelection': False, 'moveToMicro': False, 'haltMound':True, 'clearForOtherHead': True}
-<<<<<<< HEAD
-=======
-		#self.test=testProcess1(name='sdf', sim=self)
- 		#self.activate(self.test, self.test.run())
-		#self.simulate(until=5000)
->>>>>>> 9a6bad03f11bc76344db57de1623a18dc54ce54e
 		self.m=PlantMachine(name="planter", sim=self, G=self.G, mtype=mtype)
 		self.activate(self.m,self.m.run())
 		self.simulate(until=self.G.maxtime)
