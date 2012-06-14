@@ -12,7 +12,6 @@ class Obstacle():
 	Superclass for all obstacles.
 
 	If you want 
-
 	"""
 	def __init__(self,pos,isSpherical, radius=500, terrain=None,color='b'):
 		self.pos=pos
@@ -32,11 +31,13 @@ class Obstacle():
 		if not isSpherical: raise Exception('ERROR: function getNodes is not implemented for %s. This is required.'%self.name)
 		if pos and pos != self.pos: raise Exception('nodes and pos not correlated for tree.')
 		return []
+
 	def remove(self):
 		"""
 		removes obstacle from the associated lists, except for the specie-specific one, e.g. terrain.trees.
 		"""
 		if self.terrain: self.terrain.remove(self)
+
 	def draw(self,ax):
 		if self.visible:
 			cir = Circle(tuple(self.pos), radius=self.radius, facecolor=self.color, alpha=self.alpha)

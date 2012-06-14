@@ -601,6 +601,12 @@ class PlantmSim(SimExtend):
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
 			else:
 				self.G.automatic={'mound': True, 'plant': True, 'automove': True, 'micrositeSelection': False, 'moveToMicro': False, 'haltMound':True, 'clearForOtherHead': True}
+<<<<<<< HEAD
+=======
+		#self.test=testProcess1(name='sdf', sim=self)
+ 		#self.activate(self.test, self.test.run())
+		#self.simulate(until=5000)
+>>>>>>> 9a6bad03f11bc76344db57de1623a18dc54ce54e
 		self.m=PlantMachine(name="planter", sim=self, G=self.G, mtype=mtype)
 		self.activate(self.m,self.m.run())
 		self.simulate(until=self.G.maxtime)
@@ -659,4 +665,26 @@ class PlantmSim(SimExtend):
 				ax.set_ylabel('trees planted')
 		return ax
 				
+def setDefaultPlantingParams(simParam={}):
+	"""
+	Sets some params that determine porperties of simulations and and other relevent keys and stuff.
+	Mainly to be used to link from the simulation class in order to perform some sensitivity analysis,
+	hence easy change of parameter values in e.g. a for-loop in the Umbrella.
+	"""
+	s=simParam
 
+	s['dibbleDist']=1 #[m] 0.8, 1.5
+	s['tFindMuSite']=0.1 #[s] 0, 0.1
+	s['wMB']=0.4 #[m] 0.5, 0.6
+	s['impObAv']=False #[m] True
+	s['shift']=0.1 #[+-m] 0.15 
+	s['rotCap']=5.0 #[+-deg] 10 
+	s['tCWhenInvKO']=3 #[s] 1, 5
+	s['invExcavator']=13 #[s] 10, 16
+	s['noRemound']=False #[bool] True
+	s['critStoneSize']=0.008 #[m3] 0.006, 0.01
+	s['moundRadius']=0.2 #[m] 0.15
+	s['rectangular']=False #[bool] True
+	s['rectVol']=0.016 #[m3] 0.024
+	s['TSR']=2000 #[plants/ha] 1500, 2500
+	s['sBMWhenInv']=6.25 #[m] ?
