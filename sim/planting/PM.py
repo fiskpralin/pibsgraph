@@ -203,15 +203,31 @@ class PMSimSeries(SimSeries):
 
 def articleThree(i=1):
 	"""
-	Manages simulations for article three with BT Eriksson, L Junden, M Lindh
+	Manages simulations for article three with BT Eriksson, L Junden, M Lindh during summer 2012.
+	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
+	performed. That way this method can easily be adapted to run only one of the two.
 	"""
 	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	doTheSenseAn(i)# Here the sensitivity analysis is managed
+	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
-	VaryDibbleDist(it=i, G=None, dlist=[0.6, 0.8, 1, 1.5])#
+	"""
+	Here all the different sensitivityanalyses are performed in classes. Each perform one change of parmeter and
+	the results should be saved in a .xls file in a folder.
+
+	Before this method can be run we need to add the machinemodels:
+	['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']
+
+	Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order
+	to actually have different configurations.
+
+	Also we need to check that it is the correct terrain type that is run for these. It should be
+	terrain type '3' for the complete sensitivity analysis
+	"""
+	
+	VaryDibbleDist(i)#
 	VaryTimeFindMuSite(i)#
-	VaryMoundingbladeWidth(it=i, G=None, wlist=[0.4, 0.5, 0.6])#
+	VaryMoundingBladeWidth(i)#
 	VaryImpObAv(i)#
 	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
@@ -222,54 +238,10 @@ def doTheSenseAn(i=1):
 	VaryTSR(i)#
 	TryShortSBM(i)#
 
-def varyAll(i=1):
-	"""
-	runs all the vary-classes for plantingmachine
-	"""
-	try:
-		i=eval(i)
-	except TypeError: pass #i is already integer, continue
-	VaryTerrain(i)
-	VaryCraneRadius(i)
-	VaryAttachLoc(i)
-	VaryDegrees(i)
-	VaryDibbleDist(i)
-	VaryMoundingbladeWidth(i)
-	VaryTargetStockingrate(i)
-	VaryMinDist(i)
-	VaryOperatorSwitchFocusSkill(i)
-	VaryAutomation(i)
-	VaryRadialCraneSpeed(i)
-	BestCase(i)
-	WorstCase(i)
-class VaryCraneRadius(PMSimSeries):
-	"""this class describes a simulation that varies the automation level.
-	tested: Yes
-	"""
-	def __init__(self,it=2, G=None, rList=None):
-		PMSimSeries.__init__(self,G)
-		if not G:
-			self.G.terrain=PlantMTerrain(G=self.G)
-		folder=self.makeFolder()
-		if rList==None:
-			rList=[(4,9),(4,10),(4,11)]
-		for cL in rList:
-			for mtype in ['1a1h', '1a2h', '2a2h', '2a4h']:
-				self.filename=folder+'/'+mtype+str(cL[0])+'_'+str(cL[1])+'.xls'
-				G=copy.deepcopy(self.G)
-				G.craneLim=list(cL)
-				quitPossible=False
-				i=0
-				while i<it or (not quitPossible):
-					G.terrain.restart() #makes the stumps non-static.. different distributions every time.
-					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-					i+=1
-					print "No of sims: %d, it:%d quitpossible: %s"%(i,it, str(quitPossible))
-				self.reset()
-
 class VaryTerrain(PMSimSeries):
 	"""
-	this class describes a simulation that varies the terrain 
+	This class describes a simulation that varies the terrain for all the interesting machine configurations
+	in article 3. 
 	tested: No
 	"""
 	def __init__(self,it=2,G=None):
@@ -290,67 +262,18 @@ class VaryTerrain(PMSimSeries):
 					i+=1
 					print "No of sims: %d"%(i)
 				self.reset()
-
-class VaryAttachLoc(PMSimSeries):
-	"""
-	this class describes a simulation that varies the automation level.
-	tested: Yes
-	"""
-	def __init__(self,it=2,G=None):
-		PMSimSeries.__init__(self,G)
-		if not G:
-			self.G.terrain=PlantMTerrain(G=self.G)
-		folder=self.makeFolder()
-		pList=[3+i for i in range(3)]
-		for p in pList:
-			for mtype in ['2a2h', '2a4h']: #only 2a relevant
-				G=copy.deepcopy(self.G)
-				G.PMattach=p
-				self.filename=folder+'/'+mtype+'_'+'attach'+'_'+str(p)+'.xls'
-				quitPossible=False
-				i=0
-				while i<it or not quitPossible:
-					G.terrain.restart()
-					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-					i+=1
-					print "No of sims: %d"%(i)
-				self.reset()
-
-class VaryDegrees(PMSimSeries):
-	"""
-	this class describes a simulation that varies the allowed angle for the 2a cranes.
-	tested: Yes
-	"""
-	def __init__(self,it=2,G=None):
-		PMSimSeries.__init__(self,G)
-		if not G:
-			self.G.terrain=PlantMTerrain(G=self.G)
-		folder=self.makeFolder()
-		dList=[(0, 45), (0,60), (-10,45), (-20, 45)]
-		for dmin,dmax in dList:
-			for mtype in ['2a2h', '2a4h']: #only 2a relevant
-				G=copy.deepcopy(self.G)
-				G.PMangleLim=[dmin*pi/180.0, dmax*pi/180.0]
-				self.filename=folder+'/'+mtype+'_'+'angles'+'_'+str(dmin)+'_'+str(dmax)+'.xls'
-				quitPossible=False
-				i=0
-				while i<it or not quitPossible:
-					G.terrain.restart() #makes the stumps non-static.. different root distributions every time.
-					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-					i+=1
-					print "No of sims: %d"%(i)
-				self.reset()
 				
 class VaryDibbleDist(PMSimSeries):
-	"""this class describes a simulation that varies the distance between the planting dibbles
-	tested: Yes
+	"""
+	This class describes a simulation that varies the distance between the planting dibbles.
+	tested: No
 	"""
 	def __init__(self,it=2, G=None, dList=None):
 		PMSimSeries.__init__(self,G)
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not dList: dList=[2.01, 1.50, 1.00] #default
+		if not dList: dList=[0.6, 0.8, 1.0, 1.5] #default
 		for d in dList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(d)+'.xls'
@@ -367,16 +290,17 @@ class VaryDibbleDist(PMSimSeries):
 					print "No of sims: %d"%(i)
 				self.reset()
 
-class VaryMoundingbladeWidth(PMSimSeries):
-	"""this class describes a simulation that varies the width of the mounding blade
-	tested: Yes (kind of..)
+class VaryMoundingBladeWidth(PMSimSeries):
+	"""
+	This class describes a simulation that varies the width of the mounding blade.
+	tested: No
 	"""
 	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not wList: wList=[0.45, 0.40, 0.60] #default
+		if not wList: wList=[0.4, 0.5, 0.6] #default
 		for w in wList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(w)+'.xls'
@@ -394,8 +318,9 @@ class VaryMoundingbladeWidth(PMSimSeries):
 				self.reset()
 
 class VaryTimeFindMuSite(PMSimSeries):
-	"""this class describes a simulation that varies the time it takes for the operator
-	to find a microsite for each visible obstaclce.
+	"""
+	This class describes a simulation that varies the time it takes for the operator
+	to find a microsite for each visible obstacle.
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, tList=None):
@@ -420,8 +345,9 @@ class VaryTimeFindMuSite(PMSimSeries):
 				self.reset()
 
 class VaryImpObAv(PMSimSeries):
-	"""This class describes a simulation that varies some properties of the obstacle avoidance,
-	namely he shift and the rotation capability
+	"""
+	This class describes a simulation that varies some properties of the obstacle avoidance,
+	namely he shift and the rotation capabilities. 
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, ObAvList=None):
@@ -447,34 +373,9 @@ class VaryImpObAv(PMSimSeries):
 				self.reset()
 
 class VaryTimeWhenInvKO(PMSimSeries):
-	"""This class describes a simulation that varies some properties of the obstacle avoidance,
-	namely he shift and the rotation capability
-	tested: No
 	"""
-	def __init__(self,it=2, G=None, tList=None):
-		PMSimSeries.__init__(self,G)
-		if not G:
-			self.G.terrain=PlantMTerrain(G=self.G)
-		folder=self.makeFolder()
-		if not tList: tList=[1 ,3 ,5] #[s] default
-		for t in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
-				G=copy.deepcopy(self.G)
-				paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used 
-				G.simParam['tCWhenInvKO']=t
-				quitPossible=False
-				i=0
-				while i<it or not quitPossible:
-					G.terrain.restart() #makes the stumps non-static.. different distributions every time.
-					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-					i+=1
-					print "No of sims: %d"%(i)
-				self.reset()
-
-class VaryTimeWhenInvKO(PMSimSeries):
-	"""This class describes a simulation that varies some properties of the obstacle avoidance,
-	namely he shift and the rotation capability
+	This class describes a simulation that varies the time consumption when inverting with the Karl-Oskar
+	method. 
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, tList=None):
@@ -499,8 +400,11 @@ class VaryTimeWhenInvKO(PMSimSeries):
 				self.reset()
 
 class VaryInvExc(PMSimSeries):
-	"""this class describes a simulation that varies the stockingrate
-	tested: Yes
+	"""
+	This class describes a simulation that varies the total time consumption when inverting with the Excavator
+	method during site prep. The same TC for digging as for the Karl-Oskar method.
+	Don't forget to change the frequency of reinverts as this should be a simulation of the excavator method. 
+	tested: No
 	"""
 	def __init__(self,it=2, G=None, tList=None):
 		PMSimSeries.__init__(self,G)
@@ -513,7 +417,7 @@ class VaryInvExc(PMSimSeries):
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				#G.simParam['invExcavator']=t
+				G.simParam['tInvExcavator']=t
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -524,10 +428,18 @@ class VaryInvExc(PMSimSeries):
 				self.reset()
 
 class TryNoRemound(PMSimSeries):
-	"""this class describes a simulation that varies the stockingrate
+	"""
+	This class describes a simulation that tries a use of no remounds. Instead the we should:
+	Try a scenario where the operator uses the strategy of choosing new	microsites instead of
+	forcing the other planting heads to queue (ie. no forced remounding/reinverting because
+	of poor work quality, just choosing more microsites)
+
+	I don't know how this should be implemented, but there is a boolean parameter given as if
+	should have noRemound. It is 
+
 	tested: No
 	"""
-	def __init__(self,it=2, G=None):
+	def __init__(self,it=2, G=None, tList=None):
 		PMSimSeries.__init__(self,G)
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
@@ -538,7 +450,7 @@ class TryNoRemound(PMSimSeries):
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				#G.simParam['invExcavator']=t
+				G.simParam['noRemound']=t
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -549,7 +461,8 @@ class TryNoRemound(PMSimSeries):
 				self.reset()
 
 class VaryCriticalStoneSize(PMSimSeries):
-	"""this class describes a simulation that varies the critical stone size
+	"""
+	This class describes a simulation that varies the critical stone size.
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, sList=None):
@@ -574,7 +487,8 @@ class VaryCriticalStoneSize(PMSimSeries):
 				self.reset()
 
 class VaryMoundRadius(PMSimSeries):
-	"""this class describes a simulation that varies the critical stone size
+	"""
+	This class describes a simulation that varies the radius of the mounding.
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, rList=None):
@@ -599,22 +513,25 @@ class VaryMoundRadius(PMSimSeries):
 				self.reset()
 
 class VaryRectScoop(PMSimSeries):
-	"""this class describes a simulation that varies the critical stone size
+	"""
+	This class describes a simulation that tries to use a rectangular mound instead of a semi-cicular. Therefore
+	the paramter G.simParam['rectangular'] is set True. What is varied is actually the width of the mounding blade,
+	this should change the volume of the mound.
 	tested: No
 	"""
-	def __init__(self,it=2, G=None, vList=None):
+	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not vList: vList=[0.016, 0.024] #default
-		for v in vList:
+		if not wList: wList=[0.4, 0.5, 0.6] #default
+		for w in wList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				self.filename=folder+'/'+mtype+'_'+str(v)+'.xls'
+				self.filename=folder+'/'+mtype+'_'+str(w)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
 				G.simParam['rectangular']=True
-				G.simParam['rectVol']=v
+				G.simParam['wMB']=w
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -625,7 +542,8 @@ class VaryRectScoop(PMSimSeries):
 				self.reset()
 
 class VaryTSR(PMSimSeries):
-	"""this class describes a simulation that varies the critical stone size
+	"""
+	Tthis class describes a simulation that varies the target stocking rate, TSR.
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, TSRList=None):
@@ -650,7 +568,9 @@ class VaryTSR(PMSimSeries):
 				self.reset()
 
 class TryShortSBM(PMSimSeries):
-	"""this class describes a simulation that varies the critical stone size
+	"""
+	This class describes a simulation that changes the survivalrate and thence the distance (I think)
+	between each stop. At least it is called S_BM_when_inverting. This is set to 6.25 m.
 	tested: No
 	"""
 	def __init__(self,it=2, G=None, dList=None):
@@ -674,9 +594,106 @@ class TryShortSBM(PMSimSeries):
 					print "No of sims: %d"%(i)
 				self.reset()
 
+def varyAll(i=1):
+	"""
+	runs all the vary-classes for plantingmachine
+	"""
+	try:
+		i=eval(i)
+	except TypeError: pass #i is already integer, continue
+	VaryTerrain(i)
+	VaryCraneRadius(i)
+	VaryAttachLoc(i)
+	VaryDegrees(i)
+	VaryDibbleDist(i)
+	VaryMoundingbladeWidth(i)
+	VaryTargetStockingrate(i)
+	VaryMinDist(i)
+	VaryOperatorSwitchFocusSkill(i)
+	VaryAutomation(i)
+	VaryRadialCraneSpeed(i)
+	BestCase(i)
+	WorstCase(i)
+
+class VaryAttachLoc(PMSimSeries):
+	"""
+	this class describes a simulation that varies the automation level.
+	tested: Yes (really?)
+	"""
+	def __init__(self,it=2,G=None):
+		PMSimSeries.__init__(self,G)
+		if not G:
+			self.G.terrain=PlantMTerrain(G=self.G)
+		folder=self.makeFolder()
+		pList=[3+i for i in range(3)]
+		for p in pList:
+			for mtype in ['2a2h', '2a4h']: #only 2a relevant
+				G=copy.deepcopy(self.G)
+				G.PMattach=p
+				self.filename=folder+'/'+mtype+'_'+'attach'+'_'+str(p)+'.xls'
+				quitPossible=False
+				i=0
+				while i<it or not quitPossible:
+					G.terrain.restart()
+					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+					i+=1
+					print "No of sims: %d"%(i)
+				self.reset()
+
+class VaryDegrees(PMSimSeries):
+	"""
+	this class describes a simulation that varies the allowed angle for the 2a cranes.
+	tested: Yes (really?)
+	"""
+	def __init__(self,it=2,G=None):
+		PMSimSeries.__init__(self,G)
+		if not G:
+			self.G.terrain=PlantMTerrain(G=self.G)
+		folder=self.makeFolder()
+		dList=[(0, 45), (0,60), (-10,45), (-20, 45)]
+		for dmin,dmax in dList:
+			for mtype in ['2a2h', '2a4h']: #only 2a relevant
+				G=copy.deepcopy(self.G)
+				G.PMangleLim=[dmin*pi/180.0, dmax*pi/180.0]
+				self.filename=folder+'/'+mtype+'_'+'angles'+'_'+str(dmin)+'_'+str(dmax)+'.xls'
+				quitPossible=False
+				i=0
+				while i<it or not quitPossible:
+					G.terrain.restart() #makes the stumps non-static.. different root distributions every time.
+					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+					i+=1
+					print "No of sims: %d"%(i)
+				self.reset()
+
+class VaryCraneRadius(PMSimSeries):
+	"""
+	This class describes a simulation that varies the crane radius.
+	tested: Yes (really?)
+	"""
+	def __init__(self,it=2, G=None, rList=None):
+		PMSimSeries.__init__(self,G)
+		if not G:
+			self.G.terrain=PlantMTerrain(G=self.G)
+		folder=self.makeFolder()
+		if rList==None:
+			rList=[(4,9),(4,10),(4,11)]
+		for cL in rList:
+			for mtype in ['1a1h', '1a2h', '2a2h', '2a4h']:
+				self.filename=folder+'/'+mtype+str(cL[0])+'_'+str(cL[1])+'.xls'
+				G=copy.deepcopy(self.G)
+				G.craneLim=list(cL)
+				quitPossible=False
+				i=0
+				while i<it or (not quitPossible):
+					G.terrain.restart() #makes the stumps non-static.. different distributions every time.
+					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+					i+=1
+					print "No of sims: %d, it:%d quitpossible: %s"%(i,it, str(quitPossible))
+				self.reset()
+
 class VaryMinDist(PMSimSeries):
 	"""this class describes a simulation that varies the stockingrate, not really? not stockingrate.
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
@@ -700,7 +717,7 @@ class VaryMinDist(PMSimSeries):
 
 class VaryOperatorSwitchFocusSkill(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus switching skill
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
@@ -724,7 +741,7 @@ class VaryOperatorSwitchFocusSkill(PMSimSeries):
 		
 class VaryAutomation(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus swiching skill
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
@@ -751,7 +768,7 @@ class VaryAutomation(PMSimSeries):
 
 class VaryRadialCraneSpeed(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus swiching skill
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None, wList=None):
 		PMSimSeries.__init__(self,G)
@@ -775,7 +792,7 @@ class VaryRadialCraneSpeed(PMSimSeries):
 
 class BestCase(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus switching skill
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None):
 		self.bestCase=True
@@ -801,7 +818,7 @@ class BestCase(PMSimSeries):
 
 class WorstCase(PMSimSeries):
 	"""this class describes a simulation that varies the operator focus swiching skill
-	tested: Yes
+	tested: Yes (really?)
 	"""
 	def __init__(self,it=2, G=None):
 		self.worstCase=True
@@ -824,6 +841,7 @@ class WorstCase(PMSimSeries):
 				i+=1
 				print "No of sims: %d"%(i)
 			self.reset()
+			
 def findBugs():
 	"""
 	just a thing for the planting simulation code
@@ -864,9 +882,9 @@ def findBugs():
 			raise Exception('plantmachine seems to be stuck..Check it..')
 
 
-#########################################
-#plantmSim - a single simulation
- ##########################################
+###################################
+# plantmSim - a single simulation #
+###################################
 class PlantmSim(SimExtend):
 	"""
 	class for a single simulation with a 1a or 2a plantmachine
@@ -874,7 +892,6 @@ class PlantmSim(SimExtend):
 	"""
 	def __init__(self, G=None, vis=True, anim=False, mtype='2a', ttype='random'):
 		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
-		#self.REMOVE_THIS=range(50000000)
 		self.initialize()
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
@@ -896,6 +913,7 @@ class PlantmSim(SimExtend):
 		if self.p: #if we have a plotter instance
 			self.p.terminate()
 			plt.show() #nothing is processed in paralell with this, thus last:
+			
 	def plotMoni(self, ax, number):
 		"""
 		defines the monitors that should be plotted.
@@ -921,16 +939,6 @@ class PlantmSim(SimExtend):
 				ax.axis([-0.1, self.now(), -0.1, max(moni.yseries())+0.1])
 				ax.grid(True)
 				ax.set_ylabel('Wait queue for driver.')
-			"""moni=self.m.driver.waitMon
-			if len(moni)>0:
-				axt=int(max(moni.yseries()))
-				ticks=[]
-				for i in range(maxt+1): ticks.append(i)
-				ax.set_yticks(tuple(ticks))
-				ax.plot(moni.tseries(),moni.yseries(), drawstyle='steps-post')
-				ax.axis([-0.1, m.sim.now(), -0.1, max(moni.yseries())+0.1])
-				ax.grid(True)
-				ax.set_ylabel('Wait queue for driver.')	"""
 		elif number==3: #plot trees planted
 			moni=self.m.treeMoni
 			#trees planted
@@ -944,12 +952,16 @@ class PlantmSim(SimExtend):
 				
 def paramsForSensAn(simParam={}):
 	"""
-	Sets some params that determine porperties of simulations and and other relevent keys and stuff.
+	Sets some parameters that determine properties of simulations and other relevent keys and stuff.
 	Mainly to be used to link from the simulation class in order to perform some sensitivity analysis,
-	hence easy change of parameter values in e.g. a for-loop in the Umbrella.
+	hence easy change of parameter values in e.g. a for-loop in the Umbrella, see 'Vary*'-classes above
+	and the method articleThree. In general simParam is saved in G. Below set values are default and
+	the commented values are what to be tested in the sensitivity analysis.
 	"""
 	s=simParam
 
+	"""Sensitivity analysis
+	-----------------------"""
 	s['dibbleDist']=1 #[m] 0.8, 1.5
 	s['tFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=0.4 #[m] 0.5, 0.6
@@ -957,7 +969,7 @@ def paramsForSensAn(simParam={}):
 	s['shift']=0.1 #[+-m] 0.15 
 	s['rotCap']=5.0 #[+-deg] 10 
 	s['tCWhenInvKO']=3 #[s] 1, 5
-	s['invExcavator']=13 #[s] 10, 16
+	s['tInvExcavator']=13 #[s] 10, 16
 	s['noRemound']=False #[bool] True
 	s['critStoneSize']=0.008 #[m3] 0.006, 0.01
 	s['moundRadius']=0.2 #[m] 0.15
@@ -965,3 +977,6 @@ def paramsForSensAn(simParam={}):
 	s['rectVol']=0.016 #[m3] 0.024
 	s['TSR']=2000 #[plants/ha] 1500, 2500
 	s['sBMWhenInv']=6.25 #[m] ?
+
+	"""Other parameters for the simulations
+	---------------------------------------"""
