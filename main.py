@@ -106,6 +106,8 @@ if __name__=='__main__':
 			TH.tryDiffConfigThinningMachine(it=100)
 		elif sys.argv[1]=='btDCTM':#bashtryDiffConfigThinningMachine
 			TH.bashTryDiffConfigThinningMachine(it=iterations, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, simNumber=simNumber, rowNumber=rowNumber, treeFile=treeFile)
+		elif sys.argv[1]=='articleThree':
+			PM.articleThree(iterations)
 		else:
 			raise Exception('could not read input argument %s'%str(sys.argv[1]))
 		
