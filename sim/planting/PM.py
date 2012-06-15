@@ -891,8 +891,8 @@ class PlantmSim(SimExtend):
 	286
 	"""
 	def __init__(self, G=None, vis=True, anim=False, mtype='2a', ttype='random'):
-		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
 		self.initialize()
+		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
