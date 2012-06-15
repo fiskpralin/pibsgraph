@@ -137,8 +137,8 @@ class PMSimSeries(SimSeries):
 		return s, quitPossible
 	def _storeData(self, s=None):
 		"""
-		stores the data. The strategy is to store it all, it has to be processed later.
-		The purpose of this function is to standardize the column "design", so the numerous data files are easily
+		Stores the data. The strategy is to store it all, it has to be processed later.
+		The purpose of this function is to standardize the column 'design', so the numerous data files are easily
 		accessed and generic scripts can be written for them.
 
 		s has to be given if this is the first time the method is called and an output should  be created.
@@ -912,7 +912,7 @@ class PlantmSim(SimExtend):
 		print "number of remounds", self.stats['remound attempts']
 		if self.p: #if we have a plotter instance
 			self.p.terminate()
-			plt.show() #nothing is processed in paralell with this, thus last:
+			plt.show() #nothing is processed in parallell with this, thus last:
 			
 	def plotMoni(self, ax, number):
 		"""

@@ -45,6 +45,7 @@ class PlotWorld(Process):
 		if self.sim.anim:
 			if not os.path.exists('animtemp'):
 				os.makedirs('animtemp')
+
 	def run(self):
 		while True:
 			yield hold, self, self.tstep
@@ -54,6 +55,7 @@ class PlotWorld(Process):
 				raw_input("Press return key to continue...")
 			else:
 				self.update()
+				
 	def update_world(self,ax1, lim=None):
 		"""
 		updates the animation, i.e terrain, machine etc visualization
@@ -81,6 +83,7 @@ class PlotWorld(Process):
 		else: ax1.axis(self.G.terrain.xlim+self.G.terrain.ylim)
 		ax1.set_xlabel('x (m)')
 		ax1.set_ylabel('y (m)')	
+
 	def update(self):
 		print self.sim.now(), ",starts plotting procedure"
 		G=self.G
@@ -101,6 +104,7 @@ class PlotWorld(Process):
 			fig.savefig('animtemp/_tmp%06d.png'%round(self.sim.now()))
 		else:
 			plt.draw() #not really needed, I think? done in run
+
 	def terminate(self):
 		"""
 		This method should be called when done with anim.
