@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 from scipy.stats import pareto
+import xlrd
 
 #from obstacle import Obstacle
 from stump import Stump
@@ -20,6 +21,7 @@ from tree import Tree
 from root import Root
 from boulder import Boulder
 from pile import Pile
+from surfaceBoulder import SurfaceBoulder
 
 class Terrain():
 	"""
@@ -380,6 +382,47 @@ class Terrain():
 			if dbh>biggestDBH: biggestDBH=dbh
 		print "biggest dbh:", biggestDBH, "m"
 		f.close()				
+
+	def makeSurfaceBoulders(self):
+		"""
+		This method should read the surfaceboulders, and generate a set of randomly distributed surface boulders
+		in the terrain. File is specified in comment below.
+		"""
+		
+		print 'This is where the surfaceboulders should be genereted'
+		"""Here the file with stone data is read"""
+		sBFile='terrain/terrainFiles/planting/surfaceBoulders.xls'
+		wb=xlrd.open_workbook(sBFile)
+		sh=wb.sheet_by_index(0)
+		sBData=sh.col_values(0)#This is all the sBoulders form the file
+		del sBData[0:2]#deletes the first two rows which are just descriptions and not data
+		"""Here we pick out the right number of stones from the data"""
+		sBoulders=[]#Surfaceboulders to be places in terrain
+		if self.blockQuota==0.25 or self.blockQuota==0: noSBoulders=0
+		elif self.blockQuota==0.55: noSBoulders=int(1800.0/10000.0*self.area)
+		elif self.blockQuota==0.75: noSBoulders=int(4000.0/10000.0*self.area)
+		for i in range(noSBoulders):
+			sBoulders.append(random.choice(sBData)/10)#To get the diameters in [m]
+		sBoulders.sort(reverse=True)
+		print sBoulders
+		"""Here we place these stones in the terrain"""
+		#There should be some collision detection in the section below...
+		for i in sBoulders:
+			xpos=random.uniform(0,50)
+			ypos=random.uniform(0,40)
+			pos=[xpos,ypos]
+			sB=SurfaceBoulder(pos=pos,radius=i/2.0,z=0,terrain=self)
+
+		
+	def getHumusLayer(self):
+		"""
+		This method should generate a humus layer with a thicknessdistribution over the polyarea. Triangular
+		distribution on grid and then interpolate with splines.
+		Important to adapt positions (z) of other obstacles such as roots, surface boudlers boulders
+		etc if this is implemented
+		"""
+		print 'This is where the humus layer is created'
+
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
 		obstList=self.getNeighborObst(pos, Lmax=R)

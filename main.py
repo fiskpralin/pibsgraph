@@ -109,8 +109,8 @@ if __name__=='__main__':
 			PM.WorstCase(iterations)
 		elif sys.argv[1]=='varyAll':
 			PM.varyAll(iterations)
-		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachine
-			TH.tryDiffConfigThinningMachine(it=100)
+		elif sys.argv[1]=='tDCTM':#tryDiffConfigThinningMachinetunately this one does not work due to memory issues. For morethan one iteration use 'btDCTM' instead.
+			TH.tryDiffConfigThinningMachine(iterations)
 		elif sys.argv[1]=='btDCTM':#bashtryDiffConfigThinningMachine
 			TH.bashTryDiffConfigThinningMachine(it=iterations, head=head, nCranes=nCranes, bundler=bundler, twigCrack=twigCrack, simNumber=simNumber, rowNumber=rowNumber, treeFile=treeFile)
 		elif sys.argv[1]=='articleThree':

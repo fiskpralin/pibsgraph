@@ -16,15 +16,19 @@ class PlantMTerrain(Terrain):
 	"""
 	This class is for the planting machine terrain.
 
-	Changes all the time due to new instructions, hard to keep it backwards compatible
+	Changes all the time due to new instructions, hard to keep it backwards compatible.
+
+	It is somewhat important in what order different constituents are generated. Should boulders,
+	stumps(with roots) or surfaceboulders be generated first?
 
 	"""
-	def __init__(self, G=None, ttype=None, areaPoly=None):
+	def __init__(self, G=None, ttype=None, areaPoly=None, surfaceBoulders=False, humus=False):
 		if not areaPoly:
 			areaPoly=[(0,0), (50,0), (50, 40), (0,40)] #default for stump-files.
 		Terrain.__init__(self,G, areaPoly=areaPoly) 
 		self.stumpFile='undefined'
 		self.treeFile='undefined'
+		#if surfaceBoulders: self.surfaceBoulderFile='/terrain/terrainfiles/planting/surfaceBoulders.xls'
 		if str(ttype)=='random':
 			choices=['0','1','2', '3', '4', '5']
 			ttype=random.choice(choices)
@@ -79,9 +83,12 @@ class PlantMTerrain(Terrain):
 			raise Exception("ttype %s not correct"%(str(ttype),))
 		if self.stumpFile=='undefined': #default..
 			self.stumpFile='554'
+		if humus: self.getHumusLayer()
 		if self.stumpFile: self.readStumps()
-		#here, visible boulders should be added.
+		#surfaceBoulders=True #only for testing and debug
+		if surfaceBoulders: self.makeSurfaceBoulders()
 		print "Terrain is initialized. Ttype: %s"%ttype
+		
 if __name__=="__main__":
 	"""example code:"""
 	terrain=Terrain()
