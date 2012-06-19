@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python
 from math import *
 from matplotlib.patches import Circle
@@ -21,8 +22,10 @@ class PlantMTerrain(Terrain):
 	It is somewhat important in what order different constituents are generated. Should boulders,
 	stumps(with roots) or surfaceboulders be generated first?
 
+	surfaceboulder=True should be removed from the code below...
+
 	"""
-	def __init__(self, G=None, ttype=None, areaPoly=None, surfaceBoulders=False, humus=False):
+	def __init__(self, G=None, ttype=None, areaPoly=None, surfaceBoulders=True, humus=False):
 		if not areaPoly:
 			areaPoly=[(0,0), (50,0), (50, 40), (0,40)] #default for stump-files.
 		Terrain.__init__(self,G, areaPoly=areaPoly) 
@@ -85,7 +88,6 @@ class PlantMTerrain(Terrain):
 			self.stumpFile='554'
 		if humus: self.getHumusLayer()
 		if self.stumpFile: self.readStumps()
-		#surfaceBoulders=True #only for testing and debug
 		if surfaceBoulders: self.makeSurfaceBoulders()
 		print "Terrain is initialized. Ttype: %s"%ttype
 		

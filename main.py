@@ -133,8 +133,8 @@ if __name__=='__main__':
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
 		#G.terrain=PlantMTerrain(G, ttype='5')
-		G.plotDelay=10
-	   	s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
+		G.plotDelay=20
+	   	s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h', ttype='4')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2, bundler=False, twigCrack=False, observer=False)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)

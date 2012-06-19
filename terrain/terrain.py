@@ -387,10 +387,13 @@ class Terrain():
 		"""
 		This method should read the surfaceboulders, and generate a set of randomly distributed surface boulders
 		in the terrain. File is specified in comment below.
+
+		The collisiondetection might be a bit wrong...
 		"""
 		
 		print 'This is where the surfaceboulders should be genereted'
 		"""Here the file with stone data is read"""
+		sBPlaced=[]
 		sBFile='terrain/terrainFiles/planting/surfaceBoulders.xls'
 		wb=xlrd.open_workbook(sBFile)
 		sh=wb.sheet_by_index(0)
@@ -401,20 +404,32 @@ class Terrain():
 		if self.blockQuota==0.25 or self.blockQuota==0: noSBoulders=0
 		elif self.blockQuota==0.55: noSBoulders=int(1800.0/10000.0*self.area)
 		elif self.blockQuota==0.75: noSBoulders=int(4000.0/10000.0*self.area)
-		for i in range(noSBoulders):
+		for i in range(800):#range(noSBoulders):
 			sBoulders.append(random.choice(sBData)/10)#To get the diameters in [m]
 		sBoulders.sort(reverse=True)
 		print sBoulders
 		"""Here we place these stones in the terrain"""
 		#There should be some collision detection in the section below...
-		for i in sBoulders:
-			xpos=random.uniform(0,50)
-			ypos=random.uniform(0,40)
-			pos=[xpos,ypos]
-			sB=SurfaceBoulder(pos=pos,radius=i/2.0,z=0,terrain=self)
+		for stoneNo, i in enumerate(sBoulders):
+			radius=i/2.0
+			placed=False
+			j=0
+			while True:
+				print j
+				j=j+1
+				if j>50: raise Exception('Too hard to place all the surface boulders. Surface density is probably too big.')
+				pos=[random.uniform(0,50),random.uniform(0,40)]
+				print 'proposed random pos to boulder number:', stoneNo, pos
+				stumps=self.GetStumps(pos,radius) #Here we choose what other obstacles it cannot collide with
+				placedSBoulders=self.GetSBoulders(pos,radius)
+				if stumps+placedSBoulders: continue
+				else:
+					sB=SurfaceBoulder(pos=pos,radius=radius,z=0,terrain=self)
+					placed=True
+					print 'Stone is placed'
+					break	   
 
-		
-	def getHumusLayer(self):
+	def makeHumusLayer(self):
 		"""
 		This method should generate a humus layer with a thicknessdistribution over the polyarea. Triangular
 		distribution on grid and then interpolate with splines.
@@ -437,6 +452,9 @@ class Terrain():
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
+	def GetSBoulders(self,pos,R):
+		obstList=self.getNeighborObst(pos, Lmax=R)
+		return [s for s in obstList if isinstance(s,SurfaceBoulder) and getDistance(pos, s.pos)< s.radius+R ]
 	def GetBoulders(self, pos, R, distr='exp', alpha=1.1):
 		"""
 		we choose to base all this on the volume
