@@ -12,7 +12,6 @@ class SurfaceBoulder(Obstacle):
 	
 	def __init__(self, pos, radius, z, terrain=None):
 		Obstacle.__init__(self, pos, isSpherical=True, radius=radius, terrain=terrain, color='grey')
-		print 'Now we made a surfaceboulder'
 		#for now, boulders are spherical with their position in the middle.
 		self.z=z # self.z = -terrain.humus.depth(pos)
 		self.radius=radius

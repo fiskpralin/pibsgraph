@@ -14,15 +14,13 @@ import numpy as np
 import random
 from scipy.stats import pareto
 import xlrd
-
-#from obstacle import Obstacle
 from stump import Stump
 from tree import Tree
 from root import Root
 from boulder import Boulder
 from pile import Pile
 from surfaceBoulder import SurfaceBoulder
-
+from humusLayer import HumusLayer
 class Terrain():
 	"""
 	The main terrain class.
@@ -41,6 +39,7 @@ class Terrain():
 		self.roots=[]
 		self.holes=[]
 		self.piles=[]
+		self.surfaceBoulders=[]
 		self.obstacles=[] #should hold all the above, except boulders.
 		self.stumpFile='undefined'
 		self.treeFile='undefined'
@@ -125,10 +124,14 @@ class Terrain():
 		"""thoughts around this problem. These trees needs to be distributed inside the cells,
 		i.e some cells should have more trees than treesPerCell. In order to have this information,
 		the polygon needs to be compared to the "grid area"."""
+
 	def _fixGrid(self,L=5):
 		"""
-		so, the grid is orginized into a dictionary with tuple (1,1), (1,2) keys and so on format
+		So, the grid is orginized into a dictionary with tuple (1,1), (1,2) keys and so on format
 		with a square uniform grid with side L. Negative numbers are allowed. (0,i),(i,0) are not allowed as a keys
+
+		Note that in order for grid to correctly handle large obstacles (with r>L),
+		the method _insertToGrid must be altered such that the complete objects extension is added to indices.
 		"""
 		self._gridL=int(L)
 		#fix the list for neighbors.
@@ -151,9 +154,11 @@ class Terrain():
 			for y in np.arange(ylim[0], ylim[1]+1):
 				if x==0 or y==0: continue
 				self._grid[(x,y)]=[]
+
 	def _insertToGrid(self,obst):
 		"""
-		inserts into grid
+		inserts into grid. This method needs top be changed such that it getGridIndex reads the
+		complete object and adds it to the list of EACH gridindex it is element in.
 		"""
 		ind=self._getGridIndex(obst.pos)
 		obst._gridIndex=ind
@@ -168,7 +173,8 @@ class Terrain():
 			self._grid[key]=[] #cleared
 	def _getGridIndex(self,p):
 		"""
-		returns grid index of pos p
+		returns grid index of pos p. Should possibly read the whole obstacle or at least both radius and position
+		in order to be able to add all approproate indices for each obstacle.
 		"""
 		if p[0]>0:
 			ind1=int(ceil(p[0]*self._gridLinv))
@@ -202,6 +208,8 @@ class Terrain():
 		elif isinstance(obst, Stump): list=self.stumps
 		elif isinstance(obst, Root): list=self.roots
 		elif isinstance(obst, Hole): list=self.holes
+		elif isinstance(obst, Pile): list=self.piles
+		elif isinstande(obst, SurfaceBoulder): list=self.surfaceBoulders
 		if list and obst in list: list.remove(obst)
 
 	def addObstacle(self, obst):
@@ -390,43 +398,38 @@ class Terrain():
 
 		The collisiondetection might be a bit wrong...
 		"""
-		
-		print 'This is where the surfaceboulders should be genereted'
+
 		"""Here the file with stone data is read"""
-		sBPlaced=[]
 		sBFile='terrain/terrainFiles/planting/surfaceBoulders.xls'
 		wb=xlrd.open_workbook(sBFile)
 		sh=wb.sheet_by_index(0)
 		sBData=sh.col_values(0)#This is all the sBoulders form the file
 		del sBData[0:2]#deletes the first two rows which are just descriptions and not data
+
 		"""Here we pick out the right number of stones from the data"""
-		sBoulders=[]#Surfaceboulders to be places in terrain
+		sBoulders=[]#Surfaceboulders to be placed in terrain
 		if self.blockQuota==0.25 or self.blockQuota==0: noSBoulders=0
 		elif self.blockQuota==0.55: noSBoulders=int(1800.0/10000.0*self.area)
 		elif self.blockQuota==0.75: noSBoulders=int(4000.0/10000.0*self.area)
-		for i in range(800):#range(noSBoulders):
+		for i in range(noSBoulders):
 			sBoulders.append(random.choice(sBData)/10)#To get the diameters in [m]
 		sBoulders.sort(reverse=True)
-		print sBoulders
-		"""Here we place these stones in the terrain"""
-		#There should be some collision detection in the section below...
+		
+		"""Here we place these stones in the terrain, whilst checking so they are not placed overlapping
+		other surfaceBoulders or the rootplates of the stumps. Roots would take a route around the blocks
+		so we don't care about their positions."""
 		for stoneNo, i in enumerate(sBoulders):
 			radius=i/2.0
-			placed=False
 			j=0
 			while True:
-				print j
 				j=j+1
 				if j>50: raise Exception('Too hard to place all the surface boulders. Surface density is probably too big.')
 				pos=[random.uniform(0,50),random.uniform(0,40)]
-				print 'proposed random pos to boulder number:', stoneNo, pos
 				stumps=self.GetStumps(pos,radius) #Here we choose what other obstacles it cannot collide with
 				placedSBoulders=self.GetSBoulders(pos,radius)
 				if stumps+placedSBoulders: continue
 				else:
 					sB=SurfaceBoulder(pos=pos,radius=radius,z=0,terrain=self)
-					placed=True
-					print 'Stone is placed'
 					break	   
 
 	def makeHumusLayer(self):
@@ -437,6 +440,7 @@ class Terrain():
 		etc if this is implemented
 		"""
 		print 'This is where the humus layer is created'
+		self.humusLayer=HumusLayer(rasterDist=1, terrain=self)
 
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.

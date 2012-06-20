@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import random
 
-from terrain.obstacle import Obstacle
+#from terrain.obstacle import Obstacle
 from terrain.terrain import *
 from collision import *
 
@@ -25,7 +25,7 @@ class PlantMTerrain(Terrain):
 	surfaceboulder=True should be removed from the code below...
 
 	"""
-	def __init__(self, G=None, ttype=None, areaPoly=None, surfaceBoulders=True, humus=False):
+	def __init__(self, G=None, ttype=None, areaPoly=None):
 		if not areaPoly:
 			areaPoly=[(0,0), (50,0), (50, 40), (0,40)] #default for stump-files.
 		Terrain.__init__(self,G, areaPoly=areaPoly) 
@@ -41,59 +41,77 @@ class PlantMTerrain(Terrain):
 			ttype=str(ttype)
 		self.ttype=ttype
 		if ttype=='0':
-			self.stumpFile=None #afforestration
-			self.stumpsPerH=0
-			self.boulderFreq=0
-			self.meanBoulderV=0
-			self.blockQuota=0
-			self.groundModel= 0  #andersson's
+			self.stumpFile = None #afforestration
+			self.stumpsPerH = 0
+			self.boulderFreq = 0
+			self.meanBoulderV = 0
+			self.blockQuota = 0
+			self.groundModel = 0  #Anderssons
+			self.humusType = '2'
+			self.surfaceBoulders= True
+			
 		elif ttype=='1':
-			self.stumpFile=554
-			self.stumpsPerH=230
-			self.boulderFreq=14
-			self.meanBoulderV=1.8/1000.#dm3-m3
-			self.blockQuota=0.25
-			self.groundModel= 4  #andersson's
+			self.stumpFile = 554
+			self.stumpsPerH = 230
+			self.boulderFreq = 28
+			self.meanBoulderV = 0.9/1000.#dm3-m3
+			self.blockQuota = 0.25
+			self.groundModel = 4  #Anderssons
+			self.humusType = '2'
+			self.surfaceBoulders= True
+			
 		elif ttype=='2':
-			self.stumpFile=553
-			self.stumpsPerH=635
-			self.boulderFreq=14
-			self.meanBoulderV=1.8/1000.#dm3-m3
-			self.blockQuota=0.25
-			self.groundModel= 4  #andersson's
+			self.stumpFile = 554
+			self.stumpsPerH = 230
+			self.boulderFreq = 28
+			self.meanBoulderV = 0.9/1000.#dm3-m3
+			self.blockQuota = 0.25
+			self.groundModel = 4  #Anderssons
+			self.humusType = '4'
+			self.surfaceBoulders= True
+			
 		elif ttype=='3':
-			self.stumpFile=554
-			self.stumpsPerH=230
-			self.boulderFreq=25
-			self.meanBoulderV=3.6/1000.
-			self.blockQuota=0.75
-			self.groundModel=2  #andersson's
+			self.stumpFile = 452
+			self.stumpsPerH = 730
+			self.boulderFreq = 43
+			self.meanBoulderV = 1.5/1000.
+			self.blockQuota = 0.55
+			self.groundModel = 3  #Anderssons
+			self.humusType = '3'
+			self.surfaceBoulders= True
+			
 		elif ttype=='4':
-			self.stumpFile=553
-			self.stumpsPerH=635
-			self.boulderFreq=25
-			self.meanBoulderV=3.6/1000.
-			self.blockQuota=0.75
-			self.groundModel= 2  #andersson's
+			self.stumpFile = 553
+			self.stumpsPerH = 635
+			self.boulderFreq = 23
+			self.meanBoulderV = 4.3/1000.
+			self.blockQuota = 0.75
+			self.groundModel = 2  #Anderssons
+			self.humusType = '2'
+			self.surfaceBoulders= True
+			
 		elif ttype=='5': #medelhygget
-			self.stumpsPerH=390
-			self.boulderFreq=21
-			self.meanBoulderV=3.0/1000.
-			self.stumpFile=552
-			self.blockQuota=0.55
-			self.groundModel= 3  #andersson's
+			self.stumpFile = 553
+			self.stumpsPerH = 635
+			self.boulderFreq = 23
+			self.meanBoulderV = 4.3/1000.
+			self.blockQuota = 0.75
+			self.groundModel = 1  #Anderssons
+			self.humusType = '4'
+			self.surfaceBoulders= True
 		else:
 			raise Exception("ttype %s not correct"%(str(ttype),))
 		if self.stumpFile=='undefined': #default..
 			self.stumpFile='554'
-		if humus: self.getHumusLayer()
+		if self.humusType: self.makeHumusLayer()
 		if self.stumpFile: self.readStumps()
-		if surfaceBoulders: self.makeSurfaceBoulders()
-		print "Terrain is initialized. Ttype: %s"%ttype
+		if self.surfaceBoulders: self.makeSurfaceBoulders()
+		print "Terrain is initialized. Ttype: %s, SurfaceBoulders: %s"%(ttype,str(self.surfaceBoulders))
 		
 if __name__=="__main__":
 	"""example code:"""
 	terrain=Terrain()
 	terrain.readTrees() #random
+	terrain.makeSurfaceBoudlers() #from file
 	terrain.draw()
 	plt.show()
