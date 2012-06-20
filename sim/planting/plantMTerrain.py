@@ -48,7 +48,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0
 			self.groundModel = 0  #Anderssons
 			self.humusType = '2'
-			self.surfaceBoulders= True
+			self.surfaceBoulders= False
 			
 		elif ttype=='1':
 			self.stumpFile = 554

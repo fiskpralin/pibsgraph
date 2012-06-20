@@ -440,7 +440,8 @@ class Terrain():
 		etc if this is implemented
 		"""
 		print 'This is where the humus layer is created'
-		self.humusLayer=HumusLayer(rasterDist=1, terrain=self)
+		self.humusLayer=HumusLayer(rasterDist=0.1, terrain=self, humusType=self.humusType)
+		#print self.humusLayer.getDepth([23,10]) #For debug
 
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
