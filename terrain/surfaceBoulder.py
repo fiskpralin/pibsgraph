@@ -13,12 +13,12 @@ class SurfaceBoulder(Obstacle):
 	def __init__(self, pos, radius, z, terrain=None):
 		Obstacle.__init__(self, pos, isSpherical=True, radius=radius, terrain=terrain, color='grey')
 		#for now, boulders are spherical with their position in the middle.
-		self.z=z #
-		self.radius=radius
-		self.volume=pow(radius,3)*pi*4.0/3.0
-		self.area=(radius**2)*pi #area projected to the surface
-		self.name="surfaceboulder"
-		self.visible=True
+		self.z = z
+		self.radius = radius
+		self.volume = pow(radius,3)*pi*4.0/3.0
+		self.area = (radius**2)*pi #area projected to the surface
+		self.name = "surfaceboulder"
+		self.visible = True
 
 	def draw(self, ax):
 		if not self.isSpherical: raise Exception('surfaceboulder should be spherical')
