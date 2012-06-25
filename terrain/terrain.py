@@ -39,6 +39,7 @@ class Terrain():
 		self.roots=[]
 		self.holes=[]
 		self.piles=[]
+		self.humusDepth=0
 		self.surfaceBoulders=[]
 		self.obstacles=[] #should hold all the above, except boulders.
 		self.stumpFile='undefined'
@@ -209,7 +210,7 @@ class Terrain():
 		elif isinstance(obst, Root): list=self.roots
 		elif isinstance(obst, Hole): list=self.holes
 		elif isinstance(obst, Pile): list=self.piles
-		elif isinstande(obst, SurfaceBoulder): list=self.surfaceBoulders
+		elif isinstance(obst, SurfaceBoulder): list=self.surfaceBoulders
 		if list and obst in list: list.remove(obst)
 
 	def addObstacle(self, obst):
@@ -439,9 +440,9 @@ class Terrain():
 		Important to adapt positions (z) of other obstacles such as roots, surface boudlers boulders
 		etc if this is implemented
 		"""
-		print 'This is where the humus layer is created'
-		self.humusLayer=HumusLayer(rasterDist=0.1, terrain=self, humusType=self.humusType)
-		#print self.humusLayer.getDepth([23,10]) #For debug
+		#print 'This is where the humus layer is created'
+		self.humusLayer=HumusLayer(rasterDist=0.1, terrainAP=self.areaPoly, humusType=self.humusType)
+		#print self.humusLayer.getDepth([23.67,10.347687]) #For debug
 
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
@@ -497,9 +498,10 @@ class Terrain():
 			i=0
 			while not placed:
 				placed=True
-				z=-uniform(0+radius,0.2+radius)
 				x=uniform(pos[0]-R-radius/2., pos[0]+R+radius/2.)
 				y=uniform(pos[1]-R-radius/2., pos[1]+R+radius/2.)
+				if self.humusLayer: self.humusDepth=self.humusLayer.getDepth([x,y])
+				z=-uniform(0+radius+self.humusDepth,0.2+radius+self.humusDepth)
 				for o in boul:
 					if sqrt(pow(x-o.pos[0],2)+pow(y-o.pos[1],2)+pow(z-o.z,2))<(radius+o.radius):
 						placed=False

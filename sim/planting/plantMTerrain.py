@@ -31,7 +31,6 @@ class PlantMTerrain(Terrain):
 		Terrain.__init__(self,G, areaPoly=areaPoly) 
 		self.stumpFile='undefined'
 		self.treeFile='undefined'
-		#if surfaceBoulders: self.surfaceBoulderFile='/terrain/terrainfiles/planting/surfaceBoulders.xls'
 		if str(ttype)=='random':
 			choices=['0','1','2', '3', '4', '5']
 			ttype=random.choice(choices)

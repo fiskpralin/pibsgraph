@@ -13,7 +13,7 @@ class SurfaceBoulder(Obstacle):
 	def __init__(self, pos, radius, z, terrain=None):
 		Obstacle.__init__(self, pos, isSpherical=True, radius=radius, terrain=terrain, color='grey')
 		#for now, boulders are spherical with their position in the middle.
-		self.z=z # self.z = -terrain.humus.depth(pos)
+		self.z=z #
 		self.radius=radius
 		self.volume=pow(radius,3)*pi*4.0/3.0
 		self.area=(radius**2)*pi #area projected to the surface
