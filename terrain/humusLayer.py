@@ -38,7 +38,7 @@ class HumusLayer():
 		xpos=pos[0]
 		ypos=pos[1]
 		depth=float(self.interpolDepth.ev(xpos,ypos))
-		print 'Depth of humuslayer is:', depth
+		#print 'Depth of humuslayer is:', depth
 		return depth
 
 	def plotIt(self):
