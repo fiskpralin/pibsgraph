@@ -9,7 +9,11 @@ from matplotlib.path import Path
 from obstacle import *
 
 class SurfaceBoulder(Obstacle):
-	
+	"""
+	A class for boulders added from a measured 'stand' (see terrain.makeSurfaceBoulders). These are always visible,
+	even if they are actually placed below the humuslayer in which case there is a visible bulge on top of that
+	layer. 
+	"""
 	def __init__(self, pos, radius, z, terrain=None):
 		Obstacle.__init__(self, pos, isSpherical=True, radius=radius, terrain=terrain, color='grey')
 		#for now, boulders are spherical with their position in the middle.

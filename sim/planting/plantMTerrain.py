@@ -35,7 +35,7 @@ class PlantMTerrain(Terrain):
 			choices=['0','1','2', '3', '4', '5']
 			ttype=random.choice(choices)
 		elif ttype is None:
-			ttype='3' #default This has now been changed from 5 which it was before article 3
+			ttype='4' #default This has now been changed from 5 which it was before article 3
 		else:
 			ttype=str(ttype)
 		self.ttype=ttype

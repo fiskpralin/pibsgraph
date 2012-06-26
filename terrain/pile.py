@@ -9,7 +9,11 @@ from obstacle import *
 
 
 class Pile(Obstacle):
-	
+	"""
+	A class for describing piles of trees. These can be trees gathered separately or accumulated at head. If they
+	are left at the same positin they build a pile. This pile can be twigcracked, cut, etc. Also it is superclass
+	for Bundle and inherits from obstacle. So it is a visible non-spehriacl obstacle with nodes.
+	"""
 	def __init__(self, pos, biomass=None, diameter=None, radius=None, terrain=None , length=None, weight=None, logWeight=None, vol=None):
 		Obstacle.__init__(self, pos, isSpherical=False, radius=radius, terrain=terrain, color='#5C3317')
 		self.pos = pos
@@ -38,6 +42,10 @@ class Pile(Obstacle):
 		self.setNodes(direction)
 
 	def twigCrackPile(self,direction):
+		"""
+		This is the twigcracking of the Pile. The model for reduction of biomass and volume (diameter) is
+		given by Dan Bergstrom at SLU.
+		"""
 		self.length = 5 #cut!
 		self.maxDiam = max([t.dbh for t in self.trees])
 		self.biomass = self.biomass*(1-((self.diameter*17.237-3.9036)/100))#with losses from twigcracking
@@ -48,7 +56,6 @@ class Pile(Obstacle):
 	def setNodes(self,direction=None):
 		#here the nodes of the pile are set
 		if direction is None: raise('EXCEPTION: updatePile needs the direction of the Road')
-		
 		c1=getCartesian([-self.diameter/2,self.length], origin=self.pos, direction=direction, fromLocalCart=True)
 		c2=getCartesian([-self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
 		c3=getCartesian([self.diameter/2, 0], origin=self.pos, direction=direction, fromLocalCart=True)
@@ -68,6 +75,11 @@ class Pile(Obstacle):
 			raise('EXCEPTION: The pile must have nodes.')
 
 class Bundle(Pile):
+	"""
+	This is a class which inherits from Pile. It is used when the thinningmachine is equipped with a bundler.
+	That means all trees are dumped at the bundler which produces a bundle, a certain type of pile which is
+	compressed in a different way than with the twigcracker.
+	"""
 	def __init__(self, pos, biomass=None, diameter=None, radius=None, terrain=None, length=None, weight=None, logweight=None, vol=None):
 		Pile.__init__(self, pos, biomass=None, diameter=None, radius=None, terrain=None , length=None, weight=None, logWeight=None, vol=None)
 		self.xSection=0
@@ -76,6 +88,7 @@ class Bundle(Pile):
 		"""
 		This should be updated such that it works for the bundler. Does only set som parameters
 		for the current bundle, does not execute the bundling, that is done in method in thBundler.py
+		Overrides updatePile in Pile.
 		"""
 		if direction is None: direction= pi/2
 		self.length = max([t.h for t in self.trees])
@@ -89,8 +102,9 @@ class Bundle(Pile):
 
 	def getXSection(self, tree=None):
 		"""
-		Adds the cross section of the stump and at five meters for each tree. Uses a linear function for the thickness of the stem.
-		The model from Dan has been changed to resemble an ordinary linear function instead  but it is still the same.
+		Adds the cross section of the stump and at five meters for each tree. Uses a linear function for the
+		thickness of the stem. The model from Dan has been changed to resemble an ordinary linear function
+		instead  but it is actually still exactly the same.
 		"""
 		if tree is None: raise('EXCEPTION: getXSection must get a tree')
 		stumpXS=tree.dstump**2
@@ -108,6 +122,6 @@ class Bundle(Pile):
 		
 	def draw(self, ax):
 		if self.nodes: #plot as polygon.
-			ax.add_patch(mpl.patches.Polygon(np.array(self.nodes), closed=True, facecolor='grey', alpha=85))
+			ax.add_patch(mpl.patches.Polygon(np.array(self.nodes), closed=True, facecolor='#5C3317', alpha=85))
 		else:
 			raise('EXCEPTION: The bundle must have nodes.')

@@ -34,6 +34,7 @@ class Terrain():
 		if not areaPoly: #create from A, square
 			raise Exception('got too little information about the area, need areaPoly polygon. ')
 		self.G=G
+		#Obstacles
 		self.trees=[]
 		self.stumps=[]
 		self.roots=[]
@@ -42,8 +43,10 @@ class Terrain():
 		self.humusDepth=0
 		self.surfaceBoulders=[]
 		self.obstacles=[] #should hold all the above, except boulders.
+		#Files
 		self.stumpFile='undefined'
 		self.treeFile='undefined'
+		#Some parameters
 		self.stumpsPerH=0
 		self.boulderFreq=0
 		self.meanBoulderV=0
@@ -394,10 +397,9 @@ class Terrain():
 
 	def makeSurfaceBoulders(self):
 		"""
-		This method should read the surfaceboulders, and generate a set of randomly distributed surface boulders
-		in the terrain. File is specified in comment below.
-
-		The collisiondetection might be a bit wrong...
+		This method reads the surfaceboulders, and generate a set of randomly distributed surface boulders
+		in the terrain. File is specified below. There are some problems with stones being to large to fit
+		easily.
 		"""
 
 		"""Here the file with stone data is read"""
@@ -420,6 +422,8 @@ class Terrain():
 		other surfaceBoulders or the rootplates of the stumps. Roots would take a route around the blocks
 		so we don't care about their positions."""
 		for stoneNo, i in enumerate(sBoulders):
+			#if i>3: i=5 #This is a debug check in order to see if it is the size or the density that causes problems
+			#if stoneNo<3: i=4 #Also debugcheck
 			radius=i/2.0
 			j=0
 			while True:
@@ -437,9 +441,7 @@ class Terrain():
 	def makeHumusLayer(self):
 		"""
 		This method should generate a humus layer with a thicknessdistribution over the polyarea. Triangular
-		distribution on grid and then interpolate with splines.
-		Important to adapt positions (z) of other obstacles such as roots, surface boudlers boulders
-		etc if this is implemented
+		distribution on grid and then interpolate with splines in order to be able to get a depth in any position.
 		"""
 		#print 'This is where the humus layer is created'
 		self.humusLayer=HumusLayer(rasterDist=0.1, terrainAP=self.areaPoly, humusType=self.humusType)
@@ -449,19 +451,24 @@ class Terrain():
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [o for o in obstList if o.visible and getDistance(pos, o.pos)< o.radius+R]
+
 	def GetTrees(self, pos, R, onlyNonHarvested=False):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		if onlyNonHarvested: obstList=[t for t in obstList if isinstance(t,Tree) and not t.harvested]
 		return [t for t in obstList if isinstance(t,Tree) and getDistance(pos, t.pos)< t.radius+R]
+
 	def GetRoots(self, pos, R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [r for r in obstList if isinstance(r,Root) and getDistance(pos, r.pos)< r.radius+R ]
+
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
+
 	def GetSBoulders(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,SurfaceBoulder) and getDistance(pos, s.pos)< s.radius+R ]
+
 	def GetBoulders(self, pos, R, distr='exp', alpha=1.1):
 		"""
 		we choose to base all this on the volume
@@ -515,6 +522,7 @@ class Terrain():
 					print "could not place all stones.. frequency/area is obviously too big."
 					break
 		return boul
+
 	def draw(self, ax=None): 
 		"""
 		draw to an axis
