@@ -56,9 +56,10 @@ class HumusLayer():
 		#print 'Depth of humuslayer is:', depth
 		return depth
 
-	def plotIt(self):
+	def draw(self):
 		"""
-		Plot method used as help when evaluating what rasterDist is suitable. Called if __name__=='__main__':.
+		Not much to plot here yet. Possibly we could add plotIt in some sense to get a picture of the humuslayer
+		in the background instead of light green flat meadow.
 		"""
 		self.z=self.z.transpose()
 		xway=np.linspace(0,50,100)
@@ -71,22 +72,14 @@ class HumusLayer():
 			z.append(ztemp)
 		self.z=np.array(z)
 		self.z=self.z.transpose()
-		plt.imshow(self.z, origin='lower',cmap='YlOrBr',extent=[0,50,0,40])
+		self.visibleLayer = plt.imshow(self.z, origin='lower',cmap='YlOrBr',extent=[0,50,0,40])
 		plt.xlabel('x[m]')
 		plt.ylabel('y[m]')
-		plt.title('Depth of humus layer [m] with interpol')
+		plt.title('Planting domain')
 		plt.colorbar()
-
-		plt.show()
-	
-	def draw(self):
-		"""
-		Not much to plot here yet. Possibly we could add plotIt in some sense to get a picture of the humuslayer
-		in the background instead of light green flat meadow.
-		"""
-		pass
 		
 if __name__=='__main__':
 	terrainAP=[(0,0),(50,0),(50,40),(0,40)]
 	hL=HumusLayer(terrainAP=terrainAP,rasterDist=1, humusType='3')
-	hL.plotIt()
+	hL.draw()
+	plt.show()

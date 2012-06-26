@@ -535,6 +535,7 @@ class Terrain():
 			ax.axis(self.xlim+self.ylim)
 			ax.set_xlabel('x (m)')
 			ax.set_ylabel('y (m)')
+		self.humusLayer.draw() #draws the humuslayer as background
 		olist=[o for o in self.obstacles if o.visible]
 		if len(olist)>100000:
 			print "too many objects to plot, breaks"
