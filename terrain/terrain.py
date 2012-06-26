@@ -40,6 +40,7 @@ class Terrain():
 		self.roots=[]
 		self.holes=[]
 		self.piles=[]
+		self.humusLayer=False
 		self.humusDepth=0
 		self.surfaceBoulders=[]
 		self.obstacles=[] #should hold all the above, except boulders.
@@ -444,6 +445,7 @@ class Terrain():
 		distribution on grid and then interpolate with splines in order to be able to get a depth in any position.
 		"""
 		#print 'This is where the humus layer is created'
+		self.humusLayer=True
 		self.humusLayer=HumusLayer(rasterDist=0.1, terrainAP=self.areaPoly, humusType=self.humusType)
 		#print self.humusLayer.getDepth([23.67,10.347687]) #For debug
 
@@ -535,7 +537,7 @@ class Terrain():
 			ax.axis(self.xlim+self.ylim)
 			ax.set_xlabel('x (m)')
 			ax.set_ylabel('y (m)')
-		self.humusLayer.draw() #draws the humuslayer as background
+		if self.humusLayer:	self.humusLayer.draw() #draws the humuslayer as background
 		olist=[o for o in self.obstacles if o.visible]
 		if len(olist)>100000:
 			print "too many objects to plot, breaks"
