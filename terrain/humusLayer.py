@@ -75,8 +75,8 @@ class HumusLayer():
 		self.visibleLayer = plt.imshow(self.z, origin='lower',cmap='YlOrBr',extent=[0,50,0,40])
 		plt.xlabel('x[m]')
 		plt.ylabel('y[m]')
-		plt.title('Planting domain')
-		plt.colorbar()
+		#plt.title('Planting domain')
+		#plt.colorbar()
 		
 if __name__=='__main__':
 	terrainAP=[(0,0),(50,0),(50,40),(0,40)]

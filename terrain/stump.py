@@ -58,9 +58,9 @@ class Stump(Obstacle):
 			middle=cart([-dr-finalR,rootL],origin=p1, direction=th, fromLocalCart=True)
 			p4=cart([-2*rootR,0],origin=p1, direction=th, fromLocalCart=True)
 			if dr+finalR-rootR>rootR/100.: raise Exception('Root model does not work as planned. %f, %f, %f'%(rootR, finalR, dr))
-			#self._makeRoot(pos=start, direction=th, nodes=[p1,p2,p3,p4], rin=rootR, rfin=finalR,length=rootL, visible=True)
-			#self._branch(middle, finalR, th=th, zin=0) #makes a branch. May create more sub-branches
-			self._branch(start, rootR, th=th, zin=0, first=True) #makes a branch. May create more sub-branches
+			if self.terrain.humusLayer: firstRootVisible=False
+			else: firstRootVisible=False
+			self._branch(start, rootR, th=th, zin=0, first=firstRootVisible) #makes a branch. May create more sub-branches
 			th+=dth
 		if self.terrain:
 			self.terrain.obstacles.remove(self)

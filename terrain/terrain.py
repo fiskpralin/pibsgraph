@@ -445,7 +445,6 @@ class Terrain():
 		distribution on grid and then interpolate with splines in order to be able to get a depth in any position.
 		"""
 		#print 'This is where the humus layer is created'
-		self.humusLayer=True
 		self.humusLayer=HumusLayer(rasterDist=0.1, terrainAP=self.areaPoly, humusType=self.humusType)
 		#print self.humusLayer.getDepth([23.67,10.347687]) #For debug
 
