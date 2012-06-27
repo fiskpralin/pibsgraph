@@ -22,7 +22,6 @@ class HumusLayer():
 		A large distance mimics a situation where the humuslayer is more or less spatially invariant,
 		whilst a small distance mimics a situation where the thickness varies on a small length scale.
 		"""
-		self.color='Tan'
 		if humusType=='2': dPar=[0.00,0.05,0.01]#triangular distribution [min,max,mode] meters
 		elif humusType=='3': dPar=[0.05,0.15,0.10]
 		elif humusType=='4': dPar=[0.15,0.30,0.22]
@@ -50,10 +49,7 @@ class HumusLayer():
 		This method returns the depth at a given position given as self.getDepth([x,y]). Used when each
 		surfaceBoulder is placed for example. So it is important that this routine is fast.
 		"""
-		xpos=pos[0]
-		ypos=pos[1]
-		depth=float(self.interpolDepth.ev(xpos,ypos))
-		#print 'Depth of humuslayer is:', depth
+		depth=float(self.interpolDepth.ev(pos[0],pos[1]))
 		return depth
 
 	def draw(self):

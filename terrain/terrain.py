@@ -423,15 +423,15 @@ class Terrain():
 		other surfaceBoulders or the rootplates of the stumps. Roots would take a route around the blocks
 		so we don't care about their positions."""
 		for stoneNo, i in enumerate(sBoulders):
-			#if i>3: i=5 #This is a debug check in order to see if it is the size or the density that causes problems
-			#if stoneNo<3: i=4 #Also debugcheck
+			#if i>4: i=4 #This is a debug check in order to see if it is the size or the density that causes problems
+			#if stoneNo<10: i=4 #Also debugcheck
 			radius=i/2.0
 			j=0
 			while True:
 				j=j+1
 				if j>50: raise Exception('Too hard to place all the surface boulders. Surface density is probably too big.')
 				pos=[random.uniform(0,50),random.uniform(0,40)]
-				stumps=self.GetStumps(pos,radius) #Here we choose what other obstacles it cannot collide with
+				stumps=self.GetStumpsForSBoulders(pos,radius) #Here we choose what other obstacles it cannot collide with
 				placedSBoulders=self.GetSBoulders(pos,radius)
 				if stumps+placedSBoulders: continue
 				else:
@@ -444,9 +444,7 @@ class Terrain():
 		This method should generate a humus layer with a thicknessdistribution over the polyarea. Triangular
 		distribution on grid and then interpolate with splines in order to be able to get a depth in any position.
 		"""
-		#print 'This is where the humus layer is created'
-		self.humusLayer=HumusLayer(rasterDist=0.1, terrainAP=self.areaPoly, humusType=self.humusType)
-		#print self.humusLayer.getDepth([23.67,10.347687]) #For debug
+		self.humusLayer=HumusLayer(rasterDist=1.0, terrainAP=self.areaPoly, humusType=self.humusType)
 
 	def GetVisibleObstacles(self,pos, R):
 		#Get obstacles in a radius R from point pos. Optimize: let the obstacles be in a grid and only search those in adjacent grids.
@@ -465,6 +463,14 @@ class Terrain():
 	def GetStumps(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
 		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.radius+R ]
+
+	def GetStumpsForSBoulders(self,pos,R):
+		"""
+		This is  a special kind of collision detection only used for the case when the surfaceBouldesrs should
+		be placed in the terrain. They can overlap the rootplate, but not the actual stump!
+		"""
+		obstList=self.getNeighborObst(pos, Lmax=R)
+		return [s for s in obstList if isinstance(s,Stump) and getDistance(pos, s.pos)< s.dbh+R ]
 
 	def GetSBoulders(self,pos,R):
 		obstList=self.getNeighborObst(pos, Lmax=R)
