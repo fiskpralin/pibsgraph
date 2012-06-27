@@ -423,7 +423,7 @@ class Terrain():
 		other surfaceBoulders or the rootplates of the stumps. Roots would take a route around the blocks
 		so we don't care about their positions."""
 		for stoneNo, i in enumerate(sBoulders):
-			#if i>4: i=4 #This is a debug check in order to see if it is the size or the density that causes problems
+			if i>4: i=4 #This was initially a debug thing, but is now implemented to avoid problems with placing the sBoulders.
 			#if stoneNo<10: i=4 #Also debugcheck
 			radius=i/2.0
 			j=0
