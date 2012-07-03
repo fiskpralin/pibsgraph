@@ -13,24 +13,33 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import cm
 
 def draw_custom(G=None, ax=None, edge_visits=False, cost=False, weight=False,road_color='k', road_width=1, poly=False):
-	if not G: raise Exception()
+	assert G != None
+	if edge_visits or cost or weight:
+		debug_mode=True #means that we do not plot bends that nicely... provides debug info
+	else:
+		debug_mode=False
 	if not ax:
 		fig=plt.figure()
 		ax=fig.add_subplot(111, aspect='equal')
 		ax.set_axis_bgcolor('#ffbb55')
 		ax.set_xlabel('x')
 		ax.set_ylabel('y')
-	plotBends(G=G, ax=ax, road_color=road_color, road_width=road_width)
+	if not debug_mode: plotBends(G=G, ax=ax, road_color=road_color, road_width=road_width)
 	for e in G.edges(data=True):
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
 		pos=middle([x[0],y[0]], [x[1],y[1]]) #used for edge text..
 		if weight:
-			ax.text(pos[0],pos[1],' '+'%.0f'%e[2]['weight'])
-		if cost: ax.text(pos[0],pos[1],' '+'%.0f'%e[2]['c'])
-		if e[2]['plotted']: continue #already have a nice bending curve
+			ax.text(pos[0],pos[1],' '+'w:%.0f'%e[2]['weight'])
+		if cost:
+			if e[2]['c']>1e10:
+				ax.text(pos[0],pos[1],' '+r'$\infty$')
+			else:
+				ax.text(pos[0],pos[1]-2,' '+'%.0f'%e[2]['c'])
+		if not debug_mode and e[2]['plotted']: continue #already have a nice bending curve
 		if edge_visits:
-			l = Line2D(x,y, color=road_color, linewidth=road_width+np.log(e[2]['visits'])/(np.log(len(G))*0.2))
+			l = Line2D(x,y, color=road_color, linewidth=road_width+np.log(1+len(e[2]['visited_from_node']))/(np.log(len(G)*0.5)*0.2))
+			ax.text(pos[0],pos[1]+2,' '+'%d'%len(e[2]['visited_from_node']))
 		else:
 			l = Line2D(x,y, color=road_color, linewidth=road_width)
 		ax.add_line(l)
@@ -77,9 +86,9 @@ def plotBends(G=None, ax=None, road_color='k', road_width=1):
 			vertices=p.get_verts()
 			x=[v[0] for v in vertices]
 			y=[v[1] for v in vertices]
-			l=Line2D(x,y, color=road_color, linewidth=road_width)
-			ax.add_line(l)
+		   	l = Line2D(x,y, color=road_color, linewidth=road_width)
 			#now, update 'plotted' thing.
+			ax.add_line(l)
 			for neigh in neighbors:
 				d=G.get_edge_data(n, neigh)
 				d['plotted']=True

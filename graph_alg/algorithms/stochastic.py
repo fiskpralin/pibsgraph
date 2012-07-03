@@ -197,8 +197,8 @@ def stochastic(R, ax=None, aCap=0.20, beta=1.5, anim=False, probListGen=None):
 		if e_data['c']>eps and R.areaCover-go.singleRoadSegmentCoverage(e, R, remove=True)*R.Ainv<aCap:
 			assert abs(R.areaCover-go.roadAreaCoverage(R))<eps #compare internal and actual.
 			break #we are finished
+		print "removes edge ",e, e_data['c'], cost(R,e)
 		assert R.degree(e[0])>2 and R.degree(e[1])>2 #cost func should have given c=inf.
-		print "removes edge ",e, e_data['c']
 		remove_edge(e, R) #remove from R.
 		choices[choice]+=1
 	if anim:

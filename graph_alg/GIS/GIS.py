@@ -59,7 +59,6 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 
 	Notes:
 	-sweref koordinates are in m, useful. We just need to normalize them to our new origin.
-	-we need to work exclusively with numpy arrays, this is heavy stuff.
 	-Problem with intersections between the files... how to handle?
 	"""
 	if not globalOrigin: globalOrigin=(596120, 6727530) #located on map.. nice position..

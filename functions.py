@@ -212,6 +212,12 @@ def getPolygonInnerCircle(areaPoly):
 	"""
 	returns the middle of a polygon, and a radius that is always inside it from this point.
 	see reference http://en.wikipedia.org/wiki/Centroid
+
+	Works for all polygons, concave as convex.
+
+	We have to test the radius with every edge all the way, so takes some time.
+
+	NOT carefully tested really..
 	"""
 	#first, find the point. we have a finite set of points.
 	C=np.array([0,0]) #will add stuff to this one..
@@ -219,13 +225,20 @@ def getPolygonInnerCircle(areaPoly):
 		C+=np.array(corner)
 	C/=(len(areaPoly))
 	C=list(C)
-	minDist=1e10
-	for corner in areaPoly:
-		print corner, C
-		d=getDistance(corner, C)
-		if d<minDist:
-			minDist=d
-	return C, minDist #middle, radius
+
+	closest=col.closestPolygonPoint(C,areaPoly)
+	return C, getDistance(C,closest)
+
+def insideCircle(pos, c, R):
+	"""
+	is the points pos inside circle middle c with radius R?
+	"""
+	d2=getDistanceSq(pos,c)
+	if d2<R**2: #could save some calc by using R2, but would give stranger input.
+		return True
+	else:
+		return False
+
 def ListTupleEquals(p1,p2):
 	"""
 	An ugly and bad way around the fact that we mix tuples and lists, and want to compare their elements.
@@ -236,6 +249,8 @@ def ListTupleEquals(p1,p2):
 			if p1[index]!=p2[index]: return False
 		except IndexError: return False #not of equal length
 	return True
+
+
 if __name__ == '__main__':
 	#main, test polygon area
 	a=polygon_area([(0,0), (2,0), (2,2), (0,2), (0,0)])

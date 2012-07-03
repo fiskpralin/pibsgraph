@@ -1,6 +1,7 @@
 import networkx as nx
 import costFunctions as cf
 import numpy as np
+import copy
 from math import *
 """
 A module with a collection of functions connected to road nets and graphs.
@@ -95,35 +96,6 @@ def get_angle(e1,e2):
 	if th>pi: th=2*pi-th
 	return th
 
-def shortestCycle(R,n, debug=False):
-	"""
-	identifies the shortest cycle for undirected graphs
-	Returns it.
-
-	Should be able to do this faster without cycle_basis..
-
-	NOT tested
-
-	"""
-	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
-	#identify the shortest of them...
-	if len(cycles)==0: return None
-	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
-	m=min([len(c) for c in cycles])
-	#cycles=[c for c in cycles if len(c)<3*m] #shortens list.
-	if debug:
-		for c in cycles:
-			cost=sumWeights(R,c)
-			print "c:", c, cost
-	for c in cycles:
-		c.reverse()
-		c.append(c[0])
-
-	weights=[sumWeights(R,P) for P in cycles]
-	if min(weights)>=1e15: return None #infinite weight...
-	shortest=cycles[weights.index(min(weights))]
-	return shortest
-
 def overLapA(e1,e2, R=None):
 	"""
 	computes the overlapping area of two road segments. Does not handle the dictionary routines at all.
@@ -168,5 +140,138 @@ def overLapA(e1,e2, R=None):
 	a=x*0.5*(y+z)
 	overlap[(e1,e2)]=a #save so we don't have to calculate next time
 	return a
+
+
+def old_shortestCycle(R,n, cutoff=None):
+	"""
+	identifies the shortest cycle for undirected graphs
+	Returns it.
+
+	Should be able to do this faster without cycle_basis..
+
+	NOT tested
+
+	"""
+	cycles=[nlist for nlist in nx.algorithms.cycles.cycle_basis(R,n) if n in nlist]
+	#identify the shortest of them...
+	if len(cycles)==0: return None
+	#do some optimization. Weight is not the same for every road BUT it does not differ that much. Saves calls to go.sumWeights
+	m=min([len(c) for c in cycles])
+	#cycles=[c for c in cycles if len(c)<3*m] #shortens list.
+	for c in cycles:
+		c.reverse()
+		c.append(c[0])
+
+	weights=[sumWeights(R,P) for P in cycles]
+	if min(weights)>=1e15: return None #infinite weight...
+	shortest=cycles[weights.index(min(weights))]
+	return shortest
+
+
+def shortestCycle(R,source, cutoff=None):
+	"""
+	Shortest cycle.
+
+	Cutoff is the maximum weight we can accept. Important to set cutoff as small as possible since it is a very complex algorithm.
+
+	This is a brute force search, takes some time. May be refined.
+
+	When a potential "winner" is found, all the other paths are explored until
+	their weight-sum is bigger than the "winner"-one. If a better soulution is
+	found in this process, we do the same for that one.
+	"""
+	assert cutoff!=None #otherwise we are screwed..
+	assert source in R #hard if n is not in our graph
+	if cutoff==0: return None
+	paths={0:[source]} # paths in [n1, n2,..] format
+	sums={0:0} #sum of weight for path i
+
+	id=0
+	current=0 #indicates where in the lists we are
+	"""from matplotlib import pyplot as plt
+	from draw import *
+	import time
+	plt.ion()
+	fig=plt.figure()"""
+	potential_winner=None 
+	pwsum=1e15
+	shortest_paths=None #will be calc. and set if needed below.
+
+	while sums[current]<cutoff:
+		path=paths[current]
+		node=path[-1] #last node in path
+
+		"""fig.clear()
+		plt.plot(source[0], source[1], 'o')
+		ax=fig.add_subplot('111', aspect='equal')
+		ax=R.draw(ax=ax, background=False, weight=True)
+		draw_road(path, ax, color='b')
+		plt.draw()
+		raw_input('dfs')"""
+		
+		for neigh in R[node]: #neighbors
+			if len(path)>1 and neigh == path[-2]:
+				continue #we do not allow going back again
+
+
+			
+			elif len(path)!=1 and neigh in path: #we might have found it.
+				if neigh==source: #we are there..
+					e_data=R.get_edge_data(node,neigh)
+					s=sums[current]+e_data['weight']
+					if s>=pwsum: #too bad.. don't fork
+						continue
+					ptmp=copy.deepcopy(path)
+					ptmp.append(neigh)	
+				else: #we have performed a loop. Take the shortest path home.
+					index=path.index(neigh)
+					assert path[-1]==node
+					assert index != len(path)-1 #would be node..
+					assert index != 0
+					if path[index-1] == node:
+						continue #we have been down that road, don't try it again
+					#simply take the shortest path back.
+					if shortest_paths==None: #then calculate it..better to do here
+						shortest_paths=nx.algorithms.shortest_paths.weighted.single_source_dijkstra_path(R,source,cutoff=cutoff)
+					ptmp=shortest_paths[neigh]
+					ptmp.reverse() #we want the last one to be node, not the opposite.
+					s=sums[current]+sumWeights(R,ptmp)
+					if s>=pwsum:
+						continue #route is too bad.
+					assert ptmp[0]==neigh
+					assert path[-1]!=neigh
+					assert ptmp[-1]==source
+					ptmp=copy.deepcopy(path)+ptmp
+					assert ptmp.count(source)==2
+					assert ptmp.count(neigh)==2
+				potential_winner=ptmp
+				pwsum=s
+				continue #should not fork this one since we reached the goal
+			#if we have come this far, we should fork, i.e. start a new branch.
+			e_data=R.get_edge_data(node, neigh)
+			newsum=sums[current]+e_data['weight']
+			if newsum>cutoff:
+				continue #too much weight
+			ptmp=copy.deepcopy(path)
+			ptmp.append(neigh)
+			id+=1 #this is a unique id 
+			sums[id]=newsum
+			paths[id]=ptmp
+		del paths[current] #we always create new id:s.. so remove
+		del sums[current]
+		
+		if len(paths)==0:
+			if potential_winner: return potential_winner
+			assert len(sums)==0
+			return None
+
+		current = min(sums, key=sums.get) #so, we get the key to the instance with lowest sum for next iteration
+		if potential_winner: #we may exit here
+			if pwsum<sums[current]:
+				return potential_winner #we have checked that no shorter path exists. Bingo.
+
+	return None #we reached the cutoff
+
+
 
 

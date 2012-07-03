@@ -15,18 +15,20 @@ import graph_alg.costFunctions as cf
 
 
 
-def get_shortest_and_second(R,node,debug=False):
+def get_shortest_and_second(R,node):
 	"""
 	returns the shortest and second shortest paths FROM node.
 
 	Does NOT store any data.
 
 	assumes that R has origin info. R is of grid-type
+
+	We have a known bug in the cycle thing. It does not consider all cycles..
 	
 	NOT tested
 	"""
 	inf=1e15
-	node=node[0]
+	node=node[0] #no data dictionary included
 	assert len(node)==2 #otherwise node was not given in the way we wanted
 	if node==R.origin: return [], []
 	p1=nx.dijkstra_path(R, node, R.origin)
@@ -37,12 +39,13 @@ def get_shortest_and_second(R,node,debug=False):
 	assert node in e #we always start from node.
 	wstore=e_data['weight']
 	e_data['weight']=inf #to force a loop..
-	cycle=go.shortestCycle(R,node, debug) #shortest cycle not including inf. weight edge
+	p2=nx.dijkstra_path(R, node, R.origin) #cannot do this single source
+	w2=go.sumWeights(R,p2)
+	cycle=go.shortestCycle(R,node,cutoff=w2-w1) #shortest cycle not including inf. weight edge
 	if cycle:
 		altW=w1+go.sumWeights(R,cycle)
 		alternative=cycle[:-1]+p1 #-1 to avoid double use of node in path..
-	p2=nx.dijkstra_path(R, node, R.origin) #cannot do this single source
-	w2=go.sumWeights(R,p2)
+
 	if w2>=inf: #if we are forced to use e in second shortest as well -> no p2 or cycle
 		if cycle:
 			p2=alternative
@@ -100,17 +103,6 @@ def update_after_mod(ein,R):
 		assert P22 != None #otherwise cost should be inf.
 		nTmp[1]['shortest_path']=P21
 		nTmp[1]['second_shortest']=P22
-		"""if __debug__: #if code is not optimized (-o)
-			p1,p2=get_shortest_and_second(R, nTmp) #what we save by storing stuff..
-			print p1==P21, p2==P22
-			if p2 != P22:
-				print nTmp
-				ax=R.draw(weight=True)
-				draw_road(p2, ax, 'r')
-				draw_road(P22, ax, 'b')
-				plt.show()
-			assert p1==P21
-			assert p2==P22"""
 		nTmp[1]['new_shortest_path']=None #to avoid hard-found bugs..
 		nTmp[1]['new_second_shortest']=None
 
@@ -158,25 +150,7 @@ def pathsDiff(R,e,storeData=False):
 
 	for nTmp in e[2]['visited_from_node']: 
 		if nTmp[0]==R.origin: continue
-		"""
-		used to use already calc. balues..
-		P11=nTmp[1]['shortest_path']
-		P12=nTmp[1]['second_shortest']
-		#remove!!!
-		"""
 		P11,P12=get_shortest_and_second(R, nTmp)
-		"""if t2!=P12:
-			print nTmp
-			print go.sumWeights(R,t2)
-			print go.sumWeights(R,P12)
-			print t2
-			print P12
-			ax=R.draw(weight=True)
-			draw_road(t2, ax,'r')
-			draw_road(P12, ax,'b')
-			plt.show()
-		assert t1==P11
-		assert t2==P12"""
 		if P12 == None or P11==None: #road is forced over e.. cannot be removed..
 			C=inf
 			break
@@ -192,32 +166,57 @@ def pathsDiff(R,e,storeData=False):
 			break
 		w21=go.sumWeights(R,P21)
 		w22=go.sumWeights(R,P22)
-		assert w22>=w21 #closest one is the one with load
-		#print w22, w21, w22+w21
-		#print w11, w12, w11+w12
-		if w22+w21<w11+w12: #new route should be longer or equal
-			print w22+w21, w11+w12
-			print e[0:2]
-			ax=R.draw()
-			P21.reverse()
-			draw_road(P21+P22, ax, 'r')
-			P11.reverse()
-			draw_road(P11+P12, ax, 'b')
-			plt.show()
-			
+		assert w22>=w21 #closest one is the one with load			
 		assert w22+w21>=w11+w12 #new route should be longer or equal
-		C+=(w21+beta*w22)-(w11+beta*w12)
+		C+=(beta*w21+w22)-(beta*w11+w12)
 		if storeData: #store so we don't have to do this all again when/if removing edge
 			assert P21!=None and P22!=None
-			"""if nTmp[0]==(135.637, 103.395):
-				p1,p2=get_shortest_and_second(R,nTmp, debug=True)
-				if go.sumWeights(R,p2)>160:
-					ax=R.draw(weight=True)
-					draw_road(p2, ax, 'r')
-					plt.show()
-					raise Exception('remove..')"""
 			nTmp[1]['new_shortest_path']=P21
 			nTmp[1]['new_second_shortest']=P22
 		e[2]['weight']=wstore
 	if C>=inf: e[2]['weight']=wstore #we broke out without adding..
 	return C
+
+def forcePaths(R, diffmax=0.1):
+	"""
+	This is a warmup function. It modifies the edges weights with respect to how many visits they have and in that way forces the paths to coincide more.
+
+	Ends with restoring the weight.
+
+	Observe that this modification may cause problems in your algorithm..
+	"""
+	modified=True
+	itmax=10
+	i=0
+	while modified and i<itmax:
+		i+=1
+		print "forcePath iteration no:", i
+		modified=False
+		for e in R.edges(data=True):
+			e[2]['weight']=R.edgeWeightCalc(e[0],e[1])*(1-min(diffmax,len(e[2]['visited_from_node'])/len(R)))
+		#now update paths etc.
+		for node in R.nodes(data=True):
+			p1,p2=get_shortest_and_second(R,node)
+			if len(p1)==0: #origin
+				assert node[0]==R.origin
+				continue
+			node[1]['second_shortest']=[]
+			if p1 != node[1]['shortest_path'] or p2 != node[1]['second_shortest']:
+				modified=True #we have a change
+				#change stored data
+				for p in node[1]['shortest_path'], node[1]['second_shortest']:
+					for edge in R.edges_from_path_gen(p):
+						d=R.get_edge_data(*edge)
+						if node in d['visited_from_node']:
+							d['visited_from_node'].remove(node)
+				#update new info
+				node[1]['shortest_path']=p1
+				node[1]['second_shortest']=p2
+				for p in p1,p2: #now, update edge info for all visited edges
+					for edge in R.edges_from_path_gen(p):
+						d=R.get_edge_data(*edge)
+						if not node in d['visited_from_node']: d['visited_from_node'].append(node) #in order to later see...
+	for e in R.edges(data=True):
+		e[2]['weight']=R.edgeWeightCalc(e[0],e[1])
+	
+

@@ -273,12 +273,15 @@ def tryP0(areaPoly=None, t=60 ):
 	ax=fig.add_subplot(111)
 	print "best cost:", best.cost
 	best.draw(ax=ax)
-def best(areaPoly=None,t=60):
+def best(areaPoly=None,t=60, tri=False):
 	"""
 	time - how long we should look for a better solution
 	"""
 	globalOrigin= 596250, 6727996
-	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+	if tri:
+		R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+	else:
+		R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	#R=simplified_bruteForce(R,aCap=0.2, anim=True)
 	R, tries=stochastic_several(R, t=t)
 	fig=plt.figure()
@@ -289,33 +292,16 @@ def best(areaPoly=None,t=60):
 	ax=fig.add_subplot(111)
 	ax.plot(tries, 'o')
 	ax.set_ylim(0,max(tries)+100)
-
+	return R
 	
 def tmp(areaPoly=None):
-	globalOrigin= 596250, 6727996
+	globalOrigin= 596250, 6727996 #coordinate
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
-	simplified_bruteForce(R,aCap=0.2, anim=False)
-	c=None
-	for i in range(5):
-		Rt=copy.deepcopy(R)
-		Rt=simplified_bruteForce(Rt,aCap=0.2, anim=False)
-		if c: assert c==Rt.cost
-		c=Rt.cost
-	
-	R=simplified_bruteForce(R,aCap=0.2, anim=False)
-	#R=stochastic(R,aCap=0.2)
-	fig=plt.figure()
-	ax=fig.add_subplot(111, aspect='equal')
-	R.draw(ax)
-
-	print "road area coverage:", go.roadAreaCoverage(R)
-	print "internal evaluation of above:", R.areaCover
-	print "total area:", fun.polygon_area(areaPoly)
-	print "used total area:", R.A, R.Ainv
-	print "total cost:", cf.totalCost(R)
-
-	#ax2=fig.add_subplot(224)
-	#plotWorstRoad(R, ax, ax2)
+	print "algorithm time... "
+	#R=simplified_bruteForce(R,aCap=0.2,warmup=False, anim=False)
+	#R=bruteForce(R,aCap=0.2, add=False)
+	R=best(areaPoly, t=60*15)
+	R.draw(edge_visits=True, cost=True)
 
 def findBugs(algList):
 	"""
@@ -339,17 +325,66 @@ def findBugs(algList):
 	print "used total area:", R.A, R.Ainv
 	print "total cost:", cf.totalCost(R)
 
-	
+def testCycles():
+	from graph_operations import shortestCycle
+	import algorithms.common as com
+	from draw import draw_road
+	h=150
+	l=130
+	aP=[(0,0), (l,0), (l,h), (0,h)]
+	R=gr.SqGridGraph(areaPoly=aP)
+	#R=simplified_bruteForce(R)
+	R.remove_edge((12.0, 12.0), (36.0, 12.0))
+	R.remove_edge((12.0, 60.0), (36.0, 60.0))
+	R.remove_edge((12.0, 84.0), (36.0, 84.0))
+	R.remove_edge((60.0, 12.0), (60.0, 36.0))
+	R.remove_edge((36.0, 60.0), (60.0, 60.0))
+	R.remove_edge((60.0, 36.0), (84.0, 36.0))
+	R.remove_edge((60.0, 84.0), (84.0, 84.0))
+	R.remove_edge((60.0, 60.0), (84.0, 60.0))
+	for n in R.nodes(data=True):
+		if n[0]==(60.0,36.0): node=n
+	d=R.get_edge_data((36.0, 12.0) , (36.0, 36.0))
+	d['weight']*=4
+	d=R.get_edge_data((36.0, 84.0) , (60.0, 84.0))
+	d['weight']*=4
+	from matplotlib import pyplot as plt
+	from draw import draw_road
+	import time
+	import algorithms.common as common
+	plt.ion()
+	fig=plt.figure()
+	t=[0,0]
+	for n in R.nodes(data=True):
+		tic=time.clock()
+		print n[0]
+
+		c=go.shortestCycle(R,n[0],cutoff=300)
+		p1,p2=common.get_shortest_and_second(R,n)
+		n=n[0]
+		if c==None:
+			continue
+		fig.clear()
+		ax=fig.add_subplot('111', aspect='equal')
+		ax=R.draw(ax=ax, background=False)
+		plt.plot(n[0], n[1], '+')
+		draw_road(p1, ax, color='r')
+		draw_road(c, ax, color='b')
+		plt.draw()
+		raw_input('dfs')
 import cProfile
 import time
 import random
 tic=time.clock()
-areaPoly=list(3*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+#areaPoly=list(5*np.array([(0,0),(48,0), (73, 105), (0,96)]))
+areaPoly=list(3*np.array([(0,0),(50,0), (50, 105), (0,105)]))
 for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
 #tmp(areaPoly)
-#cProfile.run('''best(t=60,areaPoly=areaPoly)''')
-testInterpolation()
-#best(areaPoly,60*3)
+
+#testCycles()
+#cProfile.run('''tmp(areaPoly=areaPoly)''')
+#testInterpolation()
+best(areaPoly,1, tri=True)
 #tryP0(areaPoly, t=60)
 #findBugs([simplified_bruteForce, stochastic])
 

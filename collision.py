@@ -141,10 +141,18 @@ def pointOnLine(ray, p):
 	else: return True
 def closestPolygonPoint(pos, nodes):
 	"""
-	algorithm: go through all the edges, calculate closest point.
+	algorithm: go through all the edges, calculate closest
+
+	old note:
+
+	closest point in polygon not defined if point is INSIDE polygon.
+
+	.. I think this is incorrect by inspecting the code. should work inside the polygon as well.
+
+	BUT I have not tested this.. Skip assertions since I will use it for pos inside polygon.
+
 	"""
-	#if pointInPolygon(pos,nodes): raise Exception('closest point in polygon not defined if point is INSIDE polygon.') #removed for speedup
-	d=10000
+	d=1e10
 	closest=None
 	index=0
 	for node in nodes:
@@ -156,17 +164,18 @@ def closestPolygonPoint(pos, nodes):
 			closest=P
 			d=dist
 		index+=1
+	assert d<1e10
 	return [closest[0], closest[1]] #not the numpy array, jsut a list
+
 def closestLinePoint(posIn, ray, additionalInfo=False):
 	"""
 	A startpos, B endpos)
 	"""
 	a=ray[0]
 	b=ray[1]
-	pos=np.array(posIn)
+	pos=np.array(posIn, dtype='float32') #float to avoid integer div. below
 	ab=b-a
 	t=np.dot(pos-a, ab)/np.dot(ab, ab)
-	#if np.dot(b-(a+1*ab),b-(a+1*ab))>0.0001: raise Exception('closestLinePoint works badly')
 	if t<0:
 		if additionalInfo: return a, t
 		else: return a
@@ -176,6 +185,7 @@ def closestLinePoint(posIn, ray, additionalInfo=False):
 	else:
 		if additionalInfo: return a+t*ab, t
 		else: return a+t*ab
+		
 def linesIntersect(ray1, ray2, getPoint=False):
 	"""
 	checks if the two lines defined by ray1 and 2 intersect.
@@ -186,7 +196,7 @@ def linesIntersect(ray1, ray2, getPoint=False):
 	C=ray2[0]
 	D=ray2[1]
 	#FIND NORMAL TO CD. 
-	n=np.array((-(C[1]-D[1]),C[0]-D[0])) #one of the two normals
+	n=np.array((-(C[1]-D[1]),C[0]-D[0]), dtype='float32') #one of the two normals
 	n=n/sqrt(np.dot(n,n))#normalize
 	t=np.dot(n, C-A)/(np.dot(n, B-A))
 	if t==np.inf or t==-np.inf:

@@ -128,6 +128,7 @@ def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 			if first: first=False
 		print "the chosen one:",e[2]['c'], e[0:2]
 		print "areacover:", R.areaCover
+		print "cost:", cf.totalCost(R)
 		e[2]=R.get_edge_data(*e) # Update again, to get "new second shortest"
 		if add and random.uniform(0,1)<0.33:
 			print "adds"
@@ -160,9 +161,12 @@ def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 			update_after_mod(e,R)
 	for e in R.edges(data=True):
 		modifyEdge(e, R, reset=True)
+	R.cost=cf.totalCost(R)
 	print "construction finished."
+	print "total number of nodes:", len(R.nodes())
 	print "road area coverage:", R.areaCover
 	print "total area:", G.A
+	print "total cost:", R.cost
 	return R
 
 def modifyEdge(edge, R, reset=False):

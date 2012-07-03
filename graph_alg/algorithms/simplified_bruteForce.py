@@ -13,9 +13,9 @@ from graph_alg.grid import *
 import graph_alg.graph_operations as go
 from graph_alg.draw import *
 import graph_alg.costFunctions as cf
-from common import get_shortest_and_second, sortRemList, remove_edge, cost
+from common import get_shortest_and_second, sortRemList, remove_edge, cost, forcePaths
 
-def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, anim=False):
+def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=False):
 	"""
 	a simplified algorithm. Still a little bit complex dock, but this is as simple as it gets I think.
 
@@ -28,7 +28,8 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, anim=False):
 	eps=1e-9
 	lastAdded=None
 	origin=R.origin
-	for e in R.edges(data=True): assert e[2]['weight']>=0
+	if __debug__:
+		for e in R.edges(data=True): assert e[2]['weight']>=0
 	if not origin: raise Exception('need info about origin')
 
 	#now, start for real and save away all kind of info about the paths.
@@ -44,7 +45,8 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, anim=False):
 			for edge in R.edges_from_path_gen(p):
 				d=R.get_edge_data(*edge)
 				if not node in d['visited_from_node']: d['visited_from_node'].append(node) #in order to later see...
-
+	if warmup:
+		forcePaths(R)
 	remList=[]
 	for e in R.edges(data=False): #add to remove list and calc. costs
 		e_data=R.get_edge_data(*e)
@@ -52,6 +54,7 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, anim=False):
 		remList.append(e)
 	remList=sortRemList(R,remList)
 
+	#all stuff initialized by now.
 	while len(remList)>0: #the loop where edges are removed..
 
 		"""

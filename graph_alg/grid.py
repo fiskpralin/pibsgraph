@@ -64,12 +64,13 @@ class ExtendedGraph(nx.Graph):
 		self.areaCover=go.roadAreaCoverage(self)
 		self.moviefig=None #may be used for movies later
 		self.cmdfolder=os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
+		self.aPInnerCircleM=None #used later for polygon calculations
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""
 		interpolates from the terrain data and returns line coordinates.
 		p1-start point
 		p2-end point
-g
+
 		output:
 		x - array of x-values along line
 		y - array of y-values along line
@@ -97,7 +98,7 @@ g
 		reason for using self.weightFunction is that several externa functions can be tested..
 		"""
 		d=fun.getDistance(p1,p2)
-		#return d #remove! just temporary...
+		return d #remove! just temporary...
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
@@ -186,6 +187,8 @@ g
 		However, the content is deleted next time the movie-function is used.
 
 		The fps input value is only used when final=True
+
+		Movies can usually be made through the algorithm functions. If not, this method provides a nice way to do it yourself.
 		"""
 		folder=os.path.join(self.cmdfolder, 'animtemp')
 		if not self.moviefig: #first one..
@@ -206,16 +209,27 @@ g
 			self.moviefig.clear() #saves some memory and we can re-draw next time.
 			self._plot_i+=1
 
-	def draw(self, ax=None, overlap=False, weight=False, cost=False):
+	def inside(self,pos):
+		"""
+		are we inside the polygon? We don't use colission detection directly since we can do
+		some time saving tests
+		"""
+		assert self.areaPoly
+		if self.aPInnerCircleM==None: #created yet?
+			self.aPInnerCircleM, self.aPInnerCircleRadius=fun.getPolygonInnerCircle(self.areaPoly)
+		if fun.insideCircle(pos, self.aPInnerCircleM, self.aPInnerCircleRadius):
+			return True #much faster than below
+		return col.pointInPolygon(pos,self.areaPoly)
+	def draw(self, ax=None, overlap=False, weight=False, cost=False, edge_visits=False, background=True):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
 		"""
 		if not ax: #add a new one.. 
 			fig=plt.figure()
 			ax=fig.add_subplot(111)
-		ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
+		if background: ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
 		ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
-		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight, road_color='#01243B', road_width=4, poly=False)
+		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight,edge_visits=edge_visits, road_color='#01243B', road_width=4, poly=False)
 		#bug in matplotlib always plots patch in back.. do line instead
 		vertices=self.areaPoly+[self.areaPoly[0]] #closed
 		x=[v[0] for v in vertices]
@@ -272,24 +286,24 @@ class SqGridGraph(ExtendedGraph):
 				for sign in sl:
 					x, y=tuple(cart((xloc,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
 					x,y=round(x,digits), round(y,digits)
-					if not inside((x,y),areaPoly): continue
+					if not self.inside((x,y)): continue
 					self.add_node((x, y))
 					el+=1
 					#neigbor 'backwards' in y-dir
 					neig=tuple(cart((xloc,sign*(yloc)-dy), origin=(0,0), direction=direction, fromLocalCart=True))
 					neig=round(neig[0],digits), round(neig[1],digits)
-					if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
+					if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
 					if diagonals and xloc != 0:
 						neig=tuple(cart((xloc-dx,sign*(yloc-dy)), origin=(0,0), direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+						if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
 						neig=tuple(cart((xloc+dx,sign*(yloc-dy)), origin=(0,0), direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
+						if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
 					if True or xloc != 0:
 						neig=tuple(cart((xloc-dx,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if inside(neig, areaPoly): self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+						if self.inside(neig): self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
 		rem=True
 		while rem:
 			rem=False
@@ -310,11 +324,7 @@ class SqGridGraph(ExtendedGraph):
 		elements=el
 		self.elements=el			
 		self.density=elements/self.A
-def inside(pos,areaPoly):
-	"""
-	max is a list with two elements. max[0]==xmax, max[1]==ymax. 
-	"""
-	return col.pointInPolygon(pos,areaPoly)
+
 
 class TriGridGraph(ExtendedGraph):
 	"""
@@ -363,17 +373,17 @@ class TriGridGraph(ExtendedGraph):
 					x,y=tuple(cart((xloc,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
 					x,y=round(x,digits), round(y,digits)
 					#x,y is now real coordinates, transformed through angle.
-					if not inside((x,y),areaPoly): continue
+					if not self.inside((x,y)): continue
 					self.add_node((x, y))
 					el+=1
 					if y != 0:
 						if index != 0:
 							neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
 							neig=round(neig[0],digits), round(neig[1],digits)
-							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
+							if self.inside(neig): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
 							neig=tuple(cart([xloc+dx/2., yloc-dy,digits], origin=(0,0), direction=direction, fromLocalCart=True))
 							neig=round(neig[0],digits), round(neig[1],digits)
-							if inside(neig, areaPoly): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
+							if self.inside(neig): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
 					if index != 0:
 						self.add_edge(tuple([x,round(y,digits)]),tuple([x-dx, round(y,digits)]), weight=L, visits=0, visited_from_node=[],c=0)
 		rem=True
