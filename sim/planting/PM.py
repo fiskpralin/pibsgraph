@@ -69,7 +69,7 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['plant attempts'])
 		t.append(s.stats['mound attempts'])
 		t.append(s.stats['remound attempts'])
-		t.append(s.stats['stumps in WA'])
+		t.append(s.stats['visible obstacles in WA'])
 		t.append(s.stats['stumps in WA sum diamater'])
 		t.append(s.stats['immobile boulder struck'])
 		t.append(s.stats['immobile vol sum']*1000) #change to dm3
@@ -213,16 +213,15 @@ def articleThree(i=1):
 def doTheSenseAn(i=1):
 	"""
 	Here all the different sensitivityanalyses are performed in classes. Each perform one change of parmeter and
-	the results should be saved in a .xls file in a folder.
+	the results should be saved automatically in a .xls file in a folder.
 
-	Before this method can be run we need to add the machinemodels:
-	['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']
+	* Before this method can be run we need to add the machinemodels:
+	 ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']
 
-	Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order
-	to actually have different configurations.
+	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations.
 
-	Also we need to check that it is the correct terrain type that is run for these. It should be
-	terrain type '3' for the complete sensitivity analysis
+	* Also we need to check that it is the correct terrain type that is run for these.
+	 It should be terrain type '3' for the complete sensitivity analysis
 	"""
 	
 	VaryDibbleDist(i)#
@@ -893,6 +892,9 @@ class PlantmSim(SimExtend):
 	def __init__(self, G=None, vis=True, anim=False, mtype='2a', ttype='random'):
 		self.initialize()
 		SimExtend.__init__(self, G, vis, anim, animDelay=0.3) #animDelay==standard value for animations
+		if not self.G.simParam:
+			self.G.simParam=paramsForSensAn()
+			assert self.G.simParam
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
@@ -909,6 +911,7 @@ class PlantmSim(SimExtend):
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
 		self.setQueuePerc()
 		print "stumps in WA sum diameter:", self.stats['stumps in WA sum diamater']
+		print "time to search for microsite", self.m.timeConsumption['searchTime']
 		print "number of remounds", self.stats['remound attempts']
 		if self.p: #if we have a plotter instance
 			self.p.terminate()
@@ -957,6 +960,26 @@ def paramsForSensAn(simParam={}):
 	hence easy change of parameter values in e.g. a for-loop in the Umbrella, see 'Vary*'-classes above
 	and the method articleThree. In general simParam is saved in G. Below set values are default and
 	the commented values are what to be tested in the sensitivity analysis.
+
+	implement list:
+	
+	param 				implemented?	verified?
+	s['dibbleDist']         yes			Yes
+	s['tFindMuSite']		yes
+	s['wMB']				yes
+	s['impObAv']			
+	s['shift']				
+	s['rotCap']				
+	s['tCWhenInvKO']		
+	s['tInvExcavator']		
+	s['noRemound']			
+	s['critStoneSize']		yes
+	s['moundRadius']		yes
+	s['rectangular']		
+	s['rectVol']			
+	s['TSR']				yes			yes			
+	s['sBMWhenInv']	
+	
 	"""
 	s=simParam
 
@@ -980,3 +1003,4 @@ def paramsForSensAn(simParam={}):
 
 	"""Other parameters for the simulations
 	---------------------------------------"""
+	return s

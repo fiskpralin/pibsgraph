@@ -29,6 +29,10 @@ class PlantHead(Process, UsesDriver, Obstacle):
 		Process.__init__(self, name, sim)
 		UsesDriver.__init__(self, PD.driver)
    		self.p=PD #planting device
+		self.length=2*self.p.G.simParam['moundRadius']
+		self.depth=self.length*0.5 #radius of hole
+		self.width=self.p.G.simParam['wMB']
+		self.width=self.defaultWidth #default, set in children init
 		self.timeConsumption={'mounding':0, 'planting':0, 'halting':0}
 		"""
 		Uptdated:
@@ -143,14 +147,10 @@ class PlantHead(Process, UsesDriver, Obstacle):
 #####################################
 class Mplanter(PlantHead):
 	def __init__(self, name, sim, PD, leftRight):
+		self.defaultWidth=0.4
 		PlantHead.__init__(self,name, sim, PD)
+		
 		self.leftRight=leftRight #'right' or 'left'
-		self.length=0.4 #i.e length of "tracks" 
-		if self.p.G.PMbladeWidth:
-			self.width=self.p.G.PMbladeWidth
-		else:
-			self.width=0.45 #default
-		self.depth=0.2
 		Obstacle.__init__(self, [0,0], isSpherical=False, radius=sqrt((self.width/2.)**2+(self.length/2.)**2), terrain=PD.G.terrain)
 	def run(self):
 		p=self.p
@@ -241,7 +241,7 @@ class Mplanter(PlantHead):
 					if not self.abort: #plant
 						self.debugPrint("plants...")
 						self.sim.stats['plant attempts']+=1
-						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain)
+						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain, plantMinDist=self.p.m.plantMinDist)
 						plantTime=t['dibbleDownTime']+t['relSeedlingTime']+t['dibbleUpTime']
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
@@ -280,13 +280,8 @@ class Mplanter(PlantHead):
 ###########################	
 class Bracke(PlantHead):
 	def __init__(self, name, sim, PD):
+		self.defaultWidth=0.4
 		PlantHead.__init__(self,name, sim, PD)
-		self.length=0.4 #i.e length of "tracks" 
-		if self.p.G.PMbladeWidth:
-			self.width=self.p.G.PMbladeWidth
-		else:
-			self.width=0.4 #default
-		self.depth=0.2
 		Obstacle.__init__(self, [0,0], isSpherical=False, radius=sqrt((self.width/2.)**2+(self.length/2.)**2), terrain=PD.G.terrain)
 	def run(self):
 		p=self.p
@@ -359,7 +354,7 @@ class Bracke(PlantHead):
 					if not self.abort: #plant
 						self.debugPrint("plants...")
 						self.sim.stats['plant attempts']+=1
-						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain)
+						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain, plantMinDist=self.p.m.plantMinDist)
 						plantTime=t['dibbleDownTime']+t['relSeedlingTime']+t['dibbleUpTime']
 						for c in self.cmnd([], plantTime, auto['plant']):
 							yield c
