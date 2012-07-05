@@ -1,7 +1,7 @@
 from SimPy.Simulation  import *
 import machines
 from machines.basics import Machine, UsesDriver, Operator
-from heads import PlantHead, Mplanter, Bracke
+from heads import PlantHead, Mplanter, Bracke, MultiHead
 import terrain
 from terrain.obstacle import Obstacle
 from terrain.tree import Tree
@@ -51,19 +51,33 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		else:
 			raise Exception("ERROR: cannot mount more than two planting devices to machine.%f"%len(self.m.pDevs))
 		if self.m.headType=='Mplanter':
-			self.plantSepDist=self.G.simParam['dibbleDist'] #in 1h case, we dont have this parameter
-			for lr in ["left", "right"]:
-				h=Mplanter(self.name+"_"+lr+"_head", self.sim, PD=self,leftRight=lr)
+			self.plantSepDist=2.01 #existing machine, constant parameter
+			for no in [0,1]:
+				#h=Mplanter(self.name+"_"+str(no)+"_head", self.sim, PD=self,leftRight=lr)
+				h=Mplanter(self.name+"_"+str(no)+"_head", self.sim, PD=self,number=no)
 				self.sim.activate(h,h.run())
 				self.plantHeads.append(h)
-				self.plantAreaW=self.plantSepDist+h.width
+			self.plantAreaW=self.plantSepDist+h.width
+		elif self.m.headType=='MultiHead':
+			self.plantSepDist=self.G.simParam['dibbleDist'] #1m by default
+			if '3h' in self.m.type:
+				no=3
+			elif '4h' in self.m.type:
+				no=4
+			else:
+				raise Exception('3 or 4 heads are supported, not more or less, %s'%str(self.m.type))
+			for i in range(no):
+				h=MultiHead(self.name+"_"+str(i+1)+"_head", self.sim, PD=self,number=i)
+				self.sim.activate(h,h.run())
+				self.plantHeads.append(h)
+			self.plantAreaW=(no-1)*self.plantSepDist+h.width #2*h.width/2..both sides..
 		elif self.m.headType=='Bracke':
 			h=Bracke(self.name+"_"+"brackeHead", self.sim, PD=self)
 			self.sim.activate(h, h.run())
 			self.plantHeads.append(h)
 			self.plantAreaW=h.width
 		else:
-			raise Exception('Headtype not supported: %s'%str(self.headType))
+			raise Exception('Headtype not supported: %s'%str(self.m.headType))
 		self.plantAreaL=2*h.length
 		self.radius=0.5*sqrt(self.plantAreaW**2+self.plantAreaL**2) #needed for plantingdevice to be regarded as obst.
 		#define the optimal nodes:
@@ -109,15 +123,18 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				self.struckLastTime=True
 			else:
 				self.struckLastTime=False
+				
 	def initOpt(self):
-		"""sets the pattern for optimal positions."""
+		"""
+		sets the pattern for optimal positions.
+		"""
 		self.optNodes=[]
 		self.optNode=-1
 		if self.m.headType=='Bracke':
 			bracke=True #one head per decice
 		else:
 			bracke=False
-		if self.m.type[0:2]=='2a':
+		if '2a' in self.m.type:
 			#this is strictly for 2000 plants/ha, i.e 10 spots per half circle and [4,9]m crane dimensions
 			w1 = 1.3
 			w2 = 1.0
@@ -155,14 +172,15 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				th=asin(w1/r)
 				self.optNodes.append(self.m.getCartesian([r,th]))
 				self.idealSpots.append(self.m.getCartesian([r,th]))
-		elif self.m.type[0:2]=='1a':
+		else:
+			assert len(self.m.pDevs)==0 or len(self.m.pDevs)==1 and self.m.pDevs[0]==self
 			w1 = self.plantAreaW/2.
 			w2 = self.plantAreaL/2.
-			if isinstance(self.plantHeads[0], Bracke):
+			if bracke:
 				spaceMin=self.m.plantMinDist
 			else:
-				spaceMin=self.plantSepDist+self.m.plantMinDist #minimum spacing for angular movements.
-			n=ceil(self.m.nSeedlingsPWArea/2.) #/2 due to two plantHeads per device
+				spaceMin=self.plantAreaW-self.plantHeads[0].width+self.m.plantMinDist #minimum spacing for angular movements.
+			n=ceil(self.m.nSeedlingsPWArea/len(self.plantHeads)) #due to several plantHeads per device
 			nLeft=n
 			lInner = (self.m.craneMinL+w2)*(pi-2*asin(w1/(self.m.craneMinL+w2)))
 			sLength = sqrt(pow(self.m.craneMaxL-w2,2)-pow(w1,2))-sqrt(pow(self.m.craneMinL+w2,2)-pow(w1,2))
@@ -213,35 +231,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					nSection=a
 				nLeft-=nSection
 				lCurr+=L
-		else:
-			raise Exception("ERROR, type %s not supported"%self.type)
-		if bracke: #take every plantingpoint...
-			o=self.optNodes
-			onew=[]
-			i=self.idealSpots
-			inew=[]
-			c=self.m.getCartesian
-			w=2.01/2.
-			cyl=self.m.getCylindrical(self.pos)
-			direction=self.m.direction+cyl[1]-pi/2.
-			lastPos=c([-w, 0], origin=self.pos, direction=direction, fromLocalCart=True)
-			for p in self.optNodes:
-				#p1 on the left, p2 on the right
-				cyl=self.m.getCylindrical(p)
-				direction=self.m.direction+cyl[1]-pi/2.
-				p1=c([-w, 0], origin=p, direction=direction, fromLocalCart=True)
-				p2=c([w, 0], origin=p, direction=direction, fromLocalCart=True)
-				#make the order right.
-				if getDistance(p1,lastPos)<getDistance(p2, lastPos):
-					plist=[p1,p2]
-				else:
-					plist=[p2,p1]
-				for ptmp in plist:
-					onew.append(ptmp)
-					inew.append(ptmp)
-				lastPos=ptmp
-			self.optNodes=onew
-			self.idealSpots=inew
 	def debugPrint(self, string):
 		print self.sim.now(), self.name, string
 	def autoMove(self):
@@ -393,16 +382,21 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		else:
 			#get the next optimal in list and iterate until it is "forward" angularly.
 			self.optNode+=1
-			if self.m.type[0:2] is '2a':
+			if '2a' in self.m.type:
 				while self.m.getCylindrical(nodes[self.optNode])[1] > self.posCyl[1] and self.optNode<len(nodes)-1 and not exceeds(self,nodes[self.optNode+1],self.otherDevice): 
 					self.optNode+=1
 		return nodes[self.optNode]
+	
 	def plant(self):
-		"""plants at the current position, may run into problems...
+		"""
+		plants at the current position, may run into problems...
 		the plantheads are fixed in the same direction as the crane, thus
 		we define a cartesian coordinate system with origin in the center of the head
 		the coordinates of the boulders can be translated into this pretty simply.
-		if more than half of the boulder is inside the mounding area, it goes with it"""
+		if more than half of the boulder is inside the mounding area, it goes with it
+
+		This is done here since it's all a common crane movement. Thus it should be at the same time for all the heads and is rather connected to the device than the heads.
+		"""
 		tic=time.clock()
 		commands=[]
 		t=self.m.times
@@ -458,7 +452,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							pH.biggestBlock=b.radius*2
 				pH.moundSumA=sumA		
 			pH.moundObst=moundBould
-			h=Hole(orig,radius=pH.length/2.,terrain=self.G.terrain,z=pH.depth, nodes=pH.getNodes(orig) , isSpherical=False)
+			h=Hole(orig,terrain=self.G.terrain,z=pH.depth, nodes=pH.getNodes(orig) , isSpherical=False)
 		commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
 		for pH in pHeads:
 			pH.timeConsumption['mounding']+=t['moundAndHeapTime']
@@ -570,11 +564,14 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		if len(self.plantHeads)==1: return (pos,) #bracke
 		direction=self.m.direction-pi/2.+cyl[1]
 		c=self.m.getCartesian
-		w=self.plantSepDist/2.
-		#p1 on the left, p2 on the right
-		p1=c([-w, 0], origin=pos, direction=direction, fromLocalCart=True)
-		p2=c([w, 0], origin=pos, direction=direction, fromLocalCart=True)
-		return p1, p2
+		#from left to right
+		positions=[]
+		x=-(self.plantAreaW*0.5-self.plantHeads[0].width*0.5)
+		for i in range(len(self.plantHeads)):
+			positions.append(c([x, 0], origin=pos, direction=direction, fromLocalCart=True))
+			x+=self.plantSepDist
+		return positions
+	
 	def getPlantingCoord(self,pos=None,c='cartesian'):
 		if not pos:
 			cyl=copy.copy(self.posCyl)
@@ -584,20 +581,22 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			cyl=copy.copy(pos)
 		else:
 			raise Exception("error, getPlantingCoord did not recognize %s"%c)
-		cyl[0]-=self.plantHeads[0].length
+		if not self.m.inverting: cyl[0]-=self.plantHeads[0].length #a pile behind the hole
 		return self.getPHCoord(cyl, c='cylindrical')
+	
 	def getPhNodes(self,pH, pos=None, rootA=False):
-		"""returns the nodes of the planthead pH. Needs to be here for directions and so on.
-		rootA means that the area where the roots affects the mounding are asked for."""
+		"""
+		returns the nodes of the planthead pH. Needs to be here for directions and so on.
+		rootA means that the area where the roots affects the mounding are asked for.
+		"""
 		if pos==None: 
 			pos=self.pos
 			[r,th]=self.posCyl
 			if len(self.plantHeads)==1:
 				orig=self.getPHCoord(pos)[0]
 			else:
-				[p1, p2]=self.getPHCoord(pos)
-				if pH.leftRight=='left': orig=p1
-				else: orig=p2
+				positions=self.getPHCoord(pos)
+				orig=positions[pH.number]
 		else:
 			#first, determine the direction of the CRANE
 			orig=pos
@@ -605,8 +604,10 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			#this may seem like a sign-error, but remember that pos is pH-pos. Need th for self, not pH
 			if len(self.plantHeads)==1: #bracke
 				th=posCyl[1]
-			elif pH.leftRight=='left': th=posCyl[1]-asin(self.plantSepDist/2./posCyl[0])
-			else: th=posCyl[1]+asin(self.plantSepDist/2./posCyl[0])
+			else:
+				x=-(self.plantAreaW*0.5-pH.width*0.5)
+				x+=pH.number*self.plantSepDist #this is the upper part of the triangle.
+				th=posCyl[1]+asin(x/posCyl[0])
 		direction=self.m.direction+th-pi/2.
 		cart=self.m.getCartesian
 		w=pH.width
@@ -627,14 +628,14 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		else:
 			color='r'
 			sign='s'
-		"""x=[]
+		x=[]
 		y=[]
-		for i in self.idealSpots:
+		"""for i in self.idealSpots:
 			x.append(i[0])
 			y.append(i[1])
 					 
 			#ax.plot(i[0], i[1],color+sign)
-		ax.plot(x,y, 'b')"""
+		ax.plot(x,y, '-bo')"""
 		if self.G.debug:
 			#plot visited spots
 			x=[]

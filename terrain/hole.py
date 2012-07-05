@@ -13,17 +13,27 @@ class Hole(Obstacle):
 	"""
 	A hole in the ground, right now used to mark that ground has been digged at specific spot
 	"""
-	def __init__(self,pos,radius,terrain=None,z=0, nodes=None, isSpherical=True):
+	def __init__(self,pos,radius=None,terrain=None,z=0, nodes=None, isSpherical=True):
 		Obstacle.__init__(self, pos, isSpherical=isSpherical, radius=radius, terrain=terrain)
 		self.name="hole"
 		self.z=z
-		self.radius=radius
 		self.nodes=nodes
 		self.color='b'
 		self.alpha=90
+		if radius==None:
+			if isSpherical:
+				raise Exception('Hole without nodes needs a radius')
+			radius=1e10
+			for node in nodes:
+				d=getDistance(node, pos)
+				if d<radius:
+					radius=d
+		self.radius=radius
 		if terrain: terrain.holes.append(self)
+		
 	def getNodes(self, pos):
 		return self.nodes
+	
 	def draw(self, ax):
 		codes=[Path.MOVETO]
 		for i in range(4):#one more than nodes

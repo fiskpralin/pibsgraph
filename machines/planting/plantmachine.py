@@ -28,18 +28,27 @@ from math import *
 class PlantMachine(Machine):
 	"""
 	The planting machine. A Volvo EC210C. Has one or two planting devices which in turn have two planting heads each. 
-This machine is not really intelligent, the sofisticated behavious is programmed in the planting devices. Machine does not move.
+	This machine is not really intelligent, the sofisticated behavious is programmed in the planting devices. Machine does not move.
+
+	The below machine types are allowed. If you plan to add a new one, consider that the program does tests on the type, e.g. "if '2a' in type" to determine if the machine has two arms. If e.g. '2angles' would be the name of the new type, we would get a problem.
 	"""
-	def __init__(self, name, sim, G, mtype='1a2h', craneLim=None):
+	allowedTypes= ['1h', '2h','1a1h','1a2h','2a1h', '2a2h', '1a2hObAv','1a3h', '3h','1a3hObAv','1a4h','4h','1a4hObAv','1a1hMag','1a2hMag']
+	def __init__(self, name, sim, G, mtype='2h', craneLim=None):
+		if not mtype in self.allowedTypes:
+			raise Exception('Machine type %s no allowed'%str(mtype))
 		if not craneLim: craneLim=[4.0,9.0]
 		Machine.__init__(self, name, sim, G=G, mass=21000)
 		self.driver=Operator(sim=self.sim, delay=10000) #does not go on breaks..
 		self.sim.activate(self.driver, self.driver.work())
 		self.type=mtype
-		if self.type=='1a2h' or self.type=='2a4h':
+		if '2h' in self.type:
 			self.headType='Mplanter'
+		elif '3h' in self.type or '4h' in self.type:
+			self.headType='MultiHead' #several heads, don't know how many yet.
 		else:
 			self.headType='Bracke'
+		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 1, 'searchTime': 0, 'switchFocus':0, 'invertTime':G.simParam['tCWhenInvKO'], 'invert':None} #all in seconds, invert is determined later
+		self.timeConsumption={'diggTime': 0, 'heapTime': 0,'moundAndHeapTime': 0, 'dibbleDownTime': 0, 'relSeedlingTime': 0, 'haltTime': 0, 'searchTime': 0, 'switchFocus':0, 'machineMovement':0}
 		self.pos=[0,0]
 		self.craneMaxL=G.craneLim[1]
 		self.craneMinL=G.craneLim[0]
@@ -59,13 +68,19 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		self.stockingRate=self.G.simParam['TSR']
 		self.plantMinDist=G.simParam['dibbleDist']#G.plantMinDist
 		self.dibbleDepth=0.1
+		self.inverting=G.simParam['inverting']
+		if self.inverting: assert G.simParam['ExcavatorInverting']!=G.simParam['KOInverting'] #can't use both
+		if G.simParam['KOInverting']:
+			self.invertingMethod='KO'
+			self.times['inverting']=3
+		else:
+			self.invertingMethod='Excavator'
+			self.times['inverting']=13-3
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
 		#self.direction=random.uniform(0,2*pi)
 		self.direction=0
-		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 3, 'searchTime': 0, 'switchFocus':0}
-		self.timeConsumption={'diggTime': 0, 'heapTime': 0,'moundAndHeapTime': 0, 'dibbleDownTime': 0, 'relSeedlingTime': 0, 'haltTime': 0, 'searchTime': 0, 'switchFocus':0, 'machineMovement':0}
-		self.type=mtype
+		
 		self.pDevs=[]
 		self.treesPlanted=[]
 		self.automatic=G.automatic
@@ -80,10 +95,10 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 		p1=PlantingDevice('rightDevice', sim=self.sim, belongToMachine=self, G=self.G)
 		self.sim.activate(p1,p1.run())
 		self.pDevs.append(p1)
-		if mtype[0:2]=='2a': #add another one
+		if '2a' in self.type: #add another one. 1a is default
 			self.times['switchFocus']=2
 			self.timeConstants['machine']*=1.5 #longer time for 2a
-			self.velocities['machine']*=0.75
+			self.velocities['machine']*=0.75 #heavier, takes more time to move. Part of BTE model
 			p2=PlantingDevice('leftDevice', sim=self.sim, belongToMachine=self, G=self.G)
 			self.sim.activate(p2,p2.run())
 			self.pDevs.append(p2)
@@ -100,18 +115,21 @@ This machine is not really intelligent, the sofisticated behavious is programmed
 			self.mass+=4000. #the other planting head has a mass of 4 tons.
 		self.inPlaceEvent=SimEvent('machine has moved in place', sim=self.sim) #event fired when machine has moved
 		self.calcVisibleObstInWA() #some statistics updates needed
-		if self.headType=='Mplanter':
+		if self.headType=='Mplanter' or self.headType=='MultiHead':
 			try:
 				multiplier=self.G.simParam['tFindMuSite']
 			except:
 				multiplier=0.1 #default..
 			self.times['searchTime']=multiplier*self.sim.stats['visible obstacles in WA'] #specifics for this head..0 otherwise
-		elif self.headType=='Bracke': pass
+		elif self.headType=='Bracke':
+			pass
 		else:
-			raise Exception('could not identify head type') #safety first..
+			raise Exception('could not identify head type %s'%self.headType) #safety first..
+		
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
-		distance=self.craneMaxL #not exact, half circle may overlap more or less than this.
+		distance=6.0 #not exact, half circle may overlap more or less than this.
+		if self.inverting: distance=7.2 #BTE model...fewer stoping points.
 		time=self.timeConstants['machine']+distance/self.velocities['machine']
 		yield request, self, self.driver
 		yield hold, self, time

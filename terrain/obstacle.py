@@ -10,10 +10,8 @@ from matplotlib.path import Path
 class Obstacle():
 	"""
 	Superclass for all obstacles.
-
-	If you want 
 	"""
-	def __init__(self,pos,isSpherical, radius=500, terrain=None,color='b'):
+	def __init__(self,pos,isSpherical, radius=None, terrain=None,color='b'):
 		self.pos=pos
 		self.isSpherical=isSpherical #in 2D, spherical==circular, e.g. trees (cylindrical in 3D)
 		self.radius=radius #if not spherical, this is the bounding radius
@@ -29,14 +27,15 @@ class Obstacle():
 	def getNodes(self, pos=None):
 		"""this method must be overrun and implemented if not spherical."""
 		if not isSpherical: raise Exception('ERROR: function getNodes is not implemented for %s. This is required.'%self.name)
-		if pos and pos != self.pos: raise Exception('nodes and pos not correlated for tree.')
+		if pos and pos != self.pos: raise Exception('nodes and pos not correlated for obstacle.')
 		return []
 
 	def remove(self):
 		"""
-		removes obstacle from the associated lists, except for the specie-specific one, e.g. terrain.trees.
+		removes obstacle from the associated lists. See terrain.remove method for more info
 		"""
-		if self.terrain: self.terrain.remove(self)
+		if self.terrain:
+			self.terrain.remove(self)
 
 	def draw(self,ax):
 		if self.visible:

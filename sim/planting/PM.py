@@ -979,7 +979,12 @@ def paramsForSensAn(simParam={}):
 	s['rectVol']			
 	s['TSR']				yes			yes			
 	s['sBMWhenInv']	
-	
+
+
+	saker for mattias att fixa eller Linus senare:
+	-s['inverting']=True/False... se till att denna ar True nar inverting ska goras.
+	-s['wMB'] set to None as default. None means that we use the standard values, 0.4 or 0.45. s['wMB'] is the master so if it is not None, we use this value.
+	- KOInverting och ExcavatorInverting has been added. These parameters define which method we should use. Needs to be added to the function that does the sensitivity analysis.
 	"""
 	s=simParam
 
@@ -987,10 +992,12 @@ def paramsForSensAn(simParam={}):
 	-----------------------"""
 	s['dibbleDist']=1 #[m] 0.8, 1.5
 	s['tFindMuSite']=0.1 #[s] 0, 0.1
-	s['wMB']=0.4 #[m] 0.5, 0.6
+	s['wMB']=None #[m]0.4, 0.5, 0.6
 	s['impObAv']=False #[m] True
 	s['shift']=0.1 #[+-m] 0.15 
-	s['rotCap']=5.0 #[+-deg] 10 
+	s['rotCap']=5.0 #[+-deg] 10
+	s['KOInverting']=True #default
+	s['ExcavatorInverting']=False
 	s['tCWhenInvKO']=3 #[s] 1, 5
 	s['tInvExcavator']=13 #[s] 10, 16
 	s['noRemound']=False #[bool] True
@@ -1003,4 +1010,6 @@ def paramsForSensAn(simParam={}):
 
 	"""Other parameters for the simulations
 	---------------------------------------"""
+	s['inverting']=False
+	
 	return s
