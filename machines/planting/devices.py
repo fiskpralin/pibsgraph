@@ -395,7 +395,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		the coordinates of the boulders can be translated into this pretty simply.
 		if more than half of the boulder is inside the mounding area, it goes with it
 
-		This is done here since it's all a common crane movement. Thus it should be at the same time for all the heads and is rather connected to the device than the heads.
+		This is done here since it's all a common crane movement. Thus it should be at the same time for all the heads and is rather connected to the device than the heads. If something happens in a specific head that the other heads have to queue for, we simple make it something that takes time for the device and not the heads.
 		"""
 		tic=time.clock()
 		commands=[]
@@ -413,7 +413,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			sumA=0
 			immobile=self.G.simParam['critStoneSize']
 			dibbleDisturb=0.001
-			print self.sim.stats['mound attempts'],len( self.m.treesPlanted)
 			self.m.stopControl()
 			self.sim.stats['mound attempts']+=1
 			#the old one: immobile=sqrt((0.20**2)/pi) #20cm rectangle side <=> tihs radius for sphere
@@ -453,9 +452,37 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				pH.moundSumA=sumA		
 			pH.moundObst=moundBould
 			h=Hole(orig,terrain=self.G.terrain,z=pH.depth, nodes=pH.getNodes(orig) , isSpherical=False)
-		commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
+		#time to mound and heap. With the Excavator inverting method, we don't take time for heaping now.
+		if not self.m.inverting:
+			timeTmp=t['diggTime']+t['heapTime']
+			commands=self.cmnd(commands, time,auto['mound'])
+		elif self.m.inverting and self.m.invertingMethod=='KO': #heap first..
+			timeTmp=t['diggTime']+t['heapTime']
+			commands=self.cmnd(commands, time,auto['mound'])
+		elif self.m.inverting and self.m.invertingMethod=='Excavator': #don't heap..
+			timeTmp=t['diggTime']
+			commands=self.cmnd(commands, time,auto['mound'])
+		else:
+			raise Exception('Logical error. If we are inverting, we need to use methods KO or Excavator, not %s'%self.invertingMethod)
 		for pH in pHeads:
-			pH.timeConsumption['mounding']+=t['moundAndHeapTime']
+			pH.timeConsumption['mounding']+=timeTmp
+		#mounding failures
+		for h in self.plantHeads:
+			if random.uniform(0,1)<self.m.invertFailureProb: #failure..
+				h.debugPrint('Failed inverting.. the other heads have to wait')
+				commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
+				h.timeConsumption['mounding']+=t['moundAndHeapTime']
+		#it's time to invert
+		if self.m.inverting:
+			print "inverts automatically, not sure if this is correct"
+			commands=self.cmnd([], self.m.times['inverting'], auto=True)
+			for h in self.plantHeads:
+				if pH.abort: continue
+				h.timeConsumption['inverting']+=self.m.times['inverting']
+				if random.uniform(0,1)<self.m.invertFailureProb: #failure..
+					h.debugPrint('Failed mounding.. the other heads have to wait')
+					commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
+					h.timeConsumption['inverting']+=t['moundAndHeapTime']
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]
@@ -470,11 +497,13 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			commands.append((waituntil, self, self.plantingFinished)) #waits for one or both events.
 		PlantingDevice.timesProf[1]+=time.clock()-tic
 		return commands
+	
 	def plantingFinished(self):
 		if self.plantSignals==self.pHeadsUsed:
 			return True
 		else:
 			return False
+		
 	def getNodes(self, pos=None):
 		"""returns the nodes of the device."""
 		if pos==None: pos=self.pos

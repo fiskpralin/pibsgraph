@@ -37,16 +37,18 @@ class PlantHead(Process, UsesDriver, Obstacle):
 			if width==None:
 				raise Exception('needs a width for the plantHead. Either give it or set simParam[wMB]')
 			self.width=width
-		self.timeConsumption={'mounding':0, 'planting':0, 'halting':0}
+		self.timeConsumption={'mounding':0, 'planting':0, 'halting':0, 'inverting':0}
 		self.reMoundSignal=SimEvent(name='planthead remounded', sim=self.sim)
 		self.reset()
+		
 	def run(self):
 		raise Exception('subclasses of PlantHead must implement run')
+	
 	def debugPrint(self, string):
 		print "%f %s: %s"%(self.sim.now(), self.name, string)
+		
 	def cmndWithDriver(self, commands, time):
 		"""overrides superclass method, adds priority"""
-		print "command with driver"
 		if self.usesDriver: #don't need to reserve driver..
 			commands.extend([(hold, self, time)])
 			#if a is None: print "uses driver", self.name, [].append((hold, time)), commands.append((hold, time)),hold, time
@@ -154,6 +156,14 @@ class MultiHead(PlantHead):
 		Obstacle.__init__(self, [0,0], isSpherical=False, radius=sqrt((self.width/2.)**2+(self.length/2.)**2), terrain=PD.G.terrain)
 		self.color=['y','r','g','b'][self.number]
 	def run(self):
+		"""
+		Observe that much of the works done by the head is simulated in the
+		planting device's "plant" method. This is because this work is done simulataneously
+		for all the heads and thus is simulated in the device.
+
+		Everything done here should be separate things that may be finished at different
+		heads belonging to the same device.
+		"""
 		p=self.p
 		debugPrint=self.debugPrint
 		self.otherHeads=copy.copy(p.plantHeads)
@@ -194,18 +204,6 @@ class MultiHead(PlantHead):
 								self.timeConsumption['mounding']+=t['moundAndHeapTime']
 								self.reMoundSignal.signal()
 						else: #biggestblock between limits, check if dibble succeeds.
-							#first of all, it's time to invert if
-							if self.p.m.inverting:
-								pass #lagg tilL!
-
-
-
-
-
-
-
-
-							
 							#scramble boulders.
 							self.scramble()
 							#pos=copy.copy(self.pos)
@@ -298,7 +296,7 @@ class MultiHead(PlantHead):
 				auto=True
 				if self.usesDriver: auto=False #the task we interupted was not automated
 				cmd.extend(self.releaseDriver())
-				otherHead=self.interruptCause()
+				otherHead=self.interruptCause
 				cmd.extend([(waitevent, self, otherHead.reMoundSignal)])
 				cmd=self.cmnd(cmd,self,t, auto)
 			elif self.cause is not 'plant':

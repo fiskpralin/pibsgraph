@@ -996,8 +996,8 @@ def paramsForSensAn(simParam={}):
 	s['impObAv']=False #[m] True
 	s['shift']=0.1 #[+-m] 0.15 
 	s['rotCap']=5.0 #[+-deg] 10
-	s['KOInverting']=True #default
-	s['ExcavatorInverting']=False
+	s['KOInverting']=False #default
+	s['ExcavatorInverting']=True
 	s['tCWhenInvKO']=3 #[s] 1, 5
 	s['tInvExcavator']=13 #[s] 10, 16
 	s['noRemound']=False #[bool] True
@@ -1010,6 +1010,10 @@ def paramsForSensAn(simParam={}):
 
 	"""Other parameters for the simulations
 	---------------------------------------"""
-	s['inverting']=False
+	s['inverting']=True
+	s['moundFailureProb']=0.05
+	s['invertKOFailureProb']=0.11
+	s['invertExcFailureProb']=0.05
+	  
 	
 	return s

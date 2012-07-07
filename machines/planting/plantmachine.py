@@ -68,14 +68,17 @@ class PlantMachine(Machine):
 		self.stockingRate=self.G.simParam['TSR']
 		self.plantMinDist=G.simParam['dibbleDist']#G.plantMinDist
 		self.dibbleDepth=0.1
+		self.moundingFailureProb=G.simParam['moundFailureProb']=0.05
 		self.inverting=G.simParam['inverting']
 		if self.inverting: assert G.simParam['ExcavatorInverting']!=G.simParam['KOInverting'] #can't use both
 		if G.simParam['KOInverting']:
 			self.invertingMethod='KO'
-			self.times['inverting']=3
+			self.invertFailureProb=G.simParam['invertKOFailureProb']
+			self.times['inverting']=G.simParam['tCWhenInvKO']
 		else:
 			self.invertingMethod='Excavator'
-			self.times['inverting']=13-3
+			self.invertFailureProb=G.simParam['invertExcFailureProb']			
+			self.times['inverting']=G.simParam['tInvExcavator']-self.times['diggTime']
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
 		#self.direction=random.uniform(0,2*pi)
