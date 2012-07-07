@@ -429,10 +429,23 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					for head in pHeads: head.timeConsumption['halting']+=t['haltTime']
 			if not (pH.abort or pH.strikedImmobile):
 				for b in boul:
+					#check if we are inside the scoop. It's the middle of the stone that matters
 					#get local xy-coordinates
 					cylPos=self.m.getCylindrical(b.pos,origin=orig, direction=direct)
 					twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
-					if (b.radius+pH.depth)**2 < b.z**2+twoDdist[1]**2 and collide(pH, b, o1pos=orig): #the first check is for the cylinder, through pythagoras with 2D[1] since cylinder and not sphere
+					inside=False #just to skip a really long if-statement
+					if self.G.simParam['rectangular']:
+						if (b.radius+pH.depth)**2 > b.z**2+twoDdist[1]**2 and collide(pH, b, o1pos=orig):
+							print "---:", b.radius+pH.depth, b.z, twoDdist[1]
+							print b.radius, pH.depth, b.z
+							assert b.radius+b.z>-pH.depth
+						assert b.z<=0
+						if b.radius+b.z>-pH.depth and collide(pH, b, o1pos=orig):
+							print (b.radius+pH.depth)**2 < b.z**2+twoDdist[1]**2
+							inside=True
+					elif b.z**2+twoDdist[1]**2<(b.radius+pH.depth)**2 and collide(pH, b, o1pos=orig): #the first check is for the cylinder, through pythagoras with 2D[1] since cylinder and not sphere
+						inside=True
+					if inside: 
  						#old one: abs(bpos[0])<pH.width/2. and abs(bpos[1])<pH.length/2.:
 						moundBould.append(b)
 						sumA+=b.area
@@ -469,9 +482,13 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		#mounding failures
 		for h in self.plantHeads:
 			if random.uniform(0,1)<self.m.invertFailureProb: #failure..
-				h.debugPrint('Failed inverting.. the other heads have to wait')
-				commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
-				h.timeConsumption['mounding']+=t['moundAndHeapTime']
+				if self.G.simParam['noRemound']:
+					h.debugPrint('failed mounding')
+					h.abort=True
+				else:
+					h.debugPrint('Failed inverting.. the other heads have to wait')
+					commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
+					h.timeConsumption['mounding']+=t['moundAndHeapTime']
 		#it's time to invert
 		if self.m.inverting:
 			print "inverts automatically, not sure if this is correct"
@@ -480,9 +497,13 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				if pH.abort: continue
 				h.timeConsumption['inverting']+=self.m.times['inverting']
 				if random.uniform(0,1)<self.m.invertFailureProb: #failure..
-					h.debugPrint('Failed mounding.. the other heads have to wait')
-					commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
-					h.timeConsumption['inverting']+=t['moundAndHeapTime']
+					if self.G.simParam['noRemound']:
+						h.debugPrint('failed inverting')
+						h.abort=True
+					else:
+						h.debugPrint('Failed mounding.. the other heads have to wait')
+						commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
+						h.timeConsumption['inverting']+=t['moundAndHeapTime']
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]

@@ -107,19 +107,38 @@ class PMSimSeries(SimSeries):
 		quitPossible=False
 		SimExtend.seed='undefined'
 		mtype=str(mtype)
-		if mtype=='1a1h':
+		if '2a' in mtype: #old stuff
+			if mtype=='2a2h':
+				headsCapacity=144
+				refillTime=362
+			elif mtype=='2a4h':
+				headsCapacity=324
+				refillTime=648
+			else:
+				raise Exception("does not recognize machine type %s"%(mtype,))
+		elif 'Mag' in mtype:
+			if '1h' in mtype:
+				headsCapacity=G.simParam['MagMatTCReload1h']
+				refillTime=G.simParam['MagMatnReload1h']
+			elif '2h' in mtype:
+				headsCapacity=G.simParam['MagMatTCReload2h']
+				refillTime=G.simParam['MagMatnReload2h']
+			else:
+				raise Exception('Does not support more than 2 heads and MagMat')
+
+		if '1h' in mtype:
 			headsCapacity=72
 			refillTime=223
-		elif mtype=='1a2h':
+		elif '2h' in mtype:
 			headsCapacity=162
 			refillTime=366
-		elif mtype=='2a2h':
-			headsCapacity=144
-			refillTime=362
-		elif mtype=='2a4h':
-			headsCapacity=324
-			refillTime=648
-		else: raise Exception("does not recognize machine type %s"%(mtype,))
+		elif '3h' in mtype:
+			headsCapacity=72*3
+			refillTime=223*3
+		elif '4h' in mtype:
+			headsCapacity=72*4
+			refillTime=223*4
+		
 		s=PlantmSim(G,vis=False,mtype=mtype)
 		self.cumTime+=s.now()
 		self.cumTrees+=len(s.m.treesPlanted)
@@ -179,7 +198,6 @@ class PMSimSeries(SimSeries):
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
-			print tdrow, col, val
 			e.modify(tdrow,col,round(val,2)) #writes the time data. Request from BTE to round off
 		e.save()
 		return e
@@ -333,7 +351,7 @@ class VaryTimeFindMuSite(PMSimSeries):
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				G.simParam['tFindMuSite']=t #needs to be connected
+				G.simParam['multiplierFindMuSite']=t #needs to be connected
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -965,20 +983,20 @@ def paramsForSensAn(simParam={}):
 	
 	param 				implemented?	verified?
 	s['dibbleDist']         yes			Yes
-	s['tFindMuSite']		yes
-	s['wMB']				yes
+	s['multiplierFindMuSite']yes		Yes #nytt namn, fixat alla ref.
+	s['wMB']				yes			Yes
 	s['impObAv']			
 	s['shift']				
 	s['rotCap']				
-	s['tCWhenInvKO']		
-	s['tInvExcavator']		
-	s['noRemound']			
-	s['critStoneSize']		yes
-	s['moundRadius']		yes
-	s['rectangular']		
-	s['rectVol']			
+	s['tCWhenInvKO']		yes			yes
+	s['tInvExcavator']		yes			yes
+	s['noRemound']			yes			yes
+	s['critStoneSize']		yes			yes
+	s['moundRadius']		yes			yes
+	s['rectangular']		yes			yes
+	s['rectVol']			tagit bort, inte relevant da volymen kommer fran bredden.
 	s['TSR']				yes			yes			
-	s['sBMWhenInv']	
+	s['sBMWhenInv']			
 
 
 	saker for mattias att fixa eller Linus senare:
@@ -991,20 +1009,19 @@ def paramsForSensAn(simParam={}):
 	"""Sensitivity analysis
 	-----------------------"""
 	s['dibbleDist']=1 #[m] 0.8, 1.5
-	s['tFindMuSite']=0.1 #[s] 0, 0.1
+	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
 	s['impObAv']=False #[m] True
 	s['shift']=0.1 #[+-m] 0.15 
 	s['rotCap']=5.0 #[+-deg] 10
-	s['KOInverting']=False #default
-	s['ExcavatorInverting']=True
+	s['KOInverting']=True #default
+	s['ExcavatorInverting']=False
 	s['tCWhenInvKO']=3 #[s] 1, 5
 	s['tInvExcavator']=13 #[s] 10, 16
 	s['noRemound']=False #[bool] True
 	s['critStoneSize']=0.008 #[m3] 0.006, 0.01
 	s['moundRadius']=0.2 #[m] 0.15
-	s['rectangular']=False #[bool] True
-	s['rectVol']=0.016 #[m3] 0.024
+	s['rectangular']=False#False #[bool] True
 	s['TSR']=2000 #[plants/ha] 1500, 2500
 	s['sBMWhenInv']=6.25 #[m] ?
 
@@ -1014,6 +1031,10 @@ def paramsForSensAn(simParam={}):
 	s['moundFailureProb']=0.05
 	s['invertKOFailureProb']=0.11
 	s['invertExcFailureProb']=0.05
+	s['MagMatTCReload1h']=264
+	s['MagMatnReload1h']=320	
+	s['MagMatTCReload2h']=444
+	s['MagMatnReload2h']=640
 	  
 	
 	return s

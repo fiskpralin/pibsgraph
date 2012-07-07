@@ -132,13 +132,11 @@ class PlantHead(Process, UsesDriver, Obstacle):
 			if pointInPolygon(pos, nodes):
 				print "root covers the centre of the hole"
 				col=root.z+root.diameter/2.>-self.depth*0.75 #compare depths
-				self.debugPrint('collided with root: %s'%(str(col)))
 				return col
 			else:
 				P=closestPolygonPoint(pos, nodes)
 				localP=getCartesian(P, origin=self.pos, direction=cyl[1], local=True)
 				col=(root.z+root.diameter/2.)**2+localP[1]**2<(0.75*self.depth)**2
-				self.debugPrint('collided with root: %s'%(str(col)))
 				return col
 		else: return False
 #####################################
@@ -199,7 +197,7 @@ class MultiHead(PlantHead):
 									self.interrupt(self.otherHead) #cannot do anything with other head while this head works..
 									debugPrint("interrupts other head.")
 									yield hold, self, 0.0000001 #time for other head to release driver
-								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])==len(self.otherHeads)
+								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads)
 								for c in self.cmnd([], t['moundAndHeapTime'],auto['mound']): yield c
 								self.timeConsumption['mounding']+=t['moundAndHeapTime']
 								self.reMoundSignal.signal()
@@ -241,7 +239,7 @@ class MultiHead(PlantHead):
 									self.interrupt(otherHead) #cannot do anything with other head while this head works..
 									yield hold, self, 0.0000001 #time for other head to release driver
 									self.debugPrint("interrupts other head.")
-								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])==len(self.otherHeads)
+								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads) #less if two heads reMounds at the same time
 								for c in self.cmnd([], t['moundAndHeapTime'],auto['mound']): yield c
 								self.timeConsumption['mounding']+=t['moundAndHeapTime']
 								self.reMoundSignal.signal()
@@ -298,7 +296,7 @@ class MultiHead(PlantHead):
 				cmd.extend(self.releaseDriver())
 				otherHead=self.interruptCause
 				cmd.extend([(waitevent, self, otherHead.reMoundSignal)])
-				cmd=self.cmnd(cmd,self,t, auto)
+				cmd=self.cmnd(cmd,t, auto)
 			elif self.cause is not 'plant':
 				raise Exception('only interupt possible is remound, except plant. But plant interuptions should not be possible when checkifinterrupted is called.')
 		return cmd
