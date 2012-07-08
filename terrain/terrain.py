@@ -482,7 +482,6 @@ class Terrain():
 		possible distributions: 'exp' or 'pareto'
 		alpha is the shape parameter for pareto.
 		"""
-		#new, based on volume
 		boul=[]
 		area=R**2*pi
 		uniform=random.uniform
@@ -515,8 +514,9 @@ class Terrain():
 				placed=True
 				x=uniform(pos[0]-R-radius/2., pos[0]+R+radius/2.)
 				y=uniform(pos[1]-R-radius/2., pos[1]+R+radius/2.)
-				if self.humusLayer: self.humusDepth=self.humusLayer.getDepth([x,y])
-				z=-uniform(0+radius+self.humusDepth,0.2+radius+self.humusDepth)
+				if self.humusLayer:
+					humusDepth=self.humusLayer.getDepth([x,y])
+				z=-(radius+humusDepth+uniform(0,0.2))
 				for o in boul:
 					if sqrt(pow(x-o.pos[0],2)+pow(y-o.pos[1],2)+pow(z-o.z,2))<(radius+o.radius):
 						placed=False
