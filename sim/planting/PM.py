@@ -169,7 +169,7 @@ class PMSimSeries(SimSeries):
 		if not e: #start a new instance.
 			if not s:
 				raise Exception('simulation instance has to be provided at first call for _storeData')
-			e=ExcelOutput(template='sim/planting/template.xls', out=self.filename)
+			e=ExcelOutput(template='sim/planting/template_art3.xls', out=self.filename)
 			self.excelOut=e
 			e.changeSheet(0)
 			#set all the parameters
