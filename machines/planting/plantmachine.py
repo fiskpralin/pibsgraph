@@ -75,11 +75,9 @@ class PlantMachine(Machine):
 			if G.simParam['KOInverting']:
 				self.invertingMethod='KO'
 				self.invertFailureProb=G.simParam['invertKOFailureProb']
-				self.times['inverting']=G.simParam['tCWhenInvKO']
 			else:
 				self.invertingMethod='Excavator'
 				self.invertFailureProb=G.simParam['invertExcFailureProb']			
-				self.times['inverting']=G.simParam['tInvExcavator']-self.times['digTime']
 		else:
 			assert not G.simParam['KOInverting'] and not G.simParam['ExcavatorInverting']
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
