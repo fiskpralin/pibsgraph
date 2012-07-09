@@ -46,8 +46,10 @@ class PMSimSeries(SimSeries):
 		self.sims=0
 		self.bestCase=False
 		self.worstCase=False
+
 	def run(self):
 		raise Exception('run must be implemented in PMSimSeries subclass.')
+
 	def updateTimeData(self, s, reloaded=False, reloadtime=0):
 		"""
 		self.timeData should be a list with all the relevant information that will be stored.
@@ -94,6 +96,7 @@ class PMSimSeries(SimSeries):
 			for pH in pDev.plantHeads:
 				t.append(pDev.timeConsumption['crane movement'])
 				t.append(pH.timeConsumption['mounding'])
+				t.append(pH.timeConsumption['inverting']) # new line
 				t.append(pH.timeConsumption['planting'])
 				t.append(pH.timeConsumption['halting'])
 		# to be continued
@@ -166,7 +169,7 @@ class PMSimSeries(SimSeries):
 		if not e: #start a new instance.
 			if not s:
 				raise Exception('simulation instance has to be provided at first call for _storeData')
-			e=ExcelOutput(template='sim/planting/template.xls', out=self.filename)
+			e=ExcelOutput(template='sim/planting/template_art3.xls', out=self.filename)
 			self.excelOut=e
 			e.changeSheet(0)
 			#set all the parameters
@@ -210,7 +213,7 @@ class PMSimSeries(SimSeries):
 				os.makedirs(path)
 			return path
 		if self.outpfolder: return self.outpfolder
-		self.outpfolder='outputFiles'+'/'+'%s_%s'%(self.__class__.__name__, string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))
+		self.outpfolder='outputFiles/NewPlanting_2012'+'/'+'%s_%s'%(self.__class__.__name__, string.join([string.strip(a) for a in string.split(time.ctime(time.time()))], "_"))
 		if not os.path.exists(self.outpfolder):
 			os.makedirs(self.outpfolder)
 		return self.outpfolder
@@ -245,7 +248,7 @@ def doTheSenseAn(i=1):
 	VaryDibbleDist(i)#
 	VaryTimeFindMuSite(i)#
 	VaryMoundingBladeWidth(i)#
-	VaryImpObAv(i)#
+	#VaryImpObAv(i)#
 	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
 	TryNoRemound(i)#
@@ -253,7 +256,7 @@ def doTheSenseAn(i=1):
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
 	VaryTSR(i)#
-	TryShortSBM(i)#
+	#TryShortSBM(i)#
 
 class VaryTerrain(PMSimSeries):
 	"""
@@ -266,7 +269,8 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:#slightly smaller than the real one, for debug
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+'ttype'+str(ttype)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -292,7 +296,8 @@ class VaryDibbleDist(PMSimSeries):
 		folder=self.makeFolder()
 		if not dList: dList=[0.6, 0.8, 1.0, 1.5] #default
 		for d in dList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(d)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -319,7 +324,8 @@ class VaryMoundingBladeWidth(PMSimSeries):
 		folder=self.makeFolder()
 		if not wList: wList=[0.4, 0.5, 0.6] #default
 		for w in wList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(w)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -347,7 +353,8 @@ class VaryTimeFindMuSite(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[0, 0.1, 0.2] #[s] default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -402,7 +409,8 @@ class VaryTimeWhenInvKO(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[1 ,3 ,5] #[s] default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used 
@@ -430,11 +438,14 @@ class VaryInvExc(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[10 ,13 ,16] #default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
 				G.simParam['tInvExcavator']=t
+				G.simParam['ExcavatorInverting']=True
+				G.simParam['KOInverting']=False
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -463,7 +474,8 @@ class TryNoRemound(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[False, True] #default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -487,9 +499,10 @@ class VaryCriticalStoneSize(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not sList: sList=[False, True] #default
+		if not sList: sList=[0.006,0.008,0.01] #default
 		for s in sList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(s)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -515,7 +528,8 @@ class VaryMoundRadius(PMSimSeries):
 		folder=self.makeFolder()
 		if not rList: rList=[0.15, 0.2] #default
 		for r in rList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(r)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -543,7 +557,8 @@ class VaryRectScoop(PMSimSeries):
 		folder=self.makeFolder()
 		if not wList: wList=[0.4, 0.5, 0.6] #default
 		for w in wList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(w)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -570,7 +585,8 @@ class VaryTSR(PMSimSeries):
 		folder=self.makeFolder()
 		if not TSRList: TSRList=[1500, 2000, 2500] #default
 		for TSR in TSRList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(TSR)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -945,16 +961,15 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']         yes			Yes
 	s['multiplierFindMuSite']yes		Yes #nytt namn, fixat alla ref.
 	s['wMB']				yes			Yes
-	s['impObAv']			invantar svar
-	s['shift']				
-	s['rotCap']				
+	s['impObAv']			invantar svar. Nagon slags info finns i simuleringsklassen
+	s['shift']				-
+	s['rotCap']				-
 	s['tCWhenInvKO']		yes			yes
 	s['tInvExcavator']		yes			yes
 	s['noRemound']			yes			yes
 	s['critStoneSize']		yes			yes
 	s['moundRadius']		yes			yes
 	s['rectangular']		yes			yes
-	s['rectVol']			tagit bort, inte relevant da volymen kommer fran bredden.
 	s['TSR']				yes			yes			
 	s['sBMWhenInv']			Har fragat back tomas om detta. invantar svar
 
@@ -966,8 +981,8 @@ def paramsForSensAn(simParam={}):
 	"""
 	s=simParam
 
-	"""Sensitivity analysis
-	-----------------------"""
+	"""Sensitivity analysis parameters
+	-------------------------------"""
 	s['dibbleDist']=1 #[m] 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
@@ -986,7 +1001,7 @@ def paramsForSensAn(simParam={}):
 	s['sBMWhenInv']=6.25 #[m] ?
 
 	"""Other parameters for the simulations
-	---------------------------------------"""
+	------------------------------------"""
 	s['inverting']=True
 	s['moundFailureProb']=0.05
 	s['invertKOFailureProb']=0.11
@@ -995,6 +1010,5 @@ def paramsForSensAn(simParam={}):
 	s['MagMatnReload1h']=320	
 	s['MagMatTCReload2h']=444
 	s['MagMatnReload2h']=640
-	  
 	
 	return s

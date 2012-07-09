@@ -11,19 +11,12 @@ import random
 from terrain.terrain import *
 from collision import *
 
-
+ 
 
 class PlantMTerrain(Terrain):
 	"""
 	This class is for the planting machine terrain.
-
 	Changes all the time due to new instructions, hard to keep it backwards compatible.
-
-	It is somewhat important in what order different constituents are generated. Should boulders,
-	stumps(with roots) or surfaceboulders be generated first?
-
-	surfaceboulder=True should be removed from the code below...
-
 	"""
 	def __init__(self, G=None, ttype=None, areaPoly=None):
 		if not areaPoly:
