@@ -34,8 +34,8 @@ class PlantMachine(Machine):
 	"""
 	allowedTypes= ['1h', '2h','1a1h','1a2h','2a1h', '2a2h', '1a2hObAv','1a3h', '3h','1a3hObAv','1a4h','4h','1a4hObAv','1a1hMag','1a2hMag']
 	def __init__(self, name, sim, G, mtype='2h', craneLim=None):
-		if not mtype in self.allowedTypes or 'ObAv' in mtype:
-			raise Exception('Machine type %s no allowed'%str(mtype))
+		#if not mtype in self.allowedTypes or 'ObAv' in mtype:
+		#	raise Exception('Machine type %s no allowed'%str(mtype))
 		if not craneLim: craneLim=[4.0,9.0]
 		Machine.__init__(self, name, sim, G=G, mass=21000)
 		self.driver=Operator(sim=self.sim, delay=10000) #does not go on breaks..
@@ -47,8 +47,8 @@ class PlantMachine(Machine):
 			self.headType='MultiHead' #several heads, don't know how many yet.
 		else:
 			self.headType='Bracke'
-		self.times={'diggTime': 3, 'heapTime': 2,'moundAndHeapTime': 5, 'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 1, 'searchTime': 0, 'switchFocus':0, 'invertTime':G.simParam['tCWhenInvKO'], 'invert':None} #all in seconds, invert is determined later
-		self.timeConsumption={'diggTime': 0, 'heapTime': 0,'moundAndHeapTime': 0, 'dibbleDownTime': 0, 'relSeedlingTime': 0, 'haltTime': 0, 'searchTime': 0, 'switchFocus':0, 'machineMovement':0}
+		self.times={'heapTime': 2,'dibbleDownTime': 1, 'relSeedlingTime': 1, 'dibbleUpTime':1, 'haltTime': 1, 'searchTime': 0, 'switchFocus':0, 'invertTime':G.simParam['tCWhenInvKO'], 'invert':None} #all in seconds, invert is determined later
+		self.timeConsumption={'heapTime': 0,'moundAndHeapTime': 0, 'dibbleDownTime': 0, 'relSeedlingTime': 0, 'haltTime': 0, 'searchTime': 0, 'switchFocus':0, 'machineMovement':0} #new function for digTime, see plant method.
 		self.pos=[0,0]
 		self.craneMaxL=G.craneLim[1]
 		self.craneMinL=G.craneLim[0]
@@ -70,15 +70,18 @@ class PlantMachine(Machine):
 		self.dibbleDepth=0.1
 		self.moundingFailureProb=G.simParam['moundFailureProb']=0.05
 		self.inverting=G.simParam['inverting']
-		if self.inverting: assert G.simParam['ExcavatorInverting']!=G.simParam['KOInverting'] #can't use both
-		if G.simParam['KOInverting']:
-			self.invertingMethod='KO'
-			self.invertFailureProb=G.simParam['invertKOFailureProb']
-			self.times['inverting']=G.simParam['tCWhenInvKO']
+		if self.inverting:
+			assert G.simParam['ExcavatorInverting']!=G.simParam['KOInverting'] #can't use both			
+			if G.simParam['KOInverting']:
+				self.invertingMethod='KO'
+				self.invertFailureProb=G.simParam['invertKOFailureProb']
+				self.times['inverting']=G.simParam['tCWhenInvKO']
+			else:
+				self.invertingMethod='Excavator'
+				self.invertFailureProb=G.simParam['invertExcFailureProb']			
+				self.times['inverting']=G.simParam['tInvExcavator']-self.times['digTime']
 		else:
-			self.invertingMethod='Excavator'
-			self.invertFailureProb=G.simParam['invertExcFailureProb']			
-			self.times['inverting']=G.simParam['tInvExcavator']-self.times['diggTime']
+			assert not G.simParam['KOInverting'] and not G.simParam['ExcavatorInverting']
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
 		#self.direction=random.uniform(0,2*pi)
@@ -132,8 +135,7 @@ class PlantMachine(Machine):
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
 		distance=6.0 #not exact, half circle may overlap more or less than this.
-		if self.inverting:
-			distance=self.G.simParam['sBMWhenInv'] #BTE model...fewer stoping points.
+
 		time=self.timeConstants['machine']+distance/self.velocities['machine']
 		yield request, self, self.driver
 		yield hold, self, time
@@ -240,6 +242,11 @@ class PlantMachine(Machine):
 		else:
 			return True #angles exceed..
 		#assume that p1 is left and p2 right.
+	def getDigTime(self, pos):
+		"""
+		returns the time to dig at pos
+		"""
+		return 3+0.1*(self.G.terrain.humusLayer.getDepth(pos)-0.1)
 	def stopControl(self):
 		"""
 		Checks if simulations should be stopped

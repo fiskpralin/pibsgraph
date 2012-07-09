@@ -37,9 +37,7 @@ if __name__=='__main__':
 			treeFile=eval(sys.argv[9])
 		
 	if not anim and len(sys.argv)>1:
-		if sys.argv[1] == 'findBugs':
-			sim.tools.findBugs()
-		elif sys.argv[1] == 'tryItAll': #tests for all simulations so far. See if they throw exception
+		if sys.argv[1] == 'tryItAll': #tests for all simulations so far. See if they throw exception
 			for i in range(4):
 				s=PM.PlantmSim(vis=False,anim=anim,mtype=random.choice(['1a1h', '1a2h', '2a2h', '2a4h']))
 				assert s.productivity>10
@@ -135,8 +133,8 @@ if __name__=='__main__':
 		#G.terrain=PlantMTerrain(G, ttype='5')
 		#G.plotDelay=5
 		#s=PM.VaryTerrain(1)
-		#s=PM.doTheSenseAn(i=1)
-		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a4h', ttype='4')
+		s=PM.doTheSenseAn(i=1)
+		#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a4h', ttype='4')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=True, observer=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)

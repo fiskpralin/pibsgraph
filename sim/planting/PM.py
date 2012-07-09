@@ -859,46 +859,6 @@ class WorstCase(PMSimSeries):
 				print "No of sims: %d"%(i)
 			self.reset()
 			
-def findBugs():
-	"""
-	just a thing for the planting simulation code
-	"""
-	import sim.planting.PM as PM
-	while True:
-		G=globalVar()
-		seed=int(random.uniform(1,100000))
-		seed=39971
-		random.seed(seed)
-		G.seed=seed
-		"""r=random.uniform(4,5)
-		R=random.uniform(9,12)
-		G.craneLim=[r,R]"""
-		mtype='2a' #only interesting
-		#G.terrain=PlantMTerrain(G=G)
-		G.PMattach=random.choice([3,4,5])
-		#G.plotDelay=15
-		print "attach:", G.PMattach
-		"""
-		G.automatic={}
-		G.automatic['mound']=random.choice([True, False])
-		G.automatic['plant']=random.choice([True, False])
-		G.automatic['automove']=random.choice([True, False])
-		G.automatic['micrositeSelection']=random.choice([True, False])
-		G.automatic['moveToMicro']=random.choice([True, False])
-		G.automatic['haltMound']=random.choice([True, False])
-		G.automatic['clearForOtherHead']=random.choice([True, False])
-		print G.automatic, G.craneLim"""
-		s=PM.PlantmSim(mtype=mtype,G=G, vis=False) #G is copied later, so does not affect G
-		if s.productivity<50 or s.now()>1000:
-			s.p=plot.PlotWorld('ds', sim=s, delay=1e10,G=s.G)
-			s.p.update()
-			import matplotlib.pyplot as plt
-			plt.show()
-			print G.automatic, G.craneLim, G.terrain.ttype, "switching:", s.m.timeConsumption['switchFocus']
-			raw_input('plantmachine seems to be stuck..Check it..')
-			raise Exception('plantmachine seems to be stuck..Check it..')
-
-
 ###################################
 # plantmSim - a single simulation #
 ###################################
@@ -985,7 +945,7 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']         yes			Yes
 	s['multiplierFindMuSite']yes		Yes #nytt namn, fixat alla ref.
 	s['wMB']				yes			Yes
-	s['impObAv']			
+	s['impObAv']			invantar svar
 	s['shift']				
 	s['rotCap']				
 	s['tCWhenInvKO']		yes			yes
@@ -996,7 +956,7 @@ def paramsForSensAn(simParam={}):
 	s['rectangular']		yes			yes
 	s['rectVol']			tagit bort, inte relevant da volymen kommer fran bredden.
 	s['TSR']				yes			yes			
-	s['sBMWhenInv']			
+	s['sBMWhenInv']			Har fragat back tomas om detta. invantar svar
 
 
 	saker for mattias att fixa eller Linus senare:

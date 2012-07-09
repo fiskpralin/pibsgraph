@@ -386,7 +386,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				while self.m.getCylindrical(nodes[self.optNode])[1] > self.posCyl[1] and self.optNode<len(nodes)-1 and not exceeds(self,nodes[self.optNode+1],self.otherDevice): 
 					self.optNode+=1
 		return nodes[self.optNode]
-	
 	def plant(self):
 		"""
 		plants at the current position, may run into problems...
@@ -403,6 +402,14 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		auto=self.m.automatic
 		pHeads=self.plantHeads
 		#gather information about the soil at site
+		digTime=self.m.getDigTime(self.pos)
+		if self.m.inverting: #determine the time. Dependent on digTime
+			if self.m.invertingMethod=='KO':
+				invertTime=self.G.simParam['invertKOFailureProb']
+			elif self.m.invertingMethod=='Excavator':
+				invertTime=G.simParam['tInvExcavator']-digTime
+			else:
+				raise Exception('cannot identify inverting method %s'%self.m.invertingMethod)
 		for pH in pHeads:
 			pH.reset()
 			moundBould=[]
@@ -467,43 +474,44 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			h=Hole(orig,terrain=self.G.terrain,z=pH.depth, nodes=pH.getNodes(orig) , isSpherical=False)
 		#time to mound and heap. With the Excavator inverting method, we don't take time for heaping now.
 		if not self.m.inverting:
-			timeTmp=t['diggTime']+t['heapTime']
-			commands=self.cmnd(commands, time,auto['mound'])
+			timeTmp=digTime+t['heapTime']
+			commands=self.cmnd(commands, timeTmp,auto['mound'])
 		elif self.m.inverting and self.m.invertingMethod=='KO': #heap first..
-			timeTmp=t['diggTime']+t['heapTime']
-			commands=self.cmnd(commands, time,auto['mound'])
+			timeTmp=digTime+t['heapTime']
+			commands=self.cmnd(commands, timeTmp,auto['mound'])
 		elif self.m.inverting and self.m.invertingMethod=='Excavator': #don't heap..
-			timeTmp=t['diggTime']
-			commands=self.cmnd(commands, time,auto['mound'])
+			timeTmp=digTime
+			commands=self.cmnd(commands, timeTmp,auto['mound'])
 		else:
 			raise Exception('Logical error. If we are inverting, we need to use methods KO or Excavator, not %s'%self.invertingMethod)
 		for pH in pHeads:
 			pH.timeConsumption['mounding']+=timeTmp
 		#mounding failures
 		for h in self.plantHeads:
-			if random.uniform(0,1)<self.m.invertFailureProb: #failure..
+			if random.uniform(0,1)<self.m.moundingFailureProb: #failure..
 				if self.G.simParam['noRemound']:
 					h.debugPrint('failed mounding')
 					h.abort=True
 				else:
-					h.debugPrint('Failed inverting.. the other heads have to wait')
-					commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
-					h.timeConsumption['mounding']+=t['moundAndHeapTime']
+					h.debugPrint('Failed mounding.. the other heads have to wait')
+					commands=self.cmnd(commands, digTime+t['heapTime'],auto['mound'])
+					h.timeConsumption['mounding']+=digTime+t['heapTime']
 		#it's time to invert
 		if self.m.inverting:
 			print "inverts automatically, not sure if this is correct"
-			commands=self.cmnd([], self.m.times['inverting'], auto=True)
+			commands=self.cmnd([], invertTime, auto=True)
 			for h in self.plantHeads:
 				if pH.abort: continue
-				h.timeConsumption['inverting']+=self.m.times['inverting']
+				h.timeConsumption['inverting']+=invertTime
 				if random.uniform(0,1)<self.m.invertFailureProb: #failure..
 					if self.G.simParam['noRemound']:
 						h.debugPrint('failed inverting')
 						h.abort=True
 					else:
+						print "not sure which time we should use for reinverting... fix"
 						h.debugPrint('Failed mounding.. the other heads have to wait')
-						commands=self.cmnd(commands, t['moundAndHeapTime'],auto['mound'])
-						h.timeConsumption['inverting']+=t['moundAndHeapTime']
+						commands=self.cmnd(commands,digTime+t['heapTime'],auto['mound'])
+						h.timeConsumption['inverting']+=digTime+t['heapTime']
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]

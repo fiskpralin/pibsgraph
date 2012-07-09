@@ -167,6 +167,7 @@ class MultiHead(PlantHead):
 		self.otherHeads=copy.copy(p.plantHeads)
 		self.otherHeads.remove(self)
 		assert self in p.plantHeads
+		digTime=self.p.m.getDigTime(p.pos) #defined to be the same for all the heads given a position
 		while True:
 			self.sleeping=True #indicates that we are in the below hold
 			yield hold, self, 100000000 #until interupted
@@ -175,7 +176,7 @@ class MultiHead(PlantHead):
 				cause=self.cause
 				self.pos=self.getPos()
 				if cause=='Plant' or cause=='plant':
-					"""When this is invoked, the pDev is assumed to be waiting for this event."""
+					#When this is invoked, the pDev is assumed to be waiting for this event.
 					auto=p.m.automatic
 					t=p.m.times
 					p.m.stopControl()
@@ -198,8 +199,8 @@ class MultiHead(PlantHead):
 									debugPrint("interrupts other head.")
 									yield hold, self, 0.0000001 #time for other head to release driver
 								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads)
-								for c in self.cmnd([], t['moundAndHeapTime'],auto['mound']): yield c
-								self.timeConsumption['mounding']+=t['moundAndHeapTime']
+								for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
+								self.timeConsumption['mounding']+=digTime+t['heapTime']
 								self.reMoundSignal.signal()
 						else: #biggestblock between limits, check if dibble succeeds.
 							#scramble boulders.
@@ -240,8 +241,8 @@ class MultiHead(PlantHead):
 									yield hold, self, 0.0000001 #time for other head to release driver
 									self.debugPrint("interrupts other head.")
 								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads) #less if two heads reMounds at the same time
-								for c in self.cmnd([], t['moundAndHeapTime'],auto['mound']): yield c
-								self.timeConsumption['mounding']+=t['moundAndHeapTime']
+								for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
+								self.timeConsumption['mounding']+=digTime+t['heapTime']
 								self.reMoundSignal.signal()
 								debugPrint("plants after remound/heap.")
 					else: #moundSumA was to much..
