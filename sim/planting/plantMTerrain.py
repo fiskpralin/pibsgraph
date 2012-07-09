@@ -100,6 +100,8 @@ class PlantMTerrain(Terrain):
 		if self.surfaceBoulders: self.makeSurfaceBoulders()
 		print "Terrain is initialized. Ttype: %s, SurfaceBoulders: %s"%(ttype,str(self.surfaceBoulders))
 		
+"""To be run independently
+-----------------------"""		
 if __name__=="__main__":
 	"""example code:"""
 	terrain=Terrain()

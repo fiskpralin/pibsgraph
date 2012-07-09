@@ -51,7 +51,7 @@ class PMSimSeries(SimSeries):
 		raise Exception('run must be implemented in PMSimSeries subclass.')
 
 	def updateTimeData(self, s, reloaded=False, reloadtime=0):
-		"""
+v		"""
 		self.timeData should be a list with all the relevant information that will be stored.
 		for simplicity, the list is in the same order as the excel document. This increases speed, but
 		the drawback is that it slightly decreases the readability.
@@ -228,34 +228,33 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
 	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
-	Here all the different sensitivityanalyses are performed in classes. Each perform one change of parmeter and
+	Here all the different sensitivityanalyses are performed in classes. Each perform one change of parameter and
 	the results should be saved automatically in a .xls file in a folder.
 
 	* Before this method can be run we need to add the machinemodels:
 	 ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']
 
-	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations.
+	 all are made except the obstacle avoidance thingys
 
-	* Also we need to check that it is the correct terrain type that is run for these.
-	 It should be terrain type '3' for the complete sensitivity analysis
+	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations.
 	"""
 	
-	#VaryDibbleDist(i)#
-	#VaryTimeFindMuSite(i)#
-	#VaryMoundingBladeWidth(i)#
+	VaryDibbleDist(i)#
+	VaryTimeFindMuSite(i)#
+	VaryMoundingBladeWidth(i)#
 	#VaryImpObAv(i)#
-	#VaryTimeWhenInvKO(i)#
+	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
-	#TryNoRemound(i)#
-	#VaryCriticalStoneSize(i)#
-	#VaryMoundRadius(i)#
-	#VaryRectScoop(i)#
-	#VaryTSR(i)#
+	TryNoRemound(i)#
+	VaryCriticalStoneSize(i)#
+	VaryMoundRadius(i)#
+	VaryRectScoop(i)#
+	VaryTSR(i)#
 	#TryShortSBM(i)#
 
 class VaryTerrain(PMSimSeries):
@@ -959,7 +958,7 @@ def paramsForSensAn(simParam={}):
 	
 	param 				implemented?	verified?
 	s['dibbleDist']         yes			Yes
-	s['multiplierFindMuSite']yes		Yes #nytt namn, fixat alla ref.
+	s['multiplierFindMuSite']yes		Yes
 	s['wMB']				yes			Yes
 	s['impObAv']			invantar svar. Nagon slags info finns i simuleringsklassen
 	s['shift']				-
@@ -973,17 +972,15 @@ def paramsForSensAn(simParam={}):
 	s['TSR']				yes			yes			
 	s['sBMWhenInv']			Har fragat back tomas om detta. invantar svar
 
-
 	saker for mattias att fixa eller Linus senare:
-	-s['inverting']=True/False... se till att denna ar True nar inverting ska goras.
-	-s['wMB'] set to None as default. None means that we use the standard values, 0.4 or 0.45. s['wMB'] is the master so if it is not None, we use this value.
-	- KOInverting och ExcavatorInverting has been added. These parameters define which method we should use. Needs to be added to the function that does the sensitivity analysis.
+	             -s['inverting']=True/False... se till att denna ar True nar inverting ska goras.
+	done         -s['wMB'] set to None as default. None means that we use the standard values, 0.4 or 0.45. s['wMB'] is the master so if it is not None, we use this value.
 	"""
 	s=simParam
 
 	"""Sensitivity analysis parameters
 	-------------------------------"""
-	s['dibbleDist']=1 #[m] 0.8, 1.5
+	s['dibbleDist']=1 #[m] 0.6 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
 	s['impObAv']=False #[m] True
