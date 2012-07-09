@@ -226,7 +226,7 @@ def articleThree(i=1):
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
 	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
+	#doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
@@ -245,7 +245,7 @@ def doTheSenseAn(i=1):
 	VaryDibbleDist(i)#
 	VaryTimeFindMuSite(i)#
 	VaryMoundingBladeWidth(i)#
-	VaryImpObAv(i)#
+	#VaryImpObAv(i)#
 	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
 	TryNoRemound(i)#
@@ -253,7 +253,7 @@ def doTheSenseAn(i=1):
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
 	VaryTSR(i)#
-	TryShortSBM(i)#
+	#TryShortSBM(i)#
 
 class VaryTerrain(PMSimSeries):
 	"""
@@ -266,7 +266,8 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:#slightly smaller than the real one, for debug
+			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+'ttype'+str(ttype)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
@@ -435,6 +436,8 @@ class VaryInvExc(PMSimSeries):
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
 				G.simParam['tInvExcavator']=t
+				G.simParam['ExcavatorInverting']=True
+				G.simParam['KOInverting']=False
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -487,7 +490,7 @@ class VaryCriticalStoneSize(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not sList: sList=[False, True] #default
+		if not sList: sList=[0.006,0.008,0.01] #default
 		for s in sList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(s)+'.xls'
@@ -945,16 +948,15 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']         yes			Yes
 	s['multiplierFindMuSite']yes		Yes #nytt namn, fixat alla ref.
 	s['wMB']				yes			Yes
-	s['impObAv']			invantar svar
-	s['shift']				
-	s['rotCap']				
+	s['impObAv']			invantar svar. Nagon slags info finns i simuleringsklassen
+	s['shift']				-
+	s['rotCap']				-
 	s['tCWhenInvKO']		yes			yes
 	s['tInvExcavator']		yes			yes
 	s['noRemound']			yes			yes
 	s['critStoneSize']		yes			yes
 	s['moundRadius']		yes			yes
 	s['rectangular']		yes			yes
-	s['rectVol']			tagit bort, inte relevant da volymen kommer fran bredden.
 	s['TSR']				yes			yes			
 	s['sBMWhenInv']			Har fragat back tomas om detta. invantar svar
 
@@ -966,8 +968,8 @@ def paramsForSensAn(simParam={}):
 	"""
 	s=simParam
 
-	"""Sensitivity analysis
-	-----------------------"""
+	"""Sensitivity analysis parameters
+	-------------------------------"""
 	s['dibbleDist']=1 #[m] 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
@@ -986,7 +988,7 @@ def paramsForSensAn(simParam={}):
 	s['sBMWhenInv']=6.25 #[m] ?
 
 	"""Other parameters for the simulations
-	---------------------------------------"""
+	------------------------------------"""
 	s['inverting']=True
 	s['moundFailureProb']=0.05
 	s['invertKOFailureProb']=0.11
@@ -995,6 +997,5 @@ def paramsForSensAn(simParam={}):
 	s['MagMatnReload1h']=320	
 	s['MagMatTCReload2h']=444
 	s['MagMatnReload2h']=640
-	  
 	
 	return s
