@@ -1,0 +1,111 @@
+outputFiles/varyAutomationThinningMachineWed_Feb_15_13:19:04_2012/103//1aRJ.txt
+stat					value			unit
+--------------------------------------------
+clustering agg. index	237.011475814	-
+leaf tree percentage	3.01724137931	%
+trees					232.0			-
+pine percentage			96.9827586207	%
+tree density			0.232			trees/m2
+spruce percentage		0.0				%
+i	cranes		cranehead		Prod	QueuePerc	WorkPerc	ChopPerc	groundAratio	Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	1	RJ	228.4953	1.4912	97.8674	35.7759	False	False	False	False	False
+2	1	RJ	240.9276	1.2419	98.1794	41.8103	False	False	False	False	False
+3	1	RJ	238.5573	1.1810	98.2687	43.5345	False	False	False	False	False
+4	1	RJ	248.0772	1.2787	98.1254	41.8103	False	False	False	False	False
+5	1	RJ	228.7385	1.4576	97.9154	36.6379	False	False	False	False	False
+6	1	RJ	246.7661	1.3234	98.1074	43.5345	False	False	False	False	False
+7	1	RJ	248.5069	1.2551	98.1601	42.6724	False	False	False	False	False
+8	1	RJ	243.5246	1.2425	98.1786	42.2414	False	False	False	False	False
+9	1	RJ	239.2058	1.1726	98.2810	43.9655	False	False	False	False	False
+10	1	RJ	236.5312	1.5679	97.8059	37.9310	False	False	False	False	False
+11	1	RJ	232.9713	1.1766	98.2751	42.6724	False	False	False	False	False
+12	1	RJ	234.0606	1.1474	98.3180	43.9655	False	False	False	False	False
+13	1	RJ	241.3936	1.1495	98.3149	45.2586	False	False	False	False	False
+14	1	RJ	238.2444	1.5106	97.8861	39.6552	False	False	False	False	False
+15	1	RJ	240.0181	1.1766	98.2752	43.9655	False	False	False	False	False
+16	1	RJ	240.9321	1.2419	98.1794	41.8103	False	False	False	False	False
+17	1	RJ	251.6260	1.3362	98.0890	43.9655	False	False	False	False	False
+18	1	RJ	241.0967	1.1704	98.2843	44.3966	False	False	False	False	False
+19	1	RJ	240.0243	1.2246	98.2048	42.2414	False	False	False	False	False
+20	1	RJ	234.9231	1.1216	98.2063	41.3793	False	False	False	False	False
+21	1	RJ	246.0958	1.2556	98.1594	42.2414	False	False	False	False	False
+22	1	RJ	234.7463	1.1507	98.3131	43.9655	False	False	False	False	False
+23	1	RJ	234.1125	1.2322	98.1937	40.9483	False	False	False	False	False
+24	1	RJ	231.3436	1.4742	97.8917	36.6379	False	False	False	False	False
+25	1	RJ	231.2178	1.4072	97.9875	38.3621	False	False	False	False	False
+26	1	RJ	235.5208	1.5792	97.7901	37.5000	False	False	False	False	False
+27	1	RJ	237.5270	1.1759	98.2762	43.5345	False	False	False	False	False
+28	1	RJ	240.7554	1.2410	98.1807	41.8103	False	False	False	False	False
+29	1	RJ	253.2758	1.3320	98.0952	44.3966	False	False	False	False	False
+30	1	RJ	232.9630	1.1766	98.2752	42.6724	False	False	False	False	False
+31	1	RJ	238.8791	1.5313	97.8571	39.2241	False	False	False	False	False
+32	1	RJ	239.7144	1.5199	97.8730	39.6552	False	False	False	False	False
+33	1	RJ	241.1982	1.2060	98.2321	43.1034	False	False	False	False	False
+34	1	RJ	233.0528	1.4184	97.9715	38.3621	False	False	False	False	False
+35	1	RJ	247.8725	1.2777	98.1270	41.8103	False	False	False	False	False
+36	1	RJ	228.7373	1.4576	97.9154	36.6379	False	False	False	False	False
+37	1	RJ	235.5230	1.5792	97.7901	37.5000	False	False	False	False	False
+38	1	RJ	234.8634	1.2232	98.2068	41.3793	False	False	False	False	False
+39	1	RJ	235.2756	1.6146	97.7405	36.6379	False	False	False	False	False
+40	1	RJ	233.7424	1.5855	97.7813	37.0690	False	False	False	False	False
+41	1	RJ	253.2596	1.3319	98.0953	44.3966	False	False	False	False	False
+42	1	RJ	235.9723	1.6194	97.7338	36.6379	False	False	False	False	False
+43	1	RJ	233.5427	1.2292	98.1981	40.9483	False	False	False	False	False
+44	1	RJ	236.4854	1.5159	97.8786	39.2241	False	False	False	False	False
+45	1	RJ	233.7357	1.5854	97.7814	37.0690	False	False	False	False	False
+46	1	RJ	241.9818	1.4859	97.9207	40.9483	False	False	False	False	False
+47	1	RJ	243.5689	1.1940	98.2497	43.9655	False	False	False	False	False
+48	1	RJ	234.6975	1.4125	97.9799	38.7931	False	False	False	False	False
+49	1	RJ	234.6954	1.4125	97.9799	38.7931	False	False	False	False	False
+50	1	RJ	238.2410	1.5106	97.8861	39.6552	False	False	False	False	False
+51	1	RJ	242.9614	1.2148	98.2191	43.1034	False	False	False	False	False
+52	1	RJ	248.5026	1.2551	98.1601	42.6724	False	False	False	False	False
+53	1	RJ	242.3306	1.2117	98.2238	43.1034	False	False	False	False	False
+54	1	RJ	233.7638	1.2303	98.1964	40.9483	False	False	False	False	False
+55	1	RJ	241.8885	1.1975	98.2446	43.5345	False	False	False	False	False
+56	1	RJ	228.4967	1.4912	97.8674	35.7759	False	False	False	False	False
+57	1	RJ	239.1173	1.5328	97.8550	39.2241	False	False	False	False	False
+58	1	RJ	244.6555	1.2356	98.1886	42.6724	False	False	False	False	False
+59	1	RJ	237.8927	1.1437	98.3234	44.8276	False	False	False	False	False
+60	1	RJ	237.8868	1.1437	98.3234	44.8276	False	False	False	False	False
+61	1	RJ	239.1825	1.1390	98.3303	45.2586	False	False	False	False	False
+62	1	RJ	233.0612	1.4184	97.9715	38.3621	False	False	False	False	False
+63	1	RJ	239.9185	1.2241	98.2056	42.2414	False	False	False	False	False
+64	1	RJ	232.9751	1.1766	98.2751	42.6724	False	False	False	False	False
+65	1	RJ	241.1026	1.1704	98.2842	44.3966	False	False	False	False	False
+66	1	RJ	235.9723	1.6194	97.7338	36.6379	False	False	False	False	False
+67	1	RJ	239.5922	1.2744	98.1317	40.5172	False	False	False	False	False
+68	1	RJ	235.2592	1.6145	97.7406	36.6379	False	False	False	False	False
+69	1	RJ	243.5579	1.1939	98.2498	43.9655	False	False	False	False	False
+70	1	RJ	229.1072	1.3789	98.0280	38.7931	False	False	False	False	False
+71	1	RJ	236.2054	1.2564	98.1581	40.5172	False	False	False	False	False
+72	1	RJ	253.2596	1.3319	98.0953	44.3966	False	False	False	False	False
+73	1	RJ	228.4950	1.4912	97.8674	35.7759	False	False	False	False	False
+74	1	RJ	234.6817	1.4124	97.9800	38.7931	False	False	False	False	False
+75	1	RJ	237.9160	1.1438	98.3232	44.8276	False	False	False	False	False
+76	1	RJ	240.1007	1.2250	98.2042	42.2414	False	False	False	False	False
+77	1	RJ	234.5345	1.1727	98.2809	43.1034	False	False	False	False	False
+78	1	RJ	237.5612	1.1760	98.2760	43.5345	False	False	False	False	False
+79	1	RJ	234.0986	1.2321	98.1938	40.9483	False	False	False	False	False
+80	1	RJ	244.4372	1.2600	98.1529	41.8103	False	False	False	False	False
+81	1	RJ	234.1463	1.2323	98.1934	40.9483	False	False	False	False	False
+82	1	RJ	240.9327	1.2419	98.1794	41.8103	False	False	False	False	False
+83	1	RJ	231.2523	1.3139	97.9643	37.9310	False	False	False	False	False
+84	1	RJ	237.8935	1.1437	98.3234	44.8276	False	False	False	False	False
+85	1	RJ	236.5516	1.5681	97.8057	37.9310	False	False	False	False	False
+86	1	RJ	233.8552	1.5862	97.7802	37.0690	False	False	False	False	False
+87	1	RJ	229.1091	1.3789	98.0280	38.7931	False	False	False	False	False
+88	1	RJ	234.0675	1.1474	98.3180	43.9655	False	False	False	False	False
+89	1	RJ	233.7388	1.5854	97.7813	37.0690	False	False	False	False	False
+90	1	RJ	246.4242	1.2835	98.1185	41.3793	False	False	False	False	False
+91	1	RJ	235.4573	1.1656	98.2912	43.5345	False	False	False	False	False
+92	1	RJ	238.8330	1.1823	98.2667	43.5345	False	False	False	False	False
+93	1	RJ	233.5187	1.2691	98.1395	39.6552	False	False	False	False	False
+94	1	RJ	236.8243	1.1609	98.2982	43.9655	False	False	False	False	False
+95	1	RJ	240.3953	1.1339	98.3377	45.6897	False	False	False	False	False
+96	1	RJ	246.4577	1.3218	98.1097	43.5345	False	False	False	False	False
+97	1	RJ	235.2717	1.6146	97.7405	36.6379	False	False	False	False	False
+98	1	RJ	231.2336	1.4073	97.9874	38.3621	False	False	False	False	False
+99	1	RJ	249.1545	1.2977	98.0977	41.3793	False	False	False	False	False
+100	1	RJ	231.2402	1.4074	97.9873	38.3621	False	False	False	False	False

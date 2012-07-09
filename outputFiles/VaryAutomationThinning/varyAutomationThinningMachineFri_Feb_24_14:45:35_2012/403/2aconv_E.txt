@@ -1,0 +1,13 @@
+outputFiles/varyAutomationThinningMachineFri_Feb_24_14:45:35_2012/403/2aconv_E.txt
+stat					value			unit
+--------------------------------------------
+clustering agg. index	1.12982619212	-
+leaf tree percentage	0.0				%
+trees					278.0			-
+pine percentage			100.0			%
+tree density			0.278			trees/m2
+spruce percentage		0.0				%
+stand no				403				-
+i	cranes		cranehead		Prod	QueuePerc	WorkPerc	ChopPerc	groundAratio	Amove	AmoveArmin	AmoveArmOut	Adumptrees	Achop
+####
+1	1	conv	146.3837	0.0000	2.8382	33.8129	0.2690	False	True	True	True	True
