@@ -133,11 +133,11 @@ class PMSimSeries(SimSeries):
 			headsCapacity=162
 			refillTime=366
 		elif '3h' in mtype:
-			headsCapacity=72*3
-			refillTime=223*3
+			headsCapacity=243
+			refillTime=507
 		elif '4h' in mtype:
-			headsCapacity=72*4
-			refillTime=223*4
+			headsCapacity=324
+			refillTime=648
 		
 		s=PlantmSim(G,vis=False,mtype=mtype)
 		self.cumTime+=s.now()
