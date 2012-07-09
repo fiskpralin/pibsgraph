@@ -407,7 +407,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			if self.m.invertingMethod=='KO':
 				invertTime=self.G.simParam['invertKOFailureProb']
 			elif self.m.invertingMethod=='Excavator':
-				invertTime=G.simParam['tInvExcavator']-digTime
+				invertTime=self.G.simParam['tInvExcavator']-digTime
 			else:
 				raise Exception('cannot identify inverting method %s'%self.m.invertingMethod)
 		for pH in pHeads:

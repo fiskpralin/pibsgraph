@@ -228,7 +228,7 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
 	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
@@ -245,17 +245,17 @@ def doTheSenseAn(i=1):
 	 It should be terrain type '3' for the complete sensitivity analysis
 	"""
 	
-	VaryDibbleDist(i)#
-	VaryTimeFindMuSite(i)#
-	VaryMoundingBladeWidth(i)#
+	#VaryDibbleDist(i)#
+	#VaryTimeFindMuSite(i)#
+	#VaryMoundingBladeWidth(i)#
 	#VaryImpObAv(i)#
-	VaryTimeWhenInvKO(i)#
+	#VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
-	TryNoRemound(i)#
-	VaryCriticalStoneSize(i)#
-	VaryMoundRadius(i)#
-	VaryRectScoop(i)#
-	VaryTSR(i)#
+	#TryNoRemound(i)#
+	#VaryCriticalStoneSize(i)#
+	#VaryMoundRadius(i)#
+	#VaryRectScoop(i)#
+	#VaryTSR(i)#
 	#TryShortSBM(i)#
 
 class VaryTerrain(PMSimSeries):
