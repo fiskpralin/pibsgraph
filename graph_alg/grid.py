@@ -32,20 +32,26 @@ class ExtendedGraph(nx.Graph):
 
 	
 	"""
-	def __init__(self, origin=None, globalOrigin=None,areaPoly=None, gridtype=None):
+	def __init__(self, origin=None, globalOrigin=None,areaPoly=None,L=None, C=None, gridtype=None):
 		if not areaPoly:
 			raise Exception('areaPoly must be given.')
 		if not origin:
-			origin=(0,0)
+			xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
+			self.origin=xmin, ymin
+		else:
+			self.origin=origin
 		if not globalOrigin:
 			globalOrigin=(596120, 6727530) #sweref99..located on map.. nice position.. use as default.
+		assert C!=None
+		assert L!=None
+		self.L=L
+		self.C=C
 		self.areaPoly=areaPoly
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
 		side=10
 		self.lim=np.array([xmin-0.5*side,xmax+0.5*side, ymin-0.5*side, ymax+0.5*side])
 		self.A=fun.polygon_area(areaPoly)
 		self.Ainv=1./self.A #used a lot.. faster to just compute this once.
-		self.origin=origin
 		self.globalOrigin=globalOrigin
 		self.type=gridtype
 		x,y,z=GIS.readTerrain(globalOrigin=globalOrigin , areaPoly=areaPoly)
@@ -65,6 +71,7 @@ class ExtendedGraph(nx.Graph):
 		self.moviefig=None #may be used for movies later
 		self.cmdfolder=os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 		self.aPInnerCircleM=None #used later for polygon calculations
+		
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""
 		interpolates from the terrain data and returns line coordinates.
@@ -102,6 +109,7 @@ class ExtendedGraph(nx.Graph):
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
+	
 	def remove_node(self,n):
 		"""
 		like the standard one, but takes away edge first so some data is stored that we need
@@ -109,6 +117,7 @@ class ExtendedGraph(nx.Graph):
 		for neigh in self.neighbors(n):
 			self.remove_edge(n,neigh)
 		super(ExtendedGraph, self).remove_node(n=n)
+		
 	def remove_nodes_from(self,nodes):
 		"""
 		we need to update data, so we only use the above one.
@@ -151,6 +160,7 @@ class ExtendedGraph(nx.Graph):
 			super(ExtendedGraph,self).add_edges_from(ebunch=[e], attr_dict=attr_dict, attr=kwargs)
 			dA=go.singleRoadSegmentCoverage((e[0],e[1]), self, add=True)
 			self.areaCover+=dA*self.Ainv
+		
 	def edges_from_path_gen(self, path, data=False):
 		"""
 		returns a generator that steps through the edges between the nodes..
@@ -220,6 +230,8 @@ class ExtendedGraph(nx.Graph):
 		if fun.insideCircle(pos, self.aPInnerCircleM, self.aPInnerCircleRadius):
 			return True #much faster than below
 		return col.pointInPolygon(pos,self.areaPoly)
+
+
 	def draw(self, ax=None, overlap=False, weight=False, cost=False, edge_visits=False, background=True, contour=True):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
@@ -250,16 +262,14 @@ class SqGridGraph(ExtendedGraph):
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
 	"""
 	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None):
+		C=L/2.0
+		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C, gridtype='sqGridGraph')
+		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
+		origin=self.origin
 		
-		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='sqGridGraph')
-		C=L/2.
-		self.C=C
-		self.L=L
-
 		if angle ==None: #find the longest edge, and use its angle
-			print "get the angle"
-			angle=getAngleFromLongestEdge(areaPoly, origin)
-			print "got the angle.", angle
+			angle, shift=self.getAngleFromLongestEdge()
+			print "got the angle.", angle*360/(2*3.14), shift
 			while angle>pi/2. or angle<0: #if it is.. most often does not enter loop
 				if angle<0:
 					angle+=pi/2.
@@ -273,45 +283,34 @@ class SqGridGraph(ExtendedGraph):
 		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
 		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area."""
 		d=1/sqrt(2)+0.001
-		direction=angle
 		#direction is by definition not bigger that 90 degrees:
-		while direction>pi*0.5:
-			direction-=pi*0.5
-		while direction<0:
-			direction+=pi*0.5
-		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
 		ym=sqrt((xmax-xmin)**2+(ymax-ymin)**2)
-		xlmin=-ceil(sin(pi/2.-direction)*(ymax-ymin)/L)*L
-		xlmax=ceil(sin(direction)*(xmax-xmin)/L)*L
-		xl=np.arange(xlmin-3*C,xlmax+3*C, dx, dtype=np.float)
-		yl=np.arange(-3*C,ym+3*C, dy, dtype=np.float)
+		xlmin=-ceil(sin(pi/2.-angle)*(ymax-ymin)/L)*L
+		xlmax=ceil(sin(angle)*(xmax-xmin)/L)*L
+		xl=np.arange(shift[0]+xlmin,xlmax, dx, dtype=np.float)
+		yl=np.arange(shift[1],ym, dy, dtype=np.float)
 		el=0
-		origin=xmin, ymin
 		for xloc in xl:
 			for yloc in yl:
 				if yloc==0 or angle==0: sl=[1]
-				else: sl=[1]
-				for sign in sl:
-					x, y=tuple(cart((xloc,sign*yloc), origin=origin, direction=direction, fromLocalCart=True))
-					x,y=round(x,digits), round(y,digits)
-					self.add_node((x, y))
-					el+=1
-					#neigbor 'backwards' in y-dir
-					neig=tuple(cart((xloc,sign*(yloc)-dy), origin=origin, direction=direction, fromLocalCart=True))
+				x, y=tuple(cart((xloc,yloc), origin=origin, direction=angle, fromLocalCart=True))
+				x,y=round(x,digits), round(y,digits)
+				self.add_node((x, y))
+				el+=1
+				#neigbor 'backwards' in y-dir
+				neig=tuple(cart((xloc,(yloc)-dy), origin=origin, direction=angle, fromLocalCart=True))
+				neig=round(neig[0],digits), round(neig[1],digits)
+				self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
+				if diagonals and xloc != 0:
+					neig=tuple(cart((xloc-dx,(yloc-dy)), origin=origin, direction=angle,fromLocalCart=True))
 					neig=round(neig[0],digits), round(neig[1],digits)
-					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
-					if diagonals and xloc != 0:
-						neig=tuple(cart((xloc-dx,sign*(yloc-dy)), origin=origin, direction=direction, fromLocalCart=True))
-						neig=round(neig[0],digits), round(neig[1],digits)
-						self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
-						neig=tuple(cart((xloc+dx,sign*(yloc-dy)), origin=origin, direction=direction, fromLocalCart=True))
-						neig=round(neig[0],digits), round(neig[1],digits)
-						self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
-					if True or xloc != 0:
-						neig=tuple(cart((xloc-dx,sign*yloc), origin=origin, direction=direction, fromLocalCart=True))
-						neig=round(neig[0],digits), round(neig[1],digits)
-						self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
-		
+					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+					neig=tuple(cart((xloc+dx,(yloc-dy)), origin=origin, direction=angle, fromLocalCart=True))
+					neig=round(neig[0],digits), round(neig[1],digits)
+					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
+				neig=tuple(cart((xloc-dx,yloc), origin=origin, direction=angle, fromLocalCart=True))
+				neig=round(neig[0],digits), round(neig[1],digits)
+				self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
 		for node in self.nodes():
 			if not self.inside(node):
 				self.remove_node(node)
@@ -336,6 +335,61 @@ class SqGridGraph(ExtendedGraph):
 		self.elements=el			
 		self.density=elements/self.A
 
+	def getAngleFromLongestEdge(self, areaPoly=None, origin=None):
+		"""
+		finds the angle of the longest edge in relation to the x-axis.
+		if there is a draw, the edge closest to the origin wins.
+		
+		This function is only usable for konvex polygons, but works for concave as well.
+
+		the square distance is used since it's faster to compute
+
+		the shift thing only works if the origin is in the "lower left" corner.
+		"""
+		if not origin:
+			origin=self.origin
+		if not areaPoly:
+			areaPoly=self.areaPoly
+		last=areaPoly[-1]
+		longest=None
+		dmax=0
+		for node in areaPoly:
+			d2=fun.getDistanceSq(node, last)
+			if d2==dmax: #look for distance to origin
+				dtmp=min([fun.getDistanceSq(node, origin), fun.getDistanceSq(last, origin)])
+				dtmp2=min([fun.getDistanceSq(node, longest[0]), fun.getDistanceSq(last, longest[1])])
+				if dtmp<dtmp2:
+					longest = (node,last)
+					dmax=d2
+			elif d2>dmax:
+				longest = (node,last)
+				dmax=d2
+			last=node
+		#now, calculate the distance to this line.
+		#we need to make a line, not a ray, in order to get the extension as well.
+		infRay=np.array(longest)
+		infRay=infRay+1e5*(infRay-infRay[1])+1e5*(infRay-infRay[0]) #infinite extension of longest
+		pTmp, t=col.closestLinePoint(origin, infRay, True)
+		assert t!=1 and t!=0
+		d=fun.getDistance(pTmp,origin)
+		assert d>=0
+		#now, we know that d+shift=n*L+C..where n is an integer
+		n=round((d-self.C)/float(self.L))
+		shift=self.L*n+self.C-d
+		assert abs(shift)<=self.L
+		angle=fun.angleToXAxis(longest)
+		assert angle>=0
+		if 0<angle<=pi/2: #shift x negative
+			shift=(-shift,0)
+		elif pi/2<angle<=pi: #shift y negative
+			shift=(0,-shift)
+		elif pi<angle<=3*pi/2.0: #shift x positive
+			shift=(shift,0)
+		else:
+			shift=(0, -shift)
+		return angle, shift
+
+	
 class TriGridGraph(ExtendedGraph):
 	"""
 	A triangular grid. Extends from ExtendedGraph
@@ -410,32 +464,4 @@ class TriGridGraph(ExtendedGraph):
 		self.elements=el
 		self.L=L
 		self.density=elements/self.A
-
-def getAngleFromLongestEdge(areaPoly, origin=None):
-	"""
-	finds the angle of the longest edge in relation to the x-axis.
-	if there is a draw, the edge closest to the origin wins.
-
-	This function is only usable for konvex polygons, but works for concave as well.
-
-	the square distance is used since it's faster to compute
-	"""
-	if not origin: origin=(0,0)
-	last=areaPoly[-1]
-	longest=None
-	dmax=0
-	for node in areaPoly:
-		d2=fun.getDistanceSq(node, last)
-		if d2==dmax: #look for distance to origin
-			dtmp=min([fun.getDistanceSq(node, origin), fun.getDistanceSq(last, origin)])
-			dtmp2=min([fun.getDistanceSq(node, longest[0]), fun.getDistanceSq(last, longest[1])])
-			if dtmp<dtmp2:
-				longest = (node,last)
-				dmax=d2
-		elif d2>dmax:
-			longest = (node,last)
-			dmax=d2
-		last=node
-	return fun.angleToXAxis(longest)
-
 
