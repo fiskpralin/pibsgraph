@@ -51,7 +51,7 @@ class PMSimSeries(SimSeries):
 		raise Exception('run must be implemented in PMSimSeries subclass.')
 
 	def updateTimeData(self, s, reloaded=False, reloadtime=0):
-v		"""
+		"""
 		self.timeData should be a list with all the relevant information that will be stored.
 		for simplicity, the list is in the same order as the excel document. This increases speed, but
 		the drawback is that it slightly decreases the readability.
