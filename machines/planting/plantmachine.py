@@ -66,7 +66,7 @@ class PlantMachine(Machine):
 		self.visual['trackCntrPosLoc']=[po1,po2] #just for plotting..
 		self.workingArea=pow(self.craneMaxL,2)*pi/2.-pow(self.craneMinL,2)*pi/2.
 		self.stockingRate=self.G.simParam['TSR']
-		self.plantMinDist=G.simParam['dibbleDist']#G.plantMinDist
+		self.plantMinDist=G.simParam['dibbleDist']
 		self.dibbleDepth=0.1
 		self.moundingFailureProb=G.simParam['moundFailureProb']=0.05
 		self.inverting=G.simParam['inverting']

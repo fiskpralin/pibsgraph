@@ -300,8 +300,7 @@ class VaryDibbleDist(PMSimSeries):
 				self.filename=folder+'/'+mtype+'_'+str(d)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				#G.simParam['dibbleDist']=d
-				G.PMplantSepDist=d #hmm.. check so that plantmindist doesn't interfere.. remove
+				G.simParam['dibbleDist']=d
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:
@@ -328,8 +327,7 @@ class VaryMoundingBladeWidth(PMSimSeries):
 				self.filename=folder+'/'+mtype+'_'+str(w)+'.xls'
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				#G.simParam['wMB']=w
-				G.PMbladeWidth=w #hmm.. check so that plantmindist doesn't interfere.. remove
+				G.simParam['wMB']=w
 				quitPossible=False
 				i=0
 				while i<it or not quitPossible:

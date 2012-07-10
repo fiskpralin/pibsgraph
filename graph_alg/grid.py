@@ -220,7 +220,7 @@ class ExtendedGraph(nx.Graph):
 		if fun.insideCircle(pos, self.aPInnerCircleM, self.aPInnerCircleRadius):
 			return True #much faster than below
 		return col.pointInPolygon(pos,self.areaPoly)
-	def draw(self, ax=None, overlap=False, weight=False, cost=False, edge_visits=False, background=True):
+	def draw(self, ax=None, overlap=False, weight=False, cost=False, edge_visits=False, background=True, contour=True):
 		"""
 		does all the plotting. Should be able to determine if we have terrain data etc.
 		"""
@@ -228,7 +228,7 @@ class ExtendedGraph(nx.Graph):
 			fig=plt.figure()
 			ax=fig.add_subplot(111)
 		if background: ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
-		ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
+		if contour: ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
 		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight,edge_visits=edge_visits, road_color='#01243B', road_width=4, poly=False)
 		#bug in matplotlib always plots patch in back.. do line instead
 		vertices=self.areaPoly+[self.areaPoly[0]] #closed
@@ -249,7 +249,6 @@ class SqGridGraph(ExtendedGraph):
 	angle is how the grid is turned in radians. 0=default
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
 	"""
-	
 	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None):
 		
 		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='sqGridGraph')
@@ -274,36 +273,48 @@ class SqGridGraph(ExtendedGraph):
 		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
 		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area."""
 		d=1/sqrt(2)+0.001
-		direction=angle+pi/2.
+		direction=angle
+		#direction is by definition not bigger that 90 degrees:
+		while direction>pi*0.5:
+			direction-=pi*0.5
+		while direction<0:
+			direction+=pi*0.5
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
-		xl=np.arange(xmin+C,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float) #hypothenuse
-		yl=np.arange(ymin+C,ceil(sqrt(xmax**2+ymax**2)), dy, dtype=np.float) 
+		ym=sqrt((xmax-xmin)**2+(ymax-ymin)**2)
+		xlmin=-ceil(sin(pi/2.-direction)*(ymax-ymin)/L)*L
+		xlmax=ceil(sin(direction)*(xmax-xmin)/L)*L
+		xl=np.arange(xlmin-3*C,xlmax+3*C, dx, dtype=np.float)
+		yl=np.arange(-3*C,ym+3*C, dy, dtype=np.float)
 		el=0
+		origin=xmin, ymin
 		for xloc in xl:
 			for yloc in yl:
 				if yloc==0 or angle==0: sl=[1]
-				else: sl=[1,-1]
+				else: sl=[1]
 				for sign in sl:
-					x, y=tuple(cart((xloc,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
+					x, y=tuple(cart((xloc,sign*yloc), origin=origin, direction=direction, fromLocalCart=True))
 					x,y=round(x,digits), round(y,digits)
-					if not self.inside((x,y)): continue
 					self.add_node((x, y))
 					el+=1
 					#neigbor 'backwards' in y-dir
-					neig=tuple(cart((xloc,sign*(yloc)-dy), origin=(0,0), direction=direction, fromLocalCart=True))
+					neig=tuple(cart((xloc,sign*(yloc)-dy), origin=origin, direction=direction, fromLocalCart=True))
 					neig=round(neig[0],digits), round(neig[1],digits)
-					if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
+					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[], c=0)
 					if diagonals and xloc != 0:
-						neig=tuple(cart((xloc-dx,sign*(yloc-dy)), origin=(0,0), direction=direction, fromLocalCart=True))
+						neig=tuple(cart((xloc-dx,sign*(yloc-dy)), origin=origin, direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
-						neig=tuple(cart((xloc+dx,sign*(yloc-dy)), origin=(0,0), direction=direction, fromLocalCart=True))
+						self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+						neig=tuple(cart((xloc+dx,sign*(yloc-dy)), origin=origin, direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if self.inside(neig): self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
+						self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y), neig),visits=0, visited_from_node=[],c=0)
 					if True or xloc != 0:
-						neig=tuple(cart((xloc-dx,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
+						neig=tuple(cart((xloc-dx,sign*yloc), origin=origin, direction=direction, fromLocalCart=True))
 						neig=round(neig[0],digits), round(neig[1],digits)
-						if self.inside(neig): self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+						self.add_edge((x,y),neig, weight=self.edgeWeightCalc((x,y), neig), visits=0, visited_from_node=[],c=0)
+		
+		for node in self.nodes():
+			if not self.inside(node):
+				self.remove_node(node)
 		rem=True
 		while rem:
 			rem=False
@@ -324,7 +335,6 @@ class SqGridGraph(ExtendedGraph):
 		elements=el
 		self.elements=el			
 		self.density=elements/self.A
-
 
 class TriGridGraph(ExtendedGraph):
 	"""
