@@ -273,7 +273,7 @@ def tryP0(areaPoly=None, t=60 ):
 	ax=fig.add_subplot(111)
 	print "best cost:", best.cost
 	best.draw(ax=ax)
-def best(areaPoly=None,t=60, tri=False):
+def best(areaPoly=None,t=60, tri=False, origin=None, direction=None):
 	"""
 	time - how long we should look for a better solution
 	"""
@@ -281,13 +281,13 @@ def best(areaPoly=None,t=60, tri=False):
 	if tri:
 		R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	else:
-		R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+		R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin, origin=origin, angle=direction)
 	#R=simplified_bruteForce(R,aCap=0.2, anim=True)
 	R, tries=stochastic_several(R, t=t)
 	fig=plt.figure()
 	ax=fig.add_subplot(111)
 	print "best cost:", R.cost
-	R.draw(ax=ax)
+	R.draw(ax=ax, contour=False)
 	fig=plt.figure()
 	ax=fig.add_subplot(111)
 	ax.plot(tries, 'o')
@@ -377,14 +377,59 @@ import time
 import random
 tic=time.clock()
 #areaPoly=list(5*np.array([(0,0),(48,0), (73, 105), (0,96)]))
-areaPoly=list(3*np.array([(0,0),(50,0), (50, 105), (0,105)]))
+areaPoly=[(522, 1048),
+(541, 1017),
+(613, 997),
+(661,955),
+(681, 901),
+(709,883),
+(711,870),
+(858,708),
+(874,708),
+(907,640),
+(933, 622),
+(973, 553),
+(973,529),
+(885,507),
+(831, 468),
+(828, 442),
+(850, 421),
+(859,406),
+(871, 396),
+(876,375),
+(868,361),
+(460, 289),
+(367, 292),
+(339, 316),
+(319,378),
+(303, 408),
+(301, 432),
+(375, 474),
+(432, 487),
+(496, 529),
+(496, 558),
+(450, 616),
+(433,640),
+(376, 693),
+(366,711),
+(352, 711),
+(357, 838),
+(396, 901),
+(403, 940),
+(445, 993),
+(475, 1012),
+(487, 1029),]
+for i in range(len(areaPoly)):
+	areaPoly[i]=(areaPoly[i][0], 1050-areaPoly[i][1])
+	
+areaPoly=list(0.45*np.array(areaPoly))
 for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
 #tmp(areaPoly)
 
 #testCycles()
 #cProfile.run('''tmp(areaPoly=areaPoly)''')
 #testInterpolation()
-best(areaPoly,1, tri=True)
+best(areaPoly,5*60, origin=(437,226), direction=3.14/2*0.05)
 #tryP0(areaPoly, t=60)
 #findBugs([simplified_bruteForce, stochastic])
 

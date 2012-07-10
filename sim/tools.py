@@ -28,10 +28,7 @@ class globalVar():
 		self.noMonitors=False #if true, only world is plotted
 		self.productivity='undefined'
 		self.automatic='undefined'
-		#self.plantMinDist=1.5
-		self.PMstockingRate=None 
-		#self.PMplantSepDist=2.01 #standard separation distance for planting devices.
-		#self.PMbladeWidth=None
+		#self.PMstockingRate=None 
 		self.PMangleLim=[0, 45.*2.*pi/360.]
 		self.PMfocusSwitch=None
 		self.PMattach=None
