@@ -41,13 +41,16 @@ ax=draw.plot2DContour(t_x,t_y,t_z,ax, w=2) #plots contours
 
 # A naive and simple method for getting the roll of a road segment.
 def naiveroll(p1,p2):
+	"""plot ugly sometimes. depending on direction"""
 	roadwidth=4.0
-	alpha=atan((p2[0]-p1[0])/(p2[1]-p1[1]))
+	alpha=atan((p2[1]-p1[1])/(p2[0]-p1[0])) #this or
+	alpha2=atan2((p2[0]-p1[0]),(p2[1]-p1[1])) #this?
+	print 180/pi*alpha, 180/pi*alpha2
 	length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
-	p11=getCa([-roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
-	p12=getCa([roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
-	p21=getCa([-roadwidth/2,0], direction=pi/2.-alpha, origin=p2,fromLocalCart=True)
-	p22=getCa([roadwidth/2,0], direction=pi/2.-alpha, origin=p2,fromLocalCart=True)
+	p11=getCa([-roadwidth/2,0], direction=pi/2.-alpha2, origin=p1,fromLocalCart=True)
+	p12=getCa([roadwidth/2,0], direction=pi/2.-alpha2, origin=p1,fromLocalCart=True)
+	p21=getCa([-roadwidth/2,0], direction=pi/2.-alpha2, origin=p2,fromLocalCart=True)
+	p22=getCa([roadwidth/2,0], direction=pi/2.-alpha2, origin=p2,fromLocalCart=True)
 	x1=np.linspace(p11[0], p21[0], points)
 	x2=np.linspace(p12[0], p22[0], points)
 	y1=np.linspace(p11[1], p21[1], points)
@@ -57,7 +60,7 @@ def naiveroll(p1,p2):
 	roll=[]
 	for ent in range(len(z1)):
 		roll.append(180*(1/pi)*atan((z2[ent]-z1[ent])/roadwidth))
-	return roll
+	return roll, p11, p12
 
 #interpolate...I use a scipy interpolator called RectBivariateSpline.. google it for more info.
 xlist=t_x[:,0] #just the variations needed, not the 2D-matrix
@@ -68,16 +71,21 @@ interpol=RectBivariateSpline(xlist, ylist, t_z,s=0) #used pretty much everytime 
 #we now have an interpolation and can use interpol to get height in pretty much every point possible. 
 
 #two arbitrary points:
-p1=(200.3454, 30.45)
-p2=(115.343,480.454) 
+#p1=(200.0,150.0 )
+#p2=(230.0,480.454)
+p1=(200.89,300.5664)
+p2=(100.45,480.78)
+p1=(150.5,480.1)
+p2=(100.56,50.4)
 points=200 #a lot of points along above line.
 x=np.linspace(p1[0], p2[0], points)
 y=np.linspace(p1[1], p2[1], points)
 z=interpol.ev(x,y) #gives array of z for x,y list of positions. we are done with the pitch more or less
 
-roll = naiveroll(p1,p2)
-
+roll,p11,p12 = naiveroll(p1,p2)
 plt.plot(x,y, 'o') #plot the points defined by x, y arrays
+plt.plot(p12[0],p12[1],'o')
+plt.plot(p11[0],p11[1],'o')
 ax2=fig.add_subplot(222)
 d=np.sqrt(x**2+y**2)-np.sqrt(x[0]**2+y[0]**2) #distance from start point
 ax2.set_xlabel('d')
@@ -86,7 +94,7 @@ ax2.set_title('The interpolated height along the line specified to the left.')
 ax3=fig.add_subplot(224)
 ax3.set_xlabel('d')
 ax3.plot(d,roll,lw=2) #plot z along line...
-ax3.set_title('The roll with positive as falling leftwards and negative as falling rightwards')
+ax3.set_title('The roll with positive as falling left and negative as falling right')
 
 plt.show()
 
