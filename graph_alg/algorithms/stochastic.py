@@ -145,7 +145,6 @@ def stochastic(R, ax=None, aCap=0.20, beta=1.5, anim=False, probListGen=None):
 		
 		Thus, if the updated cost is still the smallest in the list, we know that this road is cheapest to remove.
 		"""
-		print "start"
 		probList=probListGen.getList(N=len(remList))
 		if anim: #it's showtime..
 			R.movieFlush()

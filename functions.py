@@ -139,10 +139,17 @@ def getPointBetween(p1,p2):
 def angleToXAxis(ray):
 	"""
 	returns the angle in relation to the xaxis.
-	vector from p1 to p2
+
+	the angle is always positive
+	
 	"""
-	r,th=getCylindrical(ray[1], origin=ray[0], direction=0)
-	return th	
+	r1,th1=getCylindrical(ray[1], origin=ray[0], direction=pi/2.0)
+	r2,th2=getCylindrical(ray[0], origin=ray[1], direction=pi/2.0)
+	if th1<0: th1=1e15
+	if th2<0: th2=1e15
+	assert min(th1, th2)>=0
+	return min(th1,th2)
+
 class rect():
 	"""
 	rectangle

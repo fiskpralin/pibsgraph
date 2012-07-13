@@ -30,7 +30,8 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 	origin=R.origin
 	if __debug__:
 		for e in R.edges(data=True): assert e[2]['weight']>=0
-	if not origin: raise Exception('need info about origin')
+	if not origin:
+		raise Exception('need info about origin')
 
 	#now, start for real and save away all kind of info about the paths.
 	for node in R.nodes(data=True):		
@@ -66,7 +67,6 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 		
 		Thus, if the updated cost is still the smallest in the list, we know that this road is cheapest to remove.
 		"""
-		print "start"
 		if anim: #movietime
 			R.movieFlush()
 		while True: #two possibilities to break out below..

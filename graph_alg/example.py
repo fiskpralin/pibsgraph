@@ -298,10 +298,10 @@ def tmp(areaPoly=None):
 	globalOrigin= 596250, 6727996 #coordinate
 	R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 	print "algorithm time... "
-	#R=simplified_bruteForce(R,aCap=0.2,warmup=False, anim=False)
+	R=simplified_bruteForce(R,aCap=0.2,warmup=False, anim=False)
 	#R=bruteForce(R,aCap=0.2, add=False)
-	R=best(areaPoly, t=60*15)
-	R.draw(edge_visits=True, cost=True)
+	#R=best(areaPoly, t=60*15)
+	R.draw()
 
 def findBugs(algList):
 	"""
@@ -325,111 +325,26 @@ def findBugs(algList):
 	print "used total area:", R.A, R.Ainv
 	print "total cost:", cf.totalCost(R)
 
-def testCycles():
-	from graph_operations import shortestCycle
-	import algorithms.common as com
-	from draw import draw_road
-	h=150
-	l=130
-	aP=[(0,0), (l,0), (l,h), (0,h)]
-	R=gr.SqGridGraph(areaPoly=aP)
-	#R=simplified_bruteForce(R)
-	R.remove_edge((12.0, 12.0), (36.0, 12.0))
-	R.remove_edge((12.0, 60.0), (36.0, 60.0))
-	R.remove_edge((12.0, 84.0), (36.0, 84.0))
-	R.remove_edge((60.0, 12.0), (60.0, 36.0))
-	R.remove_edge((36.0, 60.0), (60.0, 60.0))
-	R.remove_edge((60.0, 36.0), (84.0, 36.0))
-	R.remove_edge((60.0, 84.0), (84.0, 84.0))
-	R.remove_edge((60.0, 60.0), (84.0, 60.0))
-	for n in R.nodes(data=True):
-		if n[0]==(60.0,36.0): node=n
-	d=R.get_edge_data((36.0, 12.0) , (36.0, 36.0))
-	d['weight']*=4
-	d=R.get_edge_data((36.0, 84.0) , (60.0, 84.0))
-	d['weight']*=4
-	from matplotlib import pyplot as plt
-	from draw import draw_road
-	import time
-	import algorithms.common as common
-	plt.ion()
-	fig=plt.figure()
-	t=[0,0]
-	for n in R.nodes(data=True):
-		tic=time.clock()
-		print n[0]
-
-		c=go.shortestCycle(R,n[0],cutoff=300)
-		p1,p2=common.get_shortest_and_second(R,n)
-		n=n[0]
-		if c==None:
-			continue
-		fig.clear()
-		ax=fig.add_subplot('111', aspect='equal')
-		ax=R.draw(ax=ax, background=False)
-		plt.plot(n[0], n[1], '+')
-		draw_road(p1, ax, color='r')
-		draw_road(c, ax, color='b')
-		plt.draw()
-		raw_input('dfs')
 import cProfile
 import time
 import random
 tic=time.clock()
-#areaPoly=list(5*np.array([(0,0),(48,0), (73, 105), (0,96)]))
-areaPoly=[(522, 1048),
-(541, 1017),
-(613, 997),
-(661,955),
-(681, 901),
-(709,883),
-(711,870),
-(858,708),
-(874,708),
-(907,640),
-(933, 622),
-(973, 553),
-(973,529),
-(885,507),
-(831, 468),
-(828, 442),
-(850, 421),
-(859,406),
-(871, 396),
-(876,375),
-(868,361),
-(460, 289),
-(367, 292),
-(339, 316),
-(319,378),
-(303, 408),
-(301, 432),
-(375, 474),
-(432, 487),
-(496, 529),
-(496, 558),
-(450, 616),
-(433,640),
-(376, 693),
-(366,711),
-(352, 711),
-(357, 838),
-(396, 901),
-(403, 940),
-(445, 993),
-(475, 1012),
-(487, 1029),]
+#areaPoly=list(3*np.array([(13,74),(48,0), (-75, 25), (-35,96)]))
+areaPoly=[(522, 1048),(541, 1017),(613, 997),(661,955),(681, 901),(709,883),(711,870),(858,708),(874,708),(907,640),(933, 622),(973, 553),(973,529),(885,507),(831, 468),(828, 442),(850, 421),(859,406),(871, 396),(876,375),(868,361),(460, 289),(367, 292),(339, 316),(319,378),(303, 408),(301, 432),(375, 474),(432, 487),(496, 529),(496, 558),(450, 616),(433,640),(376, 693),(366,711),(352, 711),(357, 838),(396, 901),(403, 940),(445, 993),(475, 1012),(487, 1029),]
+brazil=[(3,189),(16,207),(23,213),(29,222),(39,218),(45,212),(47,229),(51,221),(53,228),(69,229),(94,214),(111,211),(112,233),(127,245),(139,246),(157,257),(173,259),(177,289),(199,290),(199,303),(209,311),(201,337),(205,361),(230,363),(235, 386),(243,383),(249,386),(245,405),(251,404),(254,423),(212,463),(218,461),(229,474),(233,471),(260, 493),(257,507),(271,485),(283,462),(289,464),(281,478),(289,473),(309,442),(315,430),(313,405),(350,385),(367,375),(390,375),(400,366),(419, 334),(428,315),(435,251),(443,253),(458,228),(487,201),(483,159),(458,153),(427,126),(385,117),(370,123),(370,111),(327,93),(309,115),(309,105),(322,92),(293,89),(287,99),(285,90),(302,75),(303,66),(291,59),(283,35),(268,58),(226,56),(227,63),(210,63),(189,71),(179,64),(181,39),(171,23),(167,22),(167,28),(136,43),(117,36),(125,57),(131,60),(104,81),(87,76),(80,65),(50,70),(51,78),(60,79),(59,84),(49,83),(47,93),(56,106),(50,145),(14,157),(12,174),(5,180)]
+
+areaPoly=brazil
+areaPoly=list(0.95*np.array(brazil))
 for i in range(len(areaPoly)):
 	areaPoly[i]=(areaPoly[i][0], 1050-areaPoly[i][1])
 	
-areaPoly=list(0.45*np.array(areaPoly))
 for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
-#tmp(areaPoly)
+tmp(areaPoly)
 
 #testCycles()
 #cProfile.run('''tmp(areaPoly=areaPoly)''')
 #testInterpolation()
-best(areaPoly,5*60, origin=(437,226), direction=3.14/2*0.05)
+#best(areaPoly,1, origin=(437,226), direction=3.14/2*0.05)
 #tryP0(areaPoly, t=60)
 #findBugs([simplified_bruteForce, stochastic])
 
