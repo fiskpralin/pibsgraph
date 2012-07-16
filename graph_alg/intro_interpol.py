@@ -65,7 +65,7 @@ def naiveroll(p1,p2):
 #interpolate...I use a scipy interpolator called RectBivariateSpline.. google it for more info.
 xlist=t_x[:,0] #just the variations needed, not the 2D-matrix
 ylist=t_y[0,:]
-interpol=RectBivariateSpline(xlist, ylist, t_z,s=0) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast. If we want smoothing we can use s=500 or similar
+interpol=RectBivariateSpline(xlist, ylist, t_z,s=100) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast. If we want smoothing we can use s=500 or similar
 
 
 #we now have an interpolation and can use interpol to get height in pretty much every point possible. 
