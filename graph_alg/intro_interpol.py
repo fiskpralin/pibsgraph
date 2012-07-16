@@ -40,7 +40,7 @@ ax=draw.plotBackground(globalOrigin=globalOrigin , areaPoly=areaPoly, ax=ax)
 ax=draw.plot2DContour(t_x,t_y,t_z,ax, w=2) #plots contours
 
 # A naive and simple method for getting the roll of a road segment.
-def naiveroll(p1,p2):
+def naiveroll():
 	"""plot ugly sometimes. depending on direction"""
 	roadwidth=4.0
 	alpha=atan((p2[1]-p1[1])/(p2[0]-p1[0])) #this or
@@ -62,6 +62,35 @@ def naiveroll(p1,p2):
 		roll.append(180*(1/pi)*atan((z2[ent]-z1[ent])/roadwidth))
 	return roll, p11, p12
 
+# A naive and simple method for getting the roll of a road segment.
+def GISroll():
+	"""plot ugly sometimes. depending on direction"""
+	roadwidth=4.0
+	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1])) 
+	length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
+	p11=getCa([-roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
+	p12=getCa([roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
+	p21=getCa([-roadwidth/2,0], direction=pi/2.-alpha, origin=p2,fromLocalCart=True)
+	p22=getCa([roadwidth/2,0], direction=pi/2.-alpha, origin=p2,fromLocalCart=True)
+	x1=np.linspace(p11[0], p21[0], points)
+	x2=np.linspace(p12[0], p22[0], points)
+	y1=np.linspace(p11[1], p21[1], points)
+	y2=np.linspace(p12[1], p22[1], points)
+	z1=interpol.ev(x1,y1)
+	z2=interpol.ev(x2,y2)
+	roll=[]
+	for ent in range(len(z1)):
+		print ent
+		if ent==0: continue
+		elif ent==len(z1)-1: break
+		roll.append(180*(1/pi)*atan(((z2[ent-1]+2*z2[ent]+z2[ent+1])-(z1[ent-1]+2*z1[ent]+z1[ent+1]))/(8*roadwidth/2.)))
+	#to get the correct dimensions for plotting
+	roll.insert(0,roll[0])
+	roll.insert(-1,roll[-1])
+	return roll, p11, p12
+
+
+
 #interpolate...I use a scipy interpolator called RectBivariateSpline.. google it for more info.
 xlist=t_x[:,0] #just the variations needed, not the 2D-matrix
 ylist=t_y[0,:]
@@ -73,16 +102,17 @@ interpol=RectBivariateSpline(xlist, ylist, t_z,s=100) #used pretty much everytim
 #two arbitrary points:
 #p1=(200.0,150.0 )
 #p2=(230.0,480.454)
-p1=(200.89,300.5664)
-p2=(100.45,480.78)
-p1=(150.5,480.1)
-p2=(100.56,50.4)
+#p1=(200.89,300.5664)
+#p2=(100.45,480.78)
+p2=(150.5,480.1)
+p1=(100.56,50.4)
 points=200 #a lot of points along above line.
 x=np.linspace(p1[0], p2[0], points)
 y=np.linspace(p1[1], p2[1], points)
 z=interpol.ev(x,y) #gives array of z for x,y list of positions. we are done with the pitch more or less
 
-roll,p11,p12 = naiveroll(p1,p2)
+#roll,p11,p12 = naiveroll()
+roll,p11,p12 = GISroll()
 plt.plot(x,y, 'o') #plot the points defined by x, y arrays
 plt.plot(p12[0],p12[1],'o')
 plt.plot(p11[0],p11[1],'o')
