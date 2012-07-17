@@ -64,7 +64,7 @@ def naiveroll():
 
 # A naive and simple method for getting the roll of a road segment.
 def GISroll():
-	"""plot ugly sometimes. depending on direction"""
+	"""Implements the method commercial GISsoftware uses to evauate the slope """
 	roadwidth=4.0
 	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1])) 
 	length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
@@ -87,7 +87,7 @@ def GISroll():
 	#to get the correct dimensions for plotting
 	roll.insert(0,roll[0])
 	roll.insert(-1,roll[-1])
-	return roll, p11, p12
+	return roll,p11,p12
 
 
 
