@@ -215,6 +215,7 @@ def polygonLim(poly):
 		if p[1]>ylim[1]:
 			ylim[1]=p[1]
 	return tuple(xlim+ylim)
+	
 def getPolygonInnerCircle(areaPoly):
 	"""
 	returns the middle of a polygon, and a radius that is always inside it from this point.
@@ -224,7 +225,7 @@ def getPolygonInnerCircle(areaPoly):
 
 	We have to test the radius with every edge all the way, so takes some time.
 
-	NOT carefully tested really..
+	NOT carefully tested really.. but should work
 	"""
 	#first, find the point. we have a finite set of points.
 	C=np.array([0,0]) #will add stuff to this one..

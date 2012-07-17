@@ -474,7 +474,7 @@ class ConventionalHeadAcc(ThinningCraneHead, UsesDriver):
 						'dumpTrees': self.s['dropTreesEF'],
 						'chop': self.s['fellTreesEF'],
 						'twigCrack': self.s['twigCrackF']}
-
+		
 	def run(self):
 		while True:
 			yield waituntil, self, self.roadAssigned

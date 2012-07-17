@@ -224,7 +224,6 @@ class ExtendedGraph(nx.Graph):
 		are we inside the polygon? We don't use colission detection directly since we can do
 		some time saving tests
 		"""
-		assert self.areaPoly
 		if self.aPInnerCircleM==None: #created yet?
 			self.aPInnerCircleM, self.aPInnerCircleRadius=fun.getPolygonInnerCircle(self.areaPoly)
 		if fun.insideCircle(pos, self.aPInnerCircleM, self.aPInnerCircleRadius):
@@ -238,9 +237,11 @@ class ExtendedGraph(nx.Graph):
 		"""
 		if not ax: #add a new one.. 
 			fig=plt.figure()
-			ax=fig.add_subplot(111)
-		if background: ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
-		if contour: ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
+			ax=fig.add_subplot(111,aspect='equal')
+		if background:
+			ax=draw.plotBackground(globalOrigin=self.globalOrigin , areaPoly=self.areaPoly, ax=ax)
+		if contour:
+			ax=draw.plot2DContour(self.t_x,self.t_y,self.t_z,ax, w=2)
 		draw.draw_custom(G=self, ax=ax, cost=cost,weight=weight,edge_visits=edge_visits, road_color='#01243B', road_width=4, poly=False)
 		#bug in matplotlib always plots patch in back.. do line instead
 		vertices=self.areaPoly+[self.areaPoly[0]] #closed
@@ -248,7 +249,8 @@ class ExtendedGraph(nx.Graph):
 		y=[v[1] for v in vertices]
 		l=Line2D(x,y, color='k', linewidth=4)
 		ax.add_line(l)
-		if overlap: draw.plot_coverage(self,ax, color='r')
+		if overlap:
+			draw.plot_coverage(self,ax, color='r')
 		return ax
 
 
@@ -289,14 +291,12 @@ class SqGridGraph(ExtendedGraph):
 		xlmax=ceil(sin(angle)*(xmax-xmin)/L)*L
 		xl=np.arange(shift[0]+xlmin,xlmax, dx, dtype=np.float)
 		yl=np.arange(shift[1],ym, dy, dtype=np.float)
-		el=0
 		for xloc in xl:
 			for yloc in yl:
 				if yloc==0 or angle==0: sl=[1]
 				x, y=tuple(cart((xloc,yloc), origin=origin, direction=angle, fromLocalCart=True))
 				x,y=round(x,digits), round(y,digits)
 				self.add_node((x, y))
-				el+=1
 				#neigbor 'backwards' in y-dir
 				neig=tuple(cart((xloc,(yloc)-dy), origin=origin, direction=angle, fromLocalCart=True))
 				neig=round(neig[0],digits), round(neig[1],digits)
@@ -331,8 +331,8 @@ class SqGridGraph(ExtendedGraph):
 					short_dist=d
 					shortest=n
 			self.origin=shortest
-		elements=el
-		self.elements=el			
+		elements=len(self.nodes())
+		self.elements=elements
 		self.density=elements/self.A
 
 	def getAngleFromLongestEdge(self, areaPoly=None, origin=None):
@@ -394,11 +394,14 @@ class TriGridGraph(ExtendedGraph):
 	"""
 	A triangular grid. Extends from ExtendedGraph
 	"""
-	def __init__(self,L=24, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
-		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='triGridGraph')
-		
+	def __init__(self,L=None, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
+		C=12
 		digits=3 #used later..
-		C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
+		if L==None:
+			L=C/(sin(1/3.0*pi)*0.5)
+			print L
+		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C,gridtype='triGridGraph')
+		#C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
 		self.L=L
 		self.C=C
 		dx=L
@@ -420,48 +423,51 @@ class TriGridGraph(ExtendedGraph):
 		if not angle: angle=0
 		#G=nx.Graph( L=L, type='sqGridGraph', C=C)
 		self.lim=np.array([xmin-0.5*L,xmax+0.5*L, ymin-0.5*L, ymax+0.5*L])
-		el=0
 		direction=angle+pi/2.
 
 		for yloc in yl:
 			if (round(yloc/dy))%2==0:
 				xl=x1
-				xtype='x1'
 			else:
 				xl=x2
-				xtype='x2'
 			for index,xloc in enumerate(xl):
-				if yloc==0 or angle==0: sl=[1]
-				else: sl=[1,-1]
-				for sign in sl:
-					x,y=tuple(cart((xloc,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
-					x,y=round(x,digits), round(y,digits)
-					#x,y is now real coordinates, transformed through angle.
-					if not self.inside((x,y)): continue
-					self.add_node((x, y))
-					el+=1
-					if y != 0:
-						if index != 0:
-							neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
-							neig=round(neig[0],digits), round(neig[1],digits)
-							if self.inside(neig): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
-							neig=tuple(cart([xloc+dx/2., yloc-dy,digits], origin=(0,0), direction=direction, fromLocalCart=True))
-							neig=round(neig[0],digits), round(neig[1],digits)
-							if self.inside(neig): self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
-					if index != 0:
-						self.add_edge(tuple([x,round(y,digits)]),tuple([x-dx, round(y,digits)]), weight=L, visits=0, visited_from_node=[],c=0)
+				x,y=tuple(cart((xloc,yloc), origin=(0,0), direction=direction, fromLocalCart=True))
+				x,y=round(x,digits), round(y,digits)
+				self.add_node((x, y))
+				if y != 0:
+					neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
+					neig=round(neig[0],digits), round(neig[1],digits)
+					self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
+					neig=tuple(cart([xloc+dx/2., yloc-dy,digits], origin=(0,0), direction=direction, fromLocalCart=True))
+					neig=round(neig[0],digits), round(neig[1],digits)
+					self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
+				self.add_edge(tuple([x,y]),tuple([round(x-dx,digits), round(y,digits)]), weight=L, visits=0, visited_from_node=[],c=0)
 		rem=True
+		for n in self.nodes():
+			if not self.inside(n):
+				self.remove_node(n)
 		while rem:
 			rem=False
 			for n in self.nodes(): #pretty ugly, but a must..
-				if self.degree(n)==1:
+				if self.degree(n)<=1:
 					rem=True
 					self.remove_node(n)
 					break
 		self.overlap={} #will later be filled.
 		self.roadWidth=4
-		elements=el
-		self.elements=el
 		self.L=L
+		if not self.origin in self.nodes():
+			shortest=None
+			short_dist=1e10
+			for n in self.nodes():
+				d=fun.getDistance(n, self.origin)
+				if d<short_dist:
+					short_dist=d
+					shortest=n
+			self.origin=shortest
+		elements=len(self.nodes())
+		self.elements=elements
 		self.density=elements/self.A
+		self.density=elements/self.A
+
 
