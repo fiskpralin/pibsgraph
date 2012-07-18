@@ -14,7 +14,7 @@ import graph_alg.draw as draw
 from functions import getCartesian as getCa,getCylindrical as getCy
 ###
 #This file is supposed to be a script that introduces how the interpolation and plotting works.
-#I have taken out a lot of stuff that is implemented in the ExtendedGraph class, just to show the methods I've used so that everything is in one place..
+#A lot of things implemented in the ExtendedGraph class has been left out, just to show the methods used so that everything is in one place..
 ###
 
 
@@ -22,9 +22,7 @@ from functions import getCartesian as getCa,getCylindrical as getCy
 globalOrigin=596673,6728492
 
 #define our area...local coordinates.. a polygon (actually rectangle here) with 4 points
-
 areaPoly=[(0, 0), (240, 0), (240, 480), (0, 480)]
-
 print areaPoly
 
 #get our x,y,z raster data for given area. numpy arrays
@@ -64,7 +62,8 @@ def naiveroll():
 
 # A naive and simple method for getting the roll of a road segment.
 def GISroll():
-	"""Implements the method commercial GISsoftware uses to evauate the slope """
+	"""Implements the method commercial GISsoftware uses to evaluate the slope.
+	That is use neighboring cells in a weighted scheme"""
 	roadwidth=4.0
 	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1])) 
 	length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
@@ -89,30 +88,25 @@ def GISroll():
 	roll.insert(-1,roll[-1])
 	return roll,p11,p12
 
-
-
 #interpolate...I use a scipy interpolator called RectBivariateSpline.. google it for more info.
 xlist=t_x[:,0] #just the variations needed, not the 2D-matrix
 ylist=t_y[0,:]
-interpol=RectBivariateSpline(xlist, ylist, t_z,s=100) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast. If we want smoothing we can use s=500 or similar
-
-
+interpol=RectBivariateSpline(xlist, ylist, t_z,s=75) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast. If we want smoothing we can use s=75 or similar
 #we now have an interpolation and can use interpol to get height in pretty much every point possible. 
 
 #two arbitrary points:
-#p1=(200.0,150.0 )
-#p2=(230.0,480.454)
-#p1=(200.89,300.5664)
-#p2=(100.45,480.78)
-p2=(150.5,480.1)
 p1=(100.56,50.4)
+p2=(150.5,480.1)
 points=200 #a lot of points along above line.
 x=np.linspace(p1[0], p2[0], points)
 y=np.linspace(p1[1], p2[1], points)
 z=interpol.ev(x,y) #gives array of z for x,y list of positions. we are done with the pitch more or less
 
-#roll,p11,p12 = naiveroll()
-roll,p11,p12 = GISroll()
+rollnaive,p11,p12 = naiveroll()
+rollgis,p11,p12 = GISroll()
+##############
+#The plotting#
+##############
 plt.plot(x,y, 'o') #plot the points defined by x, y arrays
 plt.plot(p12[0],p12[1],'o')
 plt.plot(p11[0],p11[1],'o')
@@ -123,11 +117,23 @@ ax2.plot(d,z,lw=2) #plot z along line...
 ax2.set_title('The interpolated height along the line specified to the left.')
 ax3=fig.add_subplot(224)
 ax3.set_xlabel('d')
-ax3.plot(d,roll,lw=2) #plot z along line...
+ax3.plot(d,rollnaive,lw=1.5) #plot z along line...
+ax3.plot(d,rollgis,'--')
 ax3.set_title('The roll with positive as falling left and negative as falling right')
 
+#fig2=plt.figure(2)
+#plt.plot(d,rollnaive,lw=1.5)
+#plt.plot(d,rollgis,'--')
+#plt.title('Roll for naive method (solid blue) and gis copy method (dashed green)')
+#plt.xlabel('d')
+#plt.ylabel('degrees')
+
+#fig3=plt.figure(3)
+#t_z=t_z.transpose()
+#cfig3=plt.imshow(t_z)
+#fig3.colorbar(cfig3)
 plt.show()
 
-#we are done and have z data for this point. What we want to do is to given t_x,t_y and t_z data above get the gradient or roll for an arbitrary point..
+#we are done and have z data for this point. Also some simple routines for getting the roll are implemented.
 
 
