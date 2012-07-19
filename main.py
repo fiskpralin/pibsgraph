@@ -131,11 +131,16 @@ if __name__=='__main__':
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
 		#G.terrain=PlantMTerrain(G, ttype='5')
+		from terrain.terrain import Terrain
+		G.terrain=Terrain(G, areaPoly=[(0,0), (25,0), (25,40), (0,40)])
+		G.terrain.treeFile=210
+		G.terrain.readTrees()
 		#G.plotDelay=20
 		#s=PM.VaryTerrain(1)
-		s=PM.doTheSenseAn(i=1)
-		#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a4h', ttype='4')
+		#s=PM.doTheSenseAn(i=1)
+		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a4h', ttype='4')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=True, observer=True)
+		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=False, observer=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
 		#FW.simRandomRoad(vis=True, anim=anim, G=G)
 		#cProfile.run('FW.ForwarderSim(vis=True, anim=anim, G=G)')

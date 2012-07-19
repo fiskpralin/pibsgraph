@@ -185,6 +185,7 @@ class MultiHead(PlantHead):
 						if self.biggestBlock < lim:
 							debugPrint("plants, no of stones:%f sumA: %f biggestBl:%f"%(len(self.moundObst),self.moundSumA,self.biggestBlock))
 						elif self.strikedImmobile: #boulder did not occupy more than 50% of z-axis, or root was correctly aligned.
+							assert not p.G.simParam['noRemound'] #we should not be here in that case
 							#remound, this is guaranteed to work..
 							if not self.remounded:
 								debugPrint("striked immobile, remounds")
@@ -231,6 +232,9 @@ class MultiHead(PlantHead):
 									debugPrint("dibble succeded, plants")
 									break
 							if not done: #remound, always works..
+								if self.G.simParam['noRemound']:
+									self.abort=True
+									break
 								debugPrint("remounds")
 								self.sim.stats['remound attempts']+=1
 								self.remounded=True

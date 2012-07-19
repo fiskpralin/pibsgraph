@@ -80,11 +80,12 @@ class PlantMachine(Machine):
 				self.invertFailureProb=G.simParam['invertExcFailureProb']			
 		else:
 			assert not G.simParam['KOInverting'] and not G.simParam['ExcavatorInverting']
-		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
-		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
-		#self.direction=random.uniform(0,2*pi)
-		self.direction=0
-		
+		if "ObAv" in self.type:
+			self.immobileAvoidShift=G.simParam['shift'] #m
+			self.rootAvoidRot=G.simParam['rotCap']
+		else:
+			self.immobileAvoidShift=0
+			self.rootAvoidRot=0
 		self.pDevs=[]
 		self.treesPlanted=[]
 		self.automatic=G.automatic
@@ -240,11 +241,16 @@ class PlantMachine(Machine):
 		else:
 			return True #angles exceed..
 		#assume that p1 is left and p2 right.
+		
 	def getDigTime(self, pos):
 		"""
 		returns the time to dig at pos
 		"""
-		return 3+0.1*(self.G.terrain.humusLayer.getDepth(pos)-0.1)
+		if self.G.terrain.humusLayer:
+			return 3+0.1*(self.G.terrain.humusLayer.getDepth(pos)-0.1)
+		else:
+			return 3
+		
 	def stopControl(self):
 		"""
 		Checks if simulations should be stopped

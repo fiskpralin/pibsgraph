@@ -117,26 +117,21 @@ def middle(p1,p2):
 	return fun.getPointBetween(p1,p2)
 
 def plot_coverage(G=None, ax=None, color='#666677'):
-	if not G or not ax: raise Exception()
+	"""
+	plots coverage from the road. Shows overlaps and spots missed.
+	"""
+	if not G or not ax: raise Exception('need ax and G to plot coverage')
 	points=15
 	angles=np.linspace(0, np.pi, points) #for half circle
 	for e in G.edges(data=False):
-		"""p1=np.array(e[0])
+		p1=np.array(e[0])
 		p2=np.array(e[1])
 		d=p1-p2
-		circles=int(np.sqrt(np.dot(d,d))/6.)#one every 6m
-		for i in range(circles):
-			p=p2+d*(i+1)/(circles+1)
-			c=Circle(p, radius=G.C, alpha=470, color='#666677')
-			ax.add_patch(c)"""
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
-		try:
-			w=G.C*2
-		except:
-			w=24
+		w=G.C*2
 		nodes=[]
-		dir=fun.angleToXAxis(e)-np.pi/2.
+		r,dir=fun.getCylindrical(e[1], origin=e[0])
 		l=fun.getDistance(e[0], e[1])
 		nodes.append(fun.getCartesian([w/2.,0], origin=e[0], direction=dir, fromLocalCart=True))
 		nodes.append(fun.getCartesian([w/2.,l], origin=e[0], direction=dir, fromLocalCart=True))
