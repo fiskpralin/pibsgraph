@@ -69,17 +69,17 @@ class PMSimSeries(SimSeries):
 		t.append(self.sims)
 		t.append(len(s.m.treesPlanted))
 		t.append(s.stats['plant attempts'])
-		t.append(s.stats['mound attempts'])
-		t.append(s.stats['remound attempts'])
+		t.append(s.stats['mound attempts'])#fix this to include inverting
+		t.append(s.stats['remound attempts'])#fix this to include inverting
 		t.append(s.stats['visible obstacles in WA'])
 		t.append(s.stats['stumps in WA sum diamater'])
-		t.append(s.stats['noSurfBoulders'])
-		t.append(s.stats['meanSurfBoulderDiam'])
+		t.append(s.stats['noSurfBoulders'])#set in plantmsim
+		t.append(s.stats['meanSurfBoulderDiam']*10)#changed to dm, set in plantmsim
 		t.append(s.stats['immobile boulder struck'])
-		t.append(s.stats['immobile vol sum']*1000) #change to dm3
+		t.append(s.stats['immobile vol sum']*1000) #changed to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
-		t.append(s.stats['dibble distr stone vol cum']*1000) #change to dm3
-		t.append(s.stats['mean humus thick at micro']*100) # change to cm
+		t.append(s.stats['dibble distr stone vol cum']*1000) #changed to dm3
+		t.append(s.stats['mean humus thick at micro']*100) # changed to cm ,SET THIS
 		t.append(s.now()-s.m.timeConsumption['machineMovement']) #total time at stationary point
 		t.append(s.now()/max(1,float(len(s.m.treesPlanted))))
 		t.append(s.m.timeConsumption['machineMovement'])
@@ -90,7 +90,6 @@ class PMSimSeries(SimSeries):
 		t.append(reloaded)
 		t.append(reloadtime)
 		t.append(s.m.timeConsumption['searchTime'])
-		#t.append(s.m.timeConsumption['switchFocus'])
 		t.append(s.stats['queue percent'])
 		t.append(s.stats['work percent'])
 		t.append(s.stats['work time'])
@@ -99,7 +98,7 @@ class PMSimSeries(SimSeries):
 			for pH in pDev.plantHeads:
 				t.append(pDev.timeConsumption['crane movement'])
 				t.append(pH.timeConsumption['mounding'])
-				t.append(pH.timeConsumption['inverting']) # new line
+				t.append(pH.timeConsumption['inverting'])
 				t.append(pH.timeConsumption['planting'])
 				t.append(pH.timeConsumption['halting'])
 		# to be continued
@@ -926,6 +925,10 @@ class PlantmSim(SimExtend):
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
+			self.stats['noSurfBoulders']=len(self.G.terrain.surfaceBoulders)
+			if self.stats['noSurfBoulders']==0: 
+				self.stats['meanSurfBoulderDiam']=0
+			else: self.stats['meanSurfBoudlerDiam']=sum([2*sstone.radius for sstone in self.G.terrain.surfaceBoulders])/float(self.stats['noSurfBoulders']) #gives mean diameter
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
@@ -1005,9 +1008,6 @@ def paramsForSensAn(simParam={}):
 	s['rectangular']		yes			yes
 	s['TSR']				yes			yes			
 
-	saker for mattias att fixa eller Linus senare:
-	done         -s['inverting']=True/False... se till att denna ar True nar inverting ska goras.
-	done         -s['wMB'] set to None as default. None means that we use the standard values, 0.4 or 0.45. s['wMB'] is the master so if it is not None, we use this value.
 	"""
 	s=simParam
 
