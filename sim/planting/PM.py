@@ -73,10 +73,13 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['remound attempts'])
 		t.append(s.stats['visible obstacles in WA'])
 		t.append(s.stats['stumps in WA sum diamater'])
+		t.append(s.stats['noSurfBoulders'])
+		t.append(s.stats['meanSurfBoulderDiam'])
 		t.append(s.stats['immobile boulder struck'])
 		t.append(s.stats['immobile vol sum']*1000) #change to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
-		t.append(s.stats['dibble distr stone vol cum']*1000) #change to dm3		
+		t.append(s.stats['dibble distr stone vol cum']*1000) #change to dm3
+		t.append(s.stats['mean humus thick at micro']*100) # change to cm
 		t.append(s.now()-s.m.timeConsumption['machineMovement']) #total time at stationary point
 		t.append(s.now()/max(1,float(len(s.m.treesPlanted))))
 		t.append(s.m.timeConsumption['machineMovement'])
@@ -87,7 +90,7 @@ class PMSimSeries(SimSeries):
 		t.append(reloaded)
 		t.append(reloadtime)
 		t.append(s.m.timeConsumption['searchTime'])
-		t.append(s.m.timeConsumption['switchFocus'])
+		#t.append(s.m.timeConsumption['switchFocus'])
 		t.append(s.stats['queue percent'])
 		t.append(s.stats['work percent'])
 		t.append(s.stats['work time'])
@@ -183,21 +186,28 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 5, s.G.terrain.blockQuota*100) #percent
 			e.modify(paramRow, 6, s.G.terrain.boulderFreq)
 			e.modify(paramRow, 7, s.G.terrain.meanBoulderV*1000)
-			e.modify(paramRow, 9, s.m.craneMaxL)
-			if s.m.type[0:2]=='2a':
-				e.modify(paramRow, 10, s.m.craneIntersect)
-				e.modify(paramRow, 11, s.m.angleLim[0]*180/pi)
-				e.modify(paramRow, 12, s.m.angleLim[1]*180/pi)
-			if len(s.m.pDevs[0].plantHeads)==2: e.modify(paramRow, 13, s.m.pDevs[0].plantSepDist*100)
-			e.modify(paramRow, 14, s.m.pDevs[0].plantHeads[0].width*100)
-			e.modify(paramRow, 15, s.m.stockingRate)
-			e.modify(paramRow, 16, s.m.plantMinDist)
-			e.modify(paramRow, 17, s.m.times['switchFocus'])
-			e.modify(paramRow, 18, str(s.G.automatic['automove']))
-			e.modify(paramRow, 19, str(s.G.automatic['mound']))
-			e.modify(paramRow, 20, s.m.velocities['radial'])			
-			e.modify(paramRow, 21, str(self.bestCase))
-			e.modify(paramRow, 22, str(self.worstCase))
+			e.modify(paramRow, 8, s.G.terrain.humusType) #humustype
+			e.modify(paramRow, 10, s.m.craneMaxL)
+			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 11, s.m.pDevs[0].plantSepDist*100)
+			e.modify(paramRow, 12, s.m.pDevs[0].plantHeads[0].width*100)
+			e.modify(paramRow, 13, s.G.simParam['critStoneSize']*1000)
+			e.modify(paramRow, 14, s.G.simParam['TSR'])
+			if s.G.simParam['inv']==True and s.G.simParam['ExcavatorInverting']==True:
+				noManRemInv = 5
+				cycleTimeInv = s.G.simParam['tInvExcavator']
+			elif s.G.simParam['inv']==True and s.G.simParam['KOInverting']==True:
+				noManRemInv = 11
+				cycleTimeInv = s.G.simParam['tCWhenInvKO']
+			elif s.G.simParam['inv']==False:
+				noMandRemInv = 'asklinus'
+				cycleTimeInv = 0
+			e.modify(paramRow, 15, cycleTimeInv)
+			e.modify(paramRow, 16, noMandRemInv)
+			if s.G.simParam['rectangular']==False: scoopshape='SemiCyl'
+			elif s.G.simParam['rectangular']==True: scoopshape='Rect'
+			e.modify(paramRow, 17, scoopshape)
+			e.modify(paramRow, 18, s.G.simParam['multiplierFindMuSite'])
+			e.modify(paramRow, 19, s.G.simParam['moundRadius'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
@@ -389,20 +399,22 @@ class VaryImpObAv(PMSimSeries):
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'.xls'
-					G=copy.deepcopy(self.G)
-					paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used
-					G.simParam['inverting']=inv
-					G.simParam['shift']=ObAv[0]
-					G.simParam['rotCap']=ObAv[1]
-					quitPossible=False
-					i=0
-					while i<it or not quitPossible:
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
-						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-						i+=1
-						print "No of sims: %d"%(i)
-					self.reset()
+					for bladewidth in [0.4, 0.6]:
+						self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'.xls'
+						G=copy.deepcopy(self.G)
+						paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used
+						G.simParam['wMB'] = bladewidth
+						G.simParam['inverting']=inv
+						G.simParam['shift']=ObAv[0]
+						G.simParam['rotCap']=ObAv[1]
+						quitPossible=False
+						i=0
+						while i<it or not quitPossible:
+							G.terrain.restart() #makes the stumps non-static.. different distributions every time.
+							s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+							i+=1
+							print "No of sims: %d"%(i)
+						self.reset()
 
 class VaryTimeWhenInvKO(PMSimSeries):
 	"""
@@ -983,7 +995,7 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']         yes			Yes
 	s['multiplierFindMuSite']yes		Yes
 	s['wMB']				yes			Yes
-	s['impObAv']			invantar svar. Nagon slags info finns i simuleringsklassen
+	s['impObAv']			invantar svar.
 	s['shift']				-
 	s['rotCap']				-
 	s['tCWhenInvKO']		yes			yes
@@ -993,7 +1005,6 @@ def paramsForSensAn(simParam={}):
 	s['moundRadius']		yes			yes
 	s['rectangular']		yes			yes
 	s['TSR']				yes			yes			
-	s['sBMWhenInv']			Har fragat back tomas om detta. invantar svar
 
 	saker for mattias att fixa eller Linus senare:
 	done         -s['inverting']=True/False... se till att denna ar True nar inverting ska goras.
@@ -1018,7 +1029,6 @@ def paramsForSensAn(simParam={}):
 	s['moundRadius']=0.2 #[m] 0.15
 	s['rectangular']=False#False #[bool] True
 	s['TSR']=2000 #[plants/ha] 1500, 2500
-	s['sBMWhenInv']=6.25 #[m] ?
 	"""Other parameters for the simulations
 	------------------------------------"""
 	s['inverting'] = True # False. This shows whether there is inverting (true) or just mounding (false) going on.
