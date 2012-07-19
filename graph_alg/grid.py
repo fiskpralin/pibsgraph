@@ -114,8 +114,8 @@ class ExtendedGraph(nx.Graph):
 		"""
 		like the standard one, but takes away edge first so some data is stored that we need
 		"""
-		for neigh in self.neighbors(n):
-			self.remove_edge(n,neigh)
+		for neig in self.neighbors(n):
+			self.remove_edge(n,neig)
 		super(ExtendedGraph, self).remove_node(n=n)
 		
 	def remove_nodes_from(self,nodes):
@@ -263,7 +263,7 @@ class SqGridGraph(ExtendedGraph):
 	angle is how the grid is turned in radians. 0=default
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
 	"""
-	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None):
+	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None, shift=(0,0)):
 		C=L/2.0
 		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C, gridtype='sqGridGraph')
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
@@ -395,11 +395,20 @@ class TriGridGraph(ExtendedGraph):
 	A triangular grid. Extends from ExtendedGraph
 	"""
 	def __init__(self,L=None, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
+		"""The strategy is to first cover an extra large area, and then take away the nodes that are outside.
+		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
+		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area.
+		This is an easy but inefficient algorithm, there is certainly room for speed up if required.
+		But when coding this, most of the time is spent somewhere else so it doesn't matter really to optimize this part.
+
+		The square grid has been updated with a better algorithm for this. It might be a good idea to copy this algorithm to this part, but it is not done now.
+
+		Another improvement could be to optimize the inside() function. It currently does unnecessary many point in polygon tests, which is time consuming for polygons with many nodes.
+		"""
 		C=12
 		digits=3 #used later..
 		if L==None:
 			L=C/(sin(1/3.0*pi)*0.5)
-			print L
 		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C,gridtype='triGridGraph')
 		#C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
 		self.L=L
@@ -410,12 +419,7 @@ class TriGridGraph(ExtendedGraph):
 		#xl=np.arange(0,Nx*dx, dx, dtype
 
 
-		"""The strategy is to first cover an extra large area, and then take away the nodes that are outside.
-		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
-		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area.
-		This is an easy but inefficient algorithm, there is certainly room for speed up if required.
-		But when coding this, most of the time is spent somewhere else so it doesn't matter really to optimize this part.
-		"""
+
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
 		x1=np.arange(xmin,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float)
 		x2=np.arange(xmin-dx/2., ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float)
@@ -437,11 +441,11 @@ class TriGridGraph(ExtendedGraph):
 				if y != 0:
 					neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
 					neig=round(neig[0],digits), round(neig[1],digits)
-					self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
+					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y),neig), visits=0, visited_from_node=[],c=0)
 					neig=tuple(cart([xloc+dx/2., yloc-dy,digits], origin=(0,0), direction=direction, fromLocalCart=True))
 					neig=round(neig[0],digits), round(neig[1],digits)
-					self.add_edge((x,y), neig, weight=L, visits=0, visited_from_node=[],c=0)
-				self.add_edge(tuple([x,y]),tuple([round(x-dx,digits), round(y,digits)]), weight=L, visits=0, visited_from_node=[],c=0)
+					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y),neig), visits=0, visited_from_node=[],c=0)
+				self.add_edge((x,y),tuple([round(x-dx,digits), round(y,digits)]), weight=self.edgeWeightCalc((x,y),tuple([round(x-dx,digits), round(y,digits)])), visits=0, visited_from_node=[],c=0)
 		rem=True
 		for n in self.nodes():
 			if not self.inside(n):

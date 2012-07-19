@@ -103,6 +103,7 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 	print "construction finished."
 	print "road area coverage:", R.areaCover
 	print "total area:", R.A
+	print "number of nodes", len(R.nodes())
 	print "total cost:", R.cost
 	return R
 
