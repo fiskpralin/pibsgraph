@@ -422,11 +422,11 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			dibbleDisturb=0.001
 			self.m.stopControl()
 			self.sim.stats['mound attempts']+=1
-			#the old one: immobile=sqrt((0.20**2)/pi) #20cm rectangle side <=> tihs radius for sphere
 			for r in roots: #determine if a root is hit in the critical area.
 				if pH.rootCollide(r): #root is within area..
 					print "striked a root.."
-					if pi/4.<abs(r.direction-direct)<3*pi/4.: #abort
+					rotation=self.m.rootAvoidRot*pi/180.0
+					if self.G.simParam['noRemound'] or pi/4.+rotation<abs(r.direction-direct)<3*pi/4.-rotation: #abort
 						pH.abort=True
 						pH.done=True
 					else: #remound
@@ -456,7 +456,15 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
  						#old one: abs(bpos[0])<pH.width/2. and abs(bpos[1])<pH.length/2.:
 						moundBould.append(b)
 						sumA+=b.area
-						if b.volume>immobile:
+						#now, look how much it occuppies vertically.
+						r=b.radius
+						#look how much of the stone that is within the scoop.
+						twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
+						dist=sqrt(b.z**2+twoDdist[1]**2)
+						hInside=b.radius+pH.depth-dist
+						ratio=hInside/float(pH.depth)
+						raise Exception('This part is not implemented yet.. fix!!')
+						if ratio>0.5+b.volume>immobile:
 							pH.strikedImmobile=True
 							self.sim.stats['immobile boulder struck']+=1
 							self.sim.stats['immobile vol sum']+=b.volume

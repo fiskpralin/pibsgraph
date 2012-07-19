@@ -19,16 +19,19 @@ def cleanMonitors(sim):
 	if mon: #throws no error if no monitors have been initialized
 		last=[sim.now(),mon[len(mon)-1][1]]
 		mon.append(last)
+		
 def getDistance(pos1, pos2):
 	"""
 	returns the distance between two points, has to be cartesian coordinates
 	"""
 	return sqrt((pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2)
+
 def getDistanceSq(pos1,pos2):
 	"""
 	same as above, but squared distance. Saves some time when sqrt is not needed
 	"""
 	return (pos1[0]-pos2[0])**2+(pos1[1]-pos2[1])**2
+
 def getCartesian(posCyl,origin=None, direction=None, local=False, fromLocalCart=False):
 	"""
 	convert from cylindrical to cartesian coordinates
@@ -62,6 +65,7 @@ def getCartesian(posCyl,origin=None, direction=None, local=False, fromLocalCart=
 	x=x+co*xloc-si*yloc
 	y=y+si*xloc+co*yloc
 	return [x,y]
+
 def getCylindrical(pos, origin=None, direction=None):
 	"""
 	convert from cartesian to cylindrical coordinates
@@ -102,6 +106,7 @@ def getCylindrical(pos, origin=None, direction=None):
 		else:
 			th=pi-asin(yloc/r)
 	return [r,th]
+
 def getAngle(r1, r2):
 	"""
 	returns the smallest positive radian angle between two rays [p11,p12], [p21,p22]
@@ -131,16 +136,20 @@ def getAngle(r1, r2):
 		if th>2*pi: raise Exception('something is wrong with getAngle')
 		th=pi-th
 	return th
+
 def getPointBetween(p1,p2):
 	"""
 	returns the points between points p1 and p2
 	"""
 	return [(p1[0]+p2[0])*0.5, (p1[1]+p2[1])*0.5]
+
 def angleToXAxis(ray):
 	"""
 	returns the angle in relation to the xaxis.
 
 	the angle is always positive
+
+	Note: The tan2 function may be better and simplier..?
 	
 	"""
 	r1,th1=getCylindrical(ray[1], origin=ray[0], direction=pi/2.0)
@@ -167,6 +176,7 @@ class rect():
 	def getNodes(self, pos=None):
 		if pos and pos != self.pos: raise Exception('wrong pos for rectangle')
 		return self.nodes
+	
 class Polygon():
 	"""polygon"""
 	def __init__(self, pos, nodes):
@@ -181,6 +191,7 @@ class Polygon():
 		self.isSpherical=False
 	def getNodes(self, pos=None):
 		return self.nodes
+	
 def polygon_area(path):
 	"""
 	calculates the area of a polygon defined by path.
@@ -196,6 +207,7 @@ def polygon_area(path):
 	for ii in ind_arr:
 		s = s + (x[ii]*y[ii+1] - x[ii+1]*y[ii])
 	return abs(s)*0.5
+
 def polygonLim(poly):
 	"""
 	finds the xlim and ylims of polygon p=[(xi,yi), ...]

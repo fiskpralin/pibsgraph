@@ -983,9 +983,8 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']         yes			Yes
 	s['multiplierFindMuSite']yes		Yes
 	s['wMB']				yes			Yes
-	s['impObAv']			invantar svar. Nagon slags info finns i simuleringsklassen
 	s['shift']				-
-	s['rotCap']				-
+	s['rotCap']				yes
 	s['tCWhenInvKO']		yes			yes
 	s['tInvExcavator']		yes			yes
 	s['noRemound']			yes			yes
@@ -1006,7 +1005,6 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']=1 #[m] 0.6 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
-	s['impObAv']=False #[m] True
 	s['shift']=0.1 #[+-m] 0.15 
 	s['rotCap']=5.0 #[+-deg] 10
 	s['KOInverting']=True #default
