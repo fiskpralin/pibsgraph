@@ -79,7 +79,7 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['immobile vol sum']*1000) #changed to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
 		t.append(s.stats['dibble distr stone vol cum']*1000) #changed to dm3
-		t.append(s.stats['mean humus thick at micro']*100) # changed to cm ,SET THIS
+		t.append(0)#(s.stats['mean humus thick at micro']*100) # changed to cm ,SET THIS
 		t.append(s.now()-s.m.timeConsumption['machineMovement']) #total time at stationary point
 		t.append(s.now()/max(1,float(len(s.m.treesPlanted))))
 		t.append(s.m.timeConsumption['machineMovement'])
@@ -265,7 +265,7 @@ def doTheSenseAn(i=1):
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
 	VaryTSR(i)#
-	#TryShortSBM(i)#
+	
 
 class VaryTerrain(PMSimSeries):
 	"""
@@ -334,7 +334,7 @@ class VaryMoundingBladeWidth(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not wList: wList=[0.4, 0.5, 0.6] #default
+		if not wList: wList=[None, 0.4, 0.5, 0.6] #default
 		for w in wList:
 			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
 			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
@@ -399,7 +399,7 @@ class VaryImpObAv(PMSimSeries):
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
 					for bladewidth in [0.4, 0.6]:
-						self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'.xls'
+						self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(bladewidth)+'.xls'
 						G=copy.deepcopy(self.G)
 						paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used
 						G.simParam['wMB'] = bladewidth
@@ -622,35 +622,6 @@ class VaryTSR(PMSimSeries):
 					paramsForSensAn(G.simParam)
 					G.simParam['TSR']=TSR
 					G.simParam['inverting']=inv
-					quitPossible=False
-					i=0
-					while i<it or not quitPossible:
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
-						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-						i+=1
-						print "No of sims: %d"%(i)
-					self.reset()
-
-class TryShortSBM(PMSimSeries):
-	"""
-	This class describes a simulation that changes the survivalrate and thence the distance (I think)
-	between each stop. At least it is called S_BM_when_inverting. This is set to 6.25 m.
-	tested: No
-	"""
-	def __init__(self,it=2, G=None, dList=None):
-		PMSimSeries.__init__(self,G)
-		if not G:
-			self.G.terrain=PlantMTerrain(G=self.G)
-		folder=self.makeFolder()
-		if not dList: dList=[6.25] #[m]default
-		for d in dList:
-			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(d)+'inv'+str(inv)+'.xls'
-					G=copy.deepcopy(self.G)
-					paramsForSensAn(G.simParam)
-					G.simParam['inverting']=inv
-					G.simParam['sBMWhenInv']=d
 					quitPossible=False
 					i=0
 					while i<it or not quitPossible:
