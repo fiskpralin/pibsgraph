@@ -394,26 +394,27 @@ class VaryImpObAv(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not ObAvList: ObAvList=[[0.1 ,5], [0.15 ,10]] #[s] default
+		if not ObAvList: ObAvList=[[0.4,50,45],[0.4,75,50],[0.4,88,55],[0.6,50,45],[0.6,65,50],[0.6,0.75,55]] #[s] default
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
-					for bladewidth in [0.4, 0.6]:
-						self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(bladewidth)+'.xls'
-						G=copy.deepcopy(self.G)
-						paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used
-						G.simParam['wMB'] = bladewidth
-						G.simParam['inverting']=inv
-						G.simParam['shift']=ObAv[0]
-						G.simParam['rotCap']=ObAv[1]
-						quitPossible=False
-						i=0
-						while i<it or not quitPossible:
-							G.terrain.restart() #makes the stumps non-static.. different distributions every time.
-							s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
-							i+=1
-							print "No of sims: %d"%(i)
-						self.reset()
+					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(bladewidth*100)+'.xls'
+					G=copy.deepcopy(self.G)
+					paramsForSensAn(G.simParam) #'shift' and 'rotCap' need to be used
+					G.simParam['wMB'] = ObAv[0]
+					G.simParam['inverting']=inv
+					G.simParam['vertOccStone']=ObAv[1]
+					G.simParam['angImpRoot']=ObAv[2]
+					#G.simParam['shift']=ObAv[1]
+					#G.simParam['rotCap']=ObAv[2]
+					quitPossible=False
+					i=0
+					while i<it or not quitPossible:
+						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
+						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+						i+=1
+						print "No of sims: %d"%(i)
+					self.reset()
 
 class VaryTimeWhenInvKO(PMSimSeries):
 	"""
@@ -989,6 +990,8 @@ def paramsForSensAn(simParam={}):
 	s['wMB']=None #[m]0.4, 0.5, 0.6
 	s['shift']=0.1 #[+-m] 0.15 
 	s['rotCap']=5.0 #[+-deg] 10
+	s['vertOccStone']=50 #% 75,88 ; 65, 75
+	s['angImpRoot']=45 #deg 50,55 ; 50,55
 	s['KOInverting']=True #default
 	s['ExcavatorInverting']=False
 	s['tCWhenInvKO']=3 #[s] 1, 5
