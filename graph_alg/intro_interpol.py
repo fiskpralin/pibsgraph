@@ -30,12 +30,19 @@ print areaPoly
 #readTerrain function is very simple, what you need to know is that it scan's through the .asc x,y,z data and stores all points that are inside areaPoly polygon.
 t_x,t_y,t_z=GIS.readTerrain(globalOrigin=globalOrigin, areaPoly=areaPoly)
 
-#draw... some routines I have written for plotting... simple to use
-fig=plt.figure()
-ax=fig.add_subplot(121)
-ax=draw.plotBackground(globalOrigin=globalOrigin , areaPoly=areaPoly, ax=ax)
-#above localizes us in the flight photo 672_59_11 found in GIS folder and uses photo as background
-ax=draw.plot2DContour(t_x,t_y,t_z,ax, w=2) #plots contours
+# A simple way of getting the pitch
+def simplePitch():
+	pitch=[]
+	for ent in range(len(z)):
+		if ent==0: continue
+		elif ent==len(z)-1: break
+		length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
+		pitch.append(180*(1/pi)*atan2((z[ent+1]-z[ent-1]),(2*length/len(z))))#central difference
+	#to get the correct dimensions for plotting
+	pitch.insert(0,pitch[0])
+	pitch.insert(-1,pitch[-1])
+	if len(pitch)!=len(z): raise Exception('Something wrong with dimensions of the pitch')
+	return pitch
 
 # A naive and simple method for getting the roll of a road segment.
 def naiveroll():
@@ -79,7 +86,6 @@ def GISroll():
 	z2=interpol.ev(x2,y2)
 	roll=[]
 	for ent in range(len(z1)):
-		print ent
 		if ent==0: continue
 		elif ent==len(z1)-1: break
 		roll.append(180*(1/pi)*atan(((z2[ent-1]+2*z2[ent]+z2[ent+1])-(z1[ent-1]+2*z1[ent]+z1[ent+1]))/(8*roadwidth/2.)))
@@ -87,6 +93,14 @@ def GISroll():
 	roll.insert(0,roll[0])
 	roll.insert(-1,roll[-1])
 	return roll,p11,p12
+
+
+#draw... some routines I have written for plotting... simple to use
+fig=plt.figure()
+ax=fig.add_subplot(121)
+ax=draw.plotBackground(globalOrigin=globalOrigin , areaPoly=areaPoly, ax=ax)
+#above localizes us in the flight photo 672_59_11 found in GIS folder and uses photo as background
+ax=draw.plot2DContour(t_x,t_y,t_z,ax, w=2) #plots contours
 
 #interpolate...I use a scipy interpolator called RectBivariateSpline.. google it for more info.
 xlist=t_x[:,0] #just the variations needed, not the 2D-matrix
@@ -100,10 +114,11 @@ p2=(150.5,480.1)
 points=200 #a lot of points along above line.
 x=np.linspace(p1[0], p2[0], points)
 y=np.linspace(p1[1], p2[1], points)
-z=interpol.ev(x,y) #gives array of z for x,y list of positions. we are done with the pitch more or less
+z=interpol.ev(x,y) #gives array of z for x,y list of positions. we are done with the pitch more or less. At least if we use simplePitch().
 
 rollnaive,p11,p12 = naiveroll()
 rollgis,p11,p12 = GISroll()
+simplepitch = simplePitch()
 ##############
 #The plotting#
 ##############
@@ -113,8 +128,9 @@ plt.plot(p11[0],p11[1],'o')
 ax2=fig.add_subplot(222)
 d=np.sqrt(x**2+y**2)-np.sqrt(x[0]**2+y[0]**2) #distance from start point
 ax2.set_xlabel('d')
-ax2.plot(d,z,lw=2) #plot z along line...
-ax2.set_title('The interpolated height along the line specified to the left.')
+ax2.plot(d,simplepitch,lw=1.5) #plot z along line...
+ax2.set_title('The pitch along the line specified to the left.')
+#ax2.set_title('The interpolated height along the line specified to the left.')
 ax3=fig.add_subplot(224)
 ax3.set_xlabel('d')
 ax3.plot(d,rollnaive,lw=1.5) #plot z along line...
