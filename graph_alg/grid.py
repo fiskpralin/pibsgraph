@@ -58,7 +58,7 @@ class ExtendedGraph(nx.Graph):
 		#get a list of how x and y varies.. strictly ascending
 		xlist=x[:,0] #just the variations, not the 2D-matrix
 		ylist=y[0,:]
-		self.interpol=RectBivariateSpline(xlist, ylist, z) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast
+		self.interpol=RectBivariateSpline(xlist, ylist, z) #used pretty much everytime we need the height of a specific point. Implemented in fortran and very fast. Supposedly one can add smoothing factor s~75 for approximating splines instead.
 
 		nx.Graph.__init__(self)
 		self.t_x=x
