@@ -425,8 +425,11 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			for r in roots: #determine if a root is hit in the critical area.
 				if pH.rootCollide(r): #root is within area..
 					print "striked a root.."
-					rotation=self.m.rootAvoidRot*pi/180.0
-					if self.G.simParam['noRemound'] or pi/4.+rotation<abs(r.direction-direct)<3*pi/4.-rotation: #abort
+					angle=abs(r.direction-direct)
+					ray1=[r.pos,fun.getCartesian([0,1],fromLocalCart=True, origin=r.pos, direction=r.direction)]
+					ray2=[orig,fun.getCartesian([0,1],fromLocalCart=True, origin=orig, direction=direct)]
+					angle=fun.getAngle(ray1, ray2) #angle between root and planting head
+					if self.G.simParam['noRemound'] or angle>self.m.rootDegreesOK: 
 						pH.abort=True
 						pH.done=True
 					else: #remound
@@ -452,28 +455,33 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 						moundBould.append(b)
 						sumA+=b.area
 						#now, look how much it occuppies vertically.
+						twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
 						if self.G.simParam['rectangular']:
-							for  #loop over the rectangle edges.
-							
-							points=
+							nodes=[(-pH.length*0.5,0), (-pH.length*0.5, -pH.depth), (pH.length*0.5, -pH.depth), (pH.length*0.5, 0)]
+							last=None
+							for node in nodes:#loop over the rectangle edges.
+								if last:
+									ray=(last,node)
+									points.extend(col)
+								last=node
 
 							
 							raise Exception('This part is not implemented yet.. fix!!')
 						else:
 							r=b.radius
 							#look how much of the stone that is within the scoop.
-							twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
-							points=col.circlesIntersectPoints((0,0), (twoDdist[1], b.z), pH.depth, b.radius)
+		
+							points=col.circlesIntersectPoints((0,0), (-twoDdist[1], b.z), pH.depth, b.radius)
 							assert points != False # we know that these circles collide.
 							if points== True:
 								hInside=2*b.radius
 							else:
 								upper=max(points[0][1], points[1][1])
-								if col.pointInCircle((twoDdist[1], b.z+b.radius), (0,0), pH.depth):
+								if col.pointInCircle((-twoDdist[1], b.z+b.radius), (0,0), pH.depth):
 									assert b.z+b.radius>=upper
 									upper=b.z+b.radius
 								lower=min(points[0][1], points[1][1])
-								if col.pointInCircle((twoDdist[1], b.z-b.radius), (0,0), pH.depth):
+								if col.pointInCircle((-twoDdist[1], b.z-b.radius), (0,0), pH.depth):
 									assert b.z-b.radius<=lower
 									lower=b.z-b.radius
 								hInside=upper-lower
