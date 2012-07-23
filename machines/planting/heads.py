@@ -232,7 +232,7 @@ class MultiHead(PlantHead):
 									debugPrint("dibble succeded, plants")
 									break
 							if not done: #remound, always works..
-								if self.G.simParam['noRemound']:
+								if self.p.G.simParam['noRemound']:
 									self.abort=True
 									break
 								debugPrint("remounds")

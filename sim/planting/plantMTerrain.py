@@ -40,7 +40,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0
 			self.groundModel = 0  #Anderssons
 			self.humusType = '2'
-			self.surfaceBoulders= False
+			self.withSurfaceBoulders= False
 			
 		elif ttype=='1':
 			self.stumpFile = 554
@@ -50,7 +50,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0.25
 			self.groundModel = 4  #Anderssons
 			self.humusType = '2'
-			self.surfaceBoulders= True
+			self.withSurfaceBoulders= True
 			
 		elif ttype=='2':
 			self.stumpFile = 554
@@ -60,7 +60,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0.25
 			self.groundModel = 4  #Anderssons
 			self.humusType = '4'
-			self.surfaceBoulders= True
+			self.withSurfaceBoulders= True
 			
 		elif ttype=='3':
 			self.stumpFile = 452
@@ -70,7 +70,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0.55
 			self.groundModel = 3  #Anderssons
 			self.humusType = '3'
-			self.surfaceBoulders= True
+			self.withSurfaceBoulders= True
 			
 		elif ttype=='4':
 			self.stumpFile = 553
@@ -80,7 +80,7 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0.75
 			self.groundModel = 2  #Anderssons
 			self.humusType = '2'
-			self.surfaceBoulders= True
+			self.withSurfaceBoulders= True
 			
 		elif ttype=='5': #medelhygget
 			self.stumpFile = 553
@@ -90,15 +90,15 @@ class PlantMTerrain(Terrain):
 			self.blockQuota = 0.75
 			self.groundModel = 1  #Anderssons
 			self.humusType = '4'
-			self.surfaceBoulders= True
+			self.withSurfaceBoulders= True
 		else:
 			raise Exception("ttype %s not correct"%(str(ttype),))
 		if self.stumpFile=='undefined': #default..
 			self.stumpFile='554'
 		if self.humusType: self.makeHumusLayer()
 		if self.stumpFile: self.readStumps()
-		if self.surfaceBoulders: self.makeSurfaceBoulders()
-		print "Terrain is initialized. Ttype: %s, SurfaceBoulders: %s"%(ttype,str(self.surfaceBoulders))
+		if self.withSurfaceBoulders: self.makeSurfaceBoulders()
+		print "Terrain is initialized. Ttype: %s, SurfaceBoulders: %s"%(ttype,str(self.withSurfaceBoulders))
 		
 """To be run independently
 -----------------------"""		

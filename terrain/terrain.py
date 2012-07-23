@@ -412,10 +412,10 @@ class Terrain():
 
 		"""Here we pick out the right number of stones from the data"""
 		sBoulders=[]#Surfaceboulders to be placed in terrain
-		if self.blockQuota==0.25 or self.blockQuota==0: noSBoulders=0
-		elif self.blockQuota==0.55: noSBoulders=int(1800.0/10000.0*self.area)
-		elif self.blockQuota==0.75: noSBoulders=int(4000.0/10000.0*self.area)
-		for i in range(noSBoulders):
+		if self.blockQuota==0.25 or self.blockQuota==0: self.noSBoulders=0
+		elif self.blockQuota==0.55: self.noSBoulders=int(1800.0/10000.0*self.area)
+		elif self.blockQuota==0.75: self.noSBoulders=int(4000.0/10000.0*self.area)
+		for i in range(self.noSBoulders):
 			sBoulders.append(random.choice(sBData)/10)#To get the diameters in [m]
 		sBoulders.sort(reverse=True)
 		
