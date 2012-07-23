@@ -128,7 +128,7 @@ class ExtendedGraph(nx.Graph):
 					break
 				else:
 					roll.append(180*piInv*atan2(((z2[ent-1]+2*z2[ent]+z2[ent+1])-(z1[ent-1]+2*z1[ent]+z1[ent+1])),8*self.roadwidth*0.5))
-		else: raise Exception('getRoll need a correct method to be supplied at call')
+		else: raise Exception('getRoll need a correct style to be supplied at call')
 		return roll
 	
 	def getLineElevationCurve(self,p1,p2, points=10):
