@@ -139,6 +139,7 @@ def pointOnLine(ray, p):
 	a=weave.inline(code, ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'], compiler='gcc')
 	if a==0: return False
 	else: return True
+	
 def closestPolygonPoint(pos, nodes):
 	"""
 	algorithm: go through all the edges, calculate closest
@@ -213,6 +214,7 @@ def linesIntersect(ray1, ray2, getPoint=False):
 		return True
 	if getPoint: return False, point
 	return False
+
 def intersectRaySphere(ray, r, pos):
 	"""
 	check for intersection

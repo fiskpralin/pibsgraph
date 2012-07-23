@@ -442,11 +442,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
 					inside=False #just to skip a really long if-statement
 					if self.G.simParam['rectangular']:
-						if (b.radius+pH.depth)**2 > b.z**2+twoDdist[1]**2 and collide(pH, b, o1pos=orig):
-							print "---:", b.radius+pH.depth, b.z, twoDdist[1]
-							print b.radius, pH.depth, b.z
-							assert b.radius+b.z>-pH.depth
-						assert b.z<=0
 						if b.radius+b.z>-pH.depth and collide(pH, b, o1pos=orig):
 							print (b.radius+pH.depth)**2 < b.z**2+twoDdist[1]**2
 							inside=True
@@ -456,15 +451,19 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
  						#old one: abs(bpos[0])<pH.width/2. and abs(bpos[1])<pH.length/2.:
 						moundBould.append(b)
 						sumA+=b.area
+						continue
 						#now, look how much it occuppies vertically.
-						r=b.radius
-						#look how much of the stone that is within the scoop.
-						twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
-						dist=sqrt(b.z**2+twoDdist[1]**2)
-						hInside=b.radius+pH.depth-dist
-						ratio=hInside/float(pH.depth)
+						if self.G.simParam['rectangular']:
+							raise Exception('This part is not implemented yet.. fix!!')
+						else:
+							r=b.radius
+							#look how much of the stone that is within the scoop.
+							twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
+							dist=sqrt(b.z**2+twoDdist[1]**2)
+							hInside=b.radius+pH.depth-dist
+							ratio=hInside/float(pH.depth)
 						raise Exception('This part is not implemented yet.. fix!!')
-						if ratio>0.5+b.volume>immobile:
+						if ratio>self.m.immobilePercent:
 							pH.strikedImmobile=True
 							self.sim.stats['immobile boulder struck']+=1
 							self.sim.stats['immobile vol sum']+=b.volume

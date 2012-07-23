@@ -130,11 +130,7 @@ if __name__=='__main__':
 		#G.terrain=PlantMTerrain(G, ttype='0')
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
-		#G.terrain=PlantMTerrain(G, ttype='5')
-		from terrain.terrain import Terrain
-		G.terrain=Terrain(G, areaPoly=[(0,0), (25,0), (25,40), (0,40)])
-		G.terrain.treeFile=210
-		G.terrain.readTrees()
+		G.terrain=PlantMTerrain(G, ttype='5')
 		#G.plotDelay=20
 		#s=PM.VaryTerrain(1)
 		#s=PM.doTheSenseAn(i=1)
