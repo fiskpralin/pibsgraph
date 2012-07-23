@@ -988,6 +988,7 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']=1 #[m] 0.6 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
+
 	s['vertOccStone']=50 #% 75,88 ; 65, 75
 	s['angImpRoot']=45 #deg 50,55 ; 50,55
 	s['KOInverting']=True #default

@@ -94,6 +94,7 @@ def pointInPolygon(p, nodes):
 		index+=1
 	if crossings%2==0: return False #odd no of crossings
 	return True
+
 def pointOnLine(ray, p):
 	"""
 	see Ericsson p.129
@@ -229,9 +230,79 @@ def intersectRaySphere(ray, r, pos):
 	b=np.dot(m,d2)
 	c=np.dot(m,m)-r**2
 	d=b**2-c
-	if c>0. and b>0.: return False #r:s origin outside s and r pointing away from s
-	elif d<0: return False #ray misses sphere completely
-	elif d==0: t=-b #one root, tangential hit.
-	else: t=-b-sqrt(b**2-c) #the smallest root.
-	if t>tmax: return False #on ray, but ray ended before reaching the sphere
+	if c>0. and b>0.:
+		return False #r:s origin outside s and r pointing away from s
+	elif d<0:
+		return False #ray misses sphere completely
+	elif d==0:
+		t=-b #one root, tangential hit.
+	else:
+		t=-b-sqrt(b**2-c) #the smallest root.
+	if t>tmax:
+		return False #on ray, but ray ended before reaching the sphere
 	return True #all the test passed. intersects.	"""
+
+def pointInCircle(p, pm, r):
+	"""
+	pm: middle of circle
+	only works for 2D
+	"""
+	d=fun.getDistance(p,pm)
+	if d<=r:
+		return True
+	else:
+		return False
+def circlesIntersectPoints(P0, P1, r0, r1):
+	"""
+	taken directyl from stack exchange:
+
+	http://gamedev.stackexchange.com/questions/7172/how-to-find-out-if-two-circles-intersect-each-other
+	
+	Determines whether two circles collide and, if applicable,
+	the points at which their borders intersect.
+	Based on an algorithm described by Paul Bourke:
+	http://local.wasp.uwa.edu.au/~pbourke/geometry/2circle/
+	Arguments:
+	P0 (complex): the centre point of the first circle
+	P1 (complex): the centre point of the second circle
+	r0 (numeric): radius of the first circle
+	r1 (numeric): radius of the second circle
+	Returns:
+	False if the circles do not collide
+	True if one circle wholly contains another such that the borders
+	do not overlap, or overlap exactly (e.g. two identical circles)
+	An array of two complex numbers containing the intersection points
+	if the circle's borders intersect.
+	"""
+	if type(P0)==tuple: assert len(P0)==2 #does not support 3d
+	assert type(P0)!=complex
+	P0=complex(P0[0], P0[1])
+	P1=complex(P1[0], P1[1])
+	if type(P0) != complex or type(P1) != complex:
+		raise TypeError("P0 and P1 must be complex types")
+	# d = distance
+	d = sqrt((P1.real - P0.real)**2 + (P1.imag - P0.imag)**2)
+    # n**2 in Python means "n to the power of 2"
+    # note: d = a + b
+
+	if d > (r0 + r1):
+		return False
+	elif d < abs(r0 - r1):
+		return True
+	elif d == 0:
+		return True
+	else:
+		a = (r0**2 - r1**2 + d**2) / (2 * d)
+		b = d - a
+		h = sqrt(r0**2 - a**2)
+		P2 = P0 + a * (P1 - P0) / d
+
+		i1x = P2.real + h * (P1.imag - P0.imag) / d
+		i1y = P2.imag - h * (P1.real - P0.real) / d
+		i2x = P2.real - h * (P1.imag - P0.imag) / d
+		i2y = P2.imag + h * (P1.real - P0.real) / d
+		
+		i1 = complex(i1x, i1y)
+		i2 = complex(i2x, i2y)
+		return (i1.real, i1.imag), (i2.real, i2.imag)
+

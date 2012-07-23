@@ -451,7 +451,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
  						#old one: abs(bpos[0])<pH.width/2. and abs(bpos[1])<pH.length/2.:
 						moundBould.append(b)
 						sumA+=b.area
-						continue
 						#now, look how much it occuppies vertically.
 						if self.G.simParam['rectangular']:
 							raise Exception('This part is not implemented yet.. fix!!')
@@ -459,9 +458,25 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							r=b.radius
 							#look how much of the stone that is within the scoop.
 							twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
-							dist=sqrt(b.z**2+twoDdist[1]**2)
-							hInside=b.radius+pH.depth-dist
+							points=col.circlesIntersectPoints((0,0), (twoDdist[1], b.z), pH.depth, b.radius)
+							assert points != False # we know that these circles collide.
+							if points== True:
+								hInside=2*b.radius
+							else:
+								upper=max(points[0][1], points[1][1])
+								if col.pointInCircle((twoDdist[1], b.z+b.radius), (0,0), pH.depth):
+									assert b.z+b.radius>=upper
+									upper=b.z+b.radius
+								lower=min(points[0][1], points[1][1])
+								if col.pointInCircle((twoDdist[1], b.z-b.radius), (0,0), pH.depth):
+									assert b.z-b.radius<=lower
+									lower=b.z-b.radius
+								hInside=upper-lower
+								assert hInside>=0
+
+							
 							ratio=hInside/float(pH.depth)
+							self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
 						raise Exception('This part is not implemented yet.. fix!!')
 						if ratio>self.m.immobilePercent:
 							pH.strikedImmobile=True
