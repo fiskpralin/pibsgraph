@@ -437,6 +437,7 @@ class Terrain():
 				else:
 					if self.humusLayer: self.humusDepth=self.humusLayer.getDepth(pos)
 					sB=SurfaceBoulder(pos=pos,radius=radius,z=-self.humusDepth,terrain=self)
+					self.surfaceBoulders.append(sB)
 					break	   
 
 	def makeHumusLayer(self):
