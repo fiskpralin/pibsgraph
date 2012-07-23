@@ -453,6 +453,11 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 						sumA+=b.area
 						#now, look how much it occuppies vertically.
 						if self.G.simParam['rectangular']:
+							for  #loop over the rectangle edges.
+							
+							points=
+
+							
 							raise Exception('This part is not implemented yet.. fix!!')
 						else:
 							r=b.radius
@@ -477,7 +482,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							
 							ratio=hInside/float(pH.depth)
 							self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
-						raise Exception('This part is not implemented yet.. fix!!')
 						if ratio>self.m.immobilePercent:
 							pH.strikedImmobile=True
 							self.sim.stats['immobile boulder struck']+=1
