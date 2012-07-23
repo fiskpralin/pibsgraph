@@ -215,8 +215,8 @@ def linesIntersect(ray1, ray2, getPoint=False):
 		return True
 	if getPoint: return False, point
 	return False
-
-def intersectRaySphere(ray, r, pos):
+	
+def intersectRaySphere(ray, r, pos, additionalInfo=False):
 	"""
 	check for intersection
 	"""
@@ -238,9 +238,22 @@ def intersectRaySphere(ray, r, pos):
 		t=-b #one root, tangential hit.
 	else:
 		t=-b-sqrt(b**2-c) #the smallest root.
+		if t<=tmax:
+			p1=ray[0]+t*d2
+			if t==tmax: #one root
+				return True, [list(p1)]
+			else:
+				t=-b+sqrt(b**2-c)
+				if t>tmax:
+					return True, [list(p1)]
+				p2=ray[0]+t*d2
+				return True, [list(p1),list(p2)]
+			
 	if t>tmax:
 		return False #on ray, but ray ended before reaching the sphere
-	return True #all the test passed. intersects.	"""
+	if additionalInfo:
+		return True, [list(ray[0]+t*d2)]
+	return True #all the test passed. intersects.
 
 def pointInCircle(p, pm, r):
 	"""
@@ -252,6 +265,7 @@ def pointInCircle(p, pm, r):
 		return True
 	else:
 		return False
+	
 def circlesIntersectPoints(P0, P1, r0, r1):
 	"""
 	taken directyl from stack exchange:
@@ -305,4 +319,3 @@ def circlesIntersectPoints(P0, P1, r0, r1):
 		i1 = complex(i1x, i1y)
 		i2 = complex(i2x, i2y)
 		return (i1.real, i1.imag), (i2.real, i2.imag)
-

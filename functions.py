@@ -118,7 +118,13 @@ def getAngle(r1, r2):
 	inters,p=col.linesIntersect(ray1,ray2, getPoint=True)
 	if inters:
 		pts=[r1[0],r1[1], r2[0], r2[1]]
-		if not tuple(p) in pts: raise Exception('lines are intersecting and not incident, angle not defined')
+		found=False
+		for ptmp in pts:
+			if getDistance(p, ptmp)<0.001:
+				found=True
+				break
+		if not found:
+			raise Exception('lines are intersecting and not incident, angle not defined')
 	p=np.array(p)
 	points=[]
 	for ray in ray1,ray2:
@@ -131,7 +137,7 @@ def getAngle(r1, r2):
 		points.append(point)
 	p1=np.array(points[0])-p
 	p2=np.array(points[1])-p
-	th=acos(np.dot(p1,p2)/(getDistance(p,p1)*getDistance(p,p2)))
+	th=acos(np.dot(p1,p2)/(np.linalg.norm(p1)*np.linalg.norm(p2)))
 	if th>pi:
 		if th>2*pi: raise Exception('something is wrong with getAngle')
 		th=pi-th
