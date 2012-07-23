@@ -404,7 +404,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		#gather information about the soil at site
 		digTime=self.m.getDigTime(self.pos)
 		depth=self.G.terrain.humusLayer.getDepth(self.pos)
-		s.m.stats['humus depths'].append(depth)
+		self.sim.stats['humus depths'].append(depth)
 		if self.m.inverting: #determine the time. Dependent on digTime
 			if self.m.invertingMethod=='KO':
 				invertTime=self.G.simParam['invertKOFailureProb']
@@ -466,9 +466,13 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							for node in nodes:#loop over the rectangle edges.
 								if last:
 									ray=(last,node)
-									points.extend(col.intersectRaySphere(np.array(ray),b.radius,b.pos additionalInfo=True)[1:])
+									points.extend(col.intersectRaySphere(np.array(ray),b.radius,b.pos, additionalInfo=True)[1:])
 								last=node
-							assert len(points=
+							assert len(points)!=1 #would be tangent but..
+							if len(points)>2: #covering a lot...
+								hInside=b.radius*2
+							elif len(points)==0:
+								assert False
 							
 							raise Exception('This part is not implemented yet.. fix!!')
 						else:
@@ -492,8 +496,8 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 								assert hInside>=0
 
 							
-							ratio=hInside/float(pH.depth)
-							self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
+						ratio=hInside/float(pH.depth)
+						self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
 						if ratio>self.m.immobilePercent:
 							pH.strikedImmobile=True
 							self.sim.stats['immobile boulder struck']+=1
