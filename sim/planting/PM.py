@@ -198,7 +198,7 @@ class PMSimSeries(SimSeries):
 				noManRemInv = 11
 				cycleTimeInv = s.G.simParam['tCWhenInvKO']
 			elif s.G.simParam['inv']==False:
-				noMandRemInv = 'asklinus'
+				noMandRemInv = 'asklinus'#LINUS MUST ASSIST ON THIS!
 				cycleTimeInv = 0
 			e.modify(paramRow, 15, cycleTimeInv)
 			e.modify(paramRow, 16, noMandRemInv)
