@@ -404,7 +404,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		#gather information about the soil at site
 		digTime=self.m.getDigTime(self.pos)
 		depth=self.G.terrain.humusLayer.getDepth(self.pos)
-		s.m.stats['humus depths'].append()
+		s.m.stats['humus depths'].append(depth)
 		if self.m.inverting: #determine the time. Dependent on digTime
 			if self.m.invertingMethod=='KO':
 				invertTime=self.G.simParam['invertKOFailureProb']
@@ -462,12 +462,13 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 						if self.G.simParam['rectangular']:
 							nodes=[(-pH.length*0.5,0), (-pH.length*0.5, -pH.depth), (pH.length*0.5, -pH.depth), (pH.length*0.5, 0)]
 							last=None
+							points=[]
 							for node in nodes:#loop over the rectangle edges.
 								if last:
 									ray=(last,node)
-									points.extend(col.intersectRaySphere(np.array(ray), additionalInfo=True))
+									points.extend(col.intersectRaySphere(np.array(ray),b.radius,b.pos additionalInfo=True)[1:])
 								last=node
-
+							assert len(points=
 							
 							raise Exception('This part is not implemented yet.. fix!!')
 						else:
