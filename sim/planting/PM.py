@@ -198,7 +198,7 @@ class PMSimSeries(SimSeries):
 				noManRemInv = 11
 				cycleTimeInv = s.G.simParam['tCWhenInvKO']
 			elif s.G.simParam['inverting']==False:
-				noManRemInv = 'asklinus'#LINUS MUST ASSIST ON THIS!
+				noManRemInv = 5
 				cycleTimeInv = 0
 			e.modify(paramRow, 15, cycleTimeInv)
 			e.modify(paramRow, 16, noManRemInv)
@@ -278,6 +278,7 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
+			ttype='5' #for debug
 			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:#slightly smaller than the real one, for debug
 			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
@@ -902,6 +903,7 @@ class PlantmSim(SimExtend):
 			self.stats['meanSurfBoulderDiam']=0
 	   	else:
 			self.stats['meanSurfBoulderDiam']=sum([2*sstone.radius for sstone in self.G.terrain.surfaceBoulders])/float(self.stats['noSurfBoulders']) #gives mean diameter
+			print 'average surface boulder diameter:',self.stats['meanSurfBoulderDiam']
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
