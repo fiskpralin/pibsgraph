@@ -191,17 +191,17 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 12, s.m.pDevs[0].plantHeads[0].width*100)
 			e.modify(paramRow, 13, s.G.simParam['critStoneSize']*1000)
 			e.modify(paramRow, 14, s.G.simParam['TSR'])
-			if s.G.simParam['inv']==True and s.G.simParam['ExcavatorInverting']==True:
+			if s.G.simParam['inverting']==True and s.G.simParam['ExcavatorInverting']==True:
 				noManRemInv = 5
 				cycleTimeInv = s.G.simParam['tInvExcavator']
-			elif s.G.simParam['inv']==True and s.G.simParam['KOInverting']==True:
+			elif s.G.simParam['inverting']==True and s.G.simParam['KOInverting']==True:
 				noManRemInv = 11
 				cycleTimeInv = s.G.simParam['tCWhenInvKO']
-			elif s.G.simParam['inv']==False:
-				noMandRemInv = 'asklinus'#LINUS MUST ASSIST ON THIS!
+			elif s.G.simParam['inverting']==False:
+				noManRemInv = 'asklinus'#LINUS MUST ASSIST ON THIS!
 				cycleTimeInv = 0
 			e.modify(paramRow, 15, cycleTimeInv)
-			e.modify(paramRow, 16, noMandRemInv)
+			e.modify(paramRow, 16, noManRemInv)
 			if s.G.simParam['rectangular']==False: scoopshape='SemiCyl'
 			elif s.G.simParam['rectangular']==True: scoopshape='Rect'
 			e.modify(paramRow, 17, scoopshape)
@@ -239,7 +239,7 @@ def articleThree(i=1):
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
 	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
+	#doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
@@ -894,13 +894,14 @@ class PlantmSim(SimExtend):
 		if not self.G.simParam:
 			self.G.simParam=paramsForSensAn()
 			assert self.G.simParam
-		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0  }
+		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0}
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
-			self.stats['noSurfBoulders']=len(self.G.terrain.surfaceBoulders)
-			if self.stats['noSurfBoulders']==0: 
-				self.stats['meanSurfBoulderDiam']=0
-			else: self.stats['meanSurfBoudlerDiam']=sum([2*sstone.radius for sstone in self.G.terrain.surfaceBoulders])/float(self.stats['noSurfBoulders']) #gives mean diameter
+		self.stats['noSurfBoulders']=self.G.terrain.noSBoulders
+	   	if self.stats['noSurfBoulders']==0: 
+			self.stats['meanSurfBoulderDiam']=0
+	   	else:
+			self.stats['meanSurfBoulderDiam']=sum([2*sstone.radius for sstone in self.G.terrain.surfaceBoulders])/float(self.stats['noSurfBoulders']) #gives mean diameter
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
