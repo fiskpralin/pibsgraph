@@ -453,9 +453,9 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 						sumA+=b.area
 						#now, look how much it occuppies vertically.
 						if self.G.simParam['rectangular']:
-							for  #loop over the rectangle edges.
+							#for  #loop over the rectangle edges.
 							
-							points=
+							#points=
 
 							
 							raise Exception('This part is not implemented yet.. fix!!')
