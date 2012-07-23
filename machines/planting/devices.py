@@ -403,6 +403,8 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		pHeads=self.plantHeads
 		#gather information about the soil at site
 		digTime=self.m.getDigTime(self.pos)
+		depth=self.G.terrain.humusLayer.getDepth(self.pos)
+		s.m.stats['humus depths'].append()
 		if self.m.inverting: #determine the time. Dependent on digTime
 			if self.m.invertingMethod=='KO':
 				invertTime=self.G.simParam['invertKOFailureProb']
@@ -426,10 +428,11 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 				if pH.rootCollide(r): #root is within area..
 					print "striked a root.."
 					angle=abs(r.direction-direct)
-					ray1=[r.pos,fun.getCartesian([0,1],fromLocalCart=True, origin=r.pos, direction=r.direction)]
+					ray1=[orig,fun.getCartesian([0,1],fromLocalCart=True, origin=orig, direction=r.direction)]
 					ray2=[orig,fun.getCartesian([0,1],fromLocalCart=True, origin=orig, direction=direct)]
 					angle=fun.getAngle(ray1, ray2) #angle between root and planting head
-					if self.G.simParam['noRemound'] or angle>self.m.rootDegreesOK: 
+					if self.G.simParam['noRemound'] or angle>self.m.rootDegreesOK:
+						self.debugPrint('pos: %s collided with root. angle was too much %s'%(str(orig), str(angle*180.0/pi)))
 						pH.abort=True
 						pH.done=True
 					else: #remound
@@ -462,7 +465,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							for node in nodes:#loop over the rectangle edges.
 								if last:
 									ray=(last,node)
-									points.extend(col)
+									points.extend(col.intersectRaySphere(np.array(ray), additionalInfo=True))
 								last=node
 
 							

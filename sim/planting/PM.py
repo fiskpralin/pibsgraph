@@ -79,7 +79,7 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['immobile vol sum']*1000) #changed to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
 		t.append(s.stats['dibble distr stone vol cum']*1000) #changed to dm3
-		t.append(0)#(s.stats['mean humus thick at micro']*100) # changed to cm ,SET THIS
+		t.append(np.mean(s.stats['humus depths'])*100) # changed to cm ,SET THIS
 		t.append(s.now()-s.m.timeConsumption['machineMovement']) #total time at stationary point
 		t.append(s.now()/max(1,float(len(s.m.treesPlanted))))
 		t.append(s.m.timeConsumption['machineMovement'])
@@ -894,7 +894,7 @@ class PlantmSim(SimExtend):
 		if not self.G.simParam:
 			self.G.simParam=paramsForSensAn()
 			assert self.G.simParam
-		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0}
+		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0, 'humus depths':[]}
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
 		self.stats['noSurfBoulders']=self.G.terrain.noSBoulders

@@ -238,7 +238,6 @@ def intersectRaySphere(ray, r, pos, additionalInfo=False):
 		t=-b #one root, tangential hit.
 	else:
 		t=-b-sqrt(b**2-c) #the smallest root.
-		print t
 		if t<=tmax:
 			p1=ray[0]+t*d2
 			if t==tmax: #one root
