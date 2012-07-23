@@ -78,8 +78,6 @@ class PlantMachine(Machine):
 			else:
 				self.invertingMethod='Excavator'
 				self.invertFailureProb=G.simParam['invertExcFailureProb']			
-		else:
-			assert not G.simParam['KOInverting'] and not G.simParam['ExcavatorInverting']
 		self.rootDegreesOK=G.simParam['angImpRoot']
 		self.immobilePercent=G.simParam['vertOccStone']
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
