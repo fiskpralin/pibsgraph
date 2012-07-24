@@ -457,6 +457,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
  						#old one: abs(bpos[0])<pH.width/2. and abs(bpos[1])<pH.length/2.:
 						moundBould.append(b)
 						sumA+=b.area
+						localPos=-twoDdist[1], b.z #2D position with z as y-axis
 						#now, look how much it occuppies vertically.
 						twoDdist=self.m.getCartesian(cylPos, origin=orig, direction=direct, local=True)#not really optimal, could be improved
 						if self.G.simParam['rectangular']:
@@ -466,20 +467,35 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 							for node in nodes:#loop over the rectangle edges.
 								if last:
 									ray=(last,node)
-									points.extend(col.intersectRaySphere(np.array(ray),b.radius,b.pos, additionalInfo=True)[1:])
+									tmp=col.intersectRaySphere(np.array(ray),b.radius,localPos, additionalInfo=True)
+									if type(tmp)!=bool:
+										for point in tmp[1:]:
+											points.append(list(point))
 								last=node
 							assert len(points)!=1 #would be tangent but..
-							if len(points)>2: #covering a lot...
-								hInside=b.radius*2
-							elif len(points)==0:
-								assert False
-							
-							raise Exception('This part is not implemented yet.. fix!!')
+							upper=(-twoDdist[1], b.z+b.radius)
+							lower=(-twoDdist[1], b.z-b.radius)
+							if not col.pointInPolygon(upper, nodes):
+								if len(points)==0: #it passed through the easy check above...
+									upper=-pH.depth
+									moundBould.remove(b)
+									sumA-=b.area
+								else:
+									upper=max([p[1] for p in points])
+							else:
+								upper=upper[1]
+							if not col.pointInPolygon(lower, nodes):
+								if len(points)==0:
+									lower=-pH.depth
+								else:
+									lower=min([p[1] for p in points])
+							else:
+								lower=lower[1]
 						else:
 							r=b.radius
 							#look how much of the stone that is within the scoop.
 		
-							points=col.circlesIntersectPoints((0,0), (-twoDdist[1], b.z), pH.depth, b.radius)
+							points=col.circlesIntersectPoints((0,0), localPos, pH.depth, b.radius)
 							assert points != False # we know that these circles collide.
 							if points== True:
 								hInside=2*b.radius
@@ -488,14 +504,16 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 								if col.pointInCircle((-twoDdist[1], b.z+b.radius), (0,0), pH.depth):
 									assert b.z+b.radius>=upper
 									upper=b.z+b.radius
+								else:
+									upper=upper[1]
 								lower=min(points[0][1], points[1][1])
 								if col.pointInCircle((-twoDdist[1], b.z-b.radius), (0,0), pH.depth):
 									assert b.z-b.radius<=lower
 									lower=b.z-b.radius
-								hInside=upper-lower
-								assert hInside>=0
-
-							
+								else:
+									lower=lower[1]
+						hInside=upper-lower
+						assert hInside>=0
 						ratio=hInside/float(pH.depth)
 						self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
 						if ratio>self.m.immobilePercent:
