@@ -402,8 +402,16 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		auto=self.m.automatic
 		pHeads=self.plantHeads
 		#gather information about the soil at site
-		digTime=self.m.getDigTime(self.pos)
-		depth=self.G.terrain.humusLayer.getDepth(self.pos)
+		deepest=0
+		deepestPos=None
+		for h in pHeads:
+			depth=self.G.terrain.humusLayer.getDepth(h.getPos())
+			assert depth>=0
+			if depth>deepest:
+				deepest=depth
+				deepestPos=h.getPos()
+		depth=deepest
+		digTime=self.m.getDigTime(deepestPos)
 		self.sim.stats['humus depths'].append(depth)
 		if self.m.inverting: #determine the time. Dependent on digTime
 			if self.m.invertingMethod=='KO':

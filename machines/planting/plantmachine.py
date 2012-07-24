@@ -126,7 +126,7 @@ class PlantMachine(Machine):
 		
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
-		distance=6.0 #not exact, half circle may overlap more or less than this.
+		distance=self.G.simParam['SBM'] #not exact, half circle may overlap more or less than this.
 
 		time=self.timeConstants['machine']+distance/self.velocities['machine']
 		yield request, self, self.driver
