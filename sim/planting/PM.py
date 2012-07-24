@@ -69,8 +69,10 @@ class PMSimSeries(SimSeries):
 		t.append(self.sims)
 		t.append(len(s.m.treesPlanted))
 		t.append(s.stats['plant attempts'])
-		t.append(s.stats['mound attempts'])#fix this to include inverting
-		t.append(s.stats['remound attempts'])#fix this to include inverting
+		t.append(s.stats['mound attempts'])#
+		t.append(s.stats['remound attempts'])#
+		t.append(s.stats['inverting attempts'])#
+		t.append(s.stats['reinverting attempts'])#
 		t.append(s.stats['visible obstacles in WA'])
 		t.append(s.stats['stumps in WA sum diameter'])
 		t.append(s.stats['noSurfBouldersWA'])#set in calcVisibleObstInWA (plantmachine)
@@ -240,8 +242,8 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
+	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	#doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
@@ -259,7 +261,7 @@ def doTheSenseAn(i=1):
 	VaryDibbleDist(i)#
 	VaryTimeFindMuSite(i)#
 	VaryMoundingBladeWidth(i)#
-	#VaryImpObAv(i)#
+	VaryImpObAv(i)#
 	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
 	TryNoRemound(i)#
@@ -364,7 +366,7 @@ class VaryTimeFindMuSite(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not tList: tList=[0, 0.1, 0.2] #[s] default
+		if not tList: tList=[0, 0.1] #[s] default
 		for t in tList:
 			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
 			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:

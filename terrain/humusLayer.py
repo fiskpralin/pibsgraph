@@ -50,6 +50,7 @@ class HumusLayer():
 		surfaceBoulder is placed for example. So it is important that this routine is fast.
 		"""
 		depth=float(self.interpolDepth.ev(pos[0],pos[1]))
+		if depth<0: depth=float(0) #If depth IS <0 it is an effect of the interpolation, and can be set to zero. No negative depths are assumed as it will induce negative times later on.
 		return depth
 
 	def draw(self):
