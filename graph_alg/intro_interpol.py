@@ -72,7 +72,7 @@ def GISroll():
 	"""Implements the method commercial GISsoftware uses to evaluate the slope.
 	That is use neighboring cells in a weighted scheme"""
 	roadwidth=4.0
-	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1])) 
+	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1]))
 	length=sqrt((p2[1]-p1[1])**2+(p2[0]-p1[0])**2)
 	p11=getCa([-roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
 	p12=getCa([roadwidth/2,0], direction=pi/2.-alpha, origin=p1,fromLocalCart=True)
