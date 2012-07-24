@@ -87,16 +87,16 @@ class ExtendedGraph(nx.Graph):
 		piInv=1/pi
 		for ent in range(len(z)):
 			if ent==0:
-				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points)) #forward difference
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points))) #forward difference
 			elif ent==len(z)-1:
-				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points)) #backward difference
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points))) #backward difference
 				break
 			else:
-				pitch.append(180*piInv*atan2(z[ent+1]-z[ent-1],2*length/float(points)) #central difference
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent-1],2*length/float(points))) #central difference
 		if len(pitch)!=len(z): raise Exception('Something wrong with the dimensions of the pitch')
 		return pitch
 
-	def getRoll(self,style='naive',p1,p2,points=20):
+	def getRoll(self,p1,p2,points=20,style='naive'):
 		"""
 		Provided choice of style is 'naive' or 'weighted', this method outputs the roll along a
 		road specified by the start point p1 and end point p2.
