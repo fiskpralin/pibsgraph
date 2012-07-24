@@ -34,7 +34,7 @@ class PlantMachine(Machine):
 	"""
 	allowedTypes= ['1h', '2h','1a1h','1a2h','2a1h', '2a2h', '1a2hObAv','1a3h', '3h','1a3hObAv','1a4h','4h','1a4hObAv','1a1hMag','1a2hMag']
 	def __init__(self, name, sim, G, mtype='2h', craneLim=None):
-		if not mtype in self.allowedTypes or 'ObAv' in mtype:
+		if not mtype in self.allowedTypes:
 			raise Exception('Machine type %s no allowed'%str(mtype))
 		if not craneLim: craneLim=[4.0,9.0]
 		Machine.__init__(self, name, sim, G=G, mass=21000)
