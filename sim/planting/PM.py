@@ -242,33 +242,32 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	#doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
+	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
-	Here all the different sensitivityanalyses are performed in classes. Each perform one change of parameter and
+	Here all the different sensitivity analyses are performed in classes. Each perform at least one change of parameter and
 	the results should be saved automatically in a .xls file in a folder.
 
 	* Before this method can be run we need to add the machinemodels:
-	 ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']
+	 ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag'] Done
 
-	 all are made except the obstacle avoidance thingys
-
-	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations.
+	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations. Done
 	"""
 	
-	VaryDibbleDist(i)#
-	VaryTimeFindMuSite(i)#
-	VaryMoundingBladeWidth(i)#
-	VaryImpObAv(i)#
-	VaryTimeWhenInvKO(i)#
-	VaryInvExc(i)#
-	TryNoRemound(i)#
-	VaryCriticalStoneSize(i)#
-	VaryMoundRadius(i)#
-	VaryRectScoop(i)#
-	VaryTSR(i)#
+	#VaryDibbleDist(i)#
+	#VaryTimeFindMuSite(i)#
+	#VaryMoundingBladeWidth(i)#
+	VaryImpObAv(i, ObAvList=[[0.4,0.0,0.0],[0.6,0.0,0.0]])# #the list is just debug in order to check 0,0
+	#VaryTimeWhenInvKO(i)#
+	#VaryInvExc(i)#
+	#TryNoRemound(i)#
+	#VaryCriticalStoneSize(i)#
+	#VaryMoundRadius(i)#
+	#VaryRectScoop(i)#
+	#VaryTSR(i)#
+	#VarySBM(i)#
 	
 
 class VaryTerrain(PMSimSeries):
@@ -282,8 +281,7 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:#slightly smaller than the real one, for debug
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+'ttype'+str(ttype)+'inv'+str(inv)+'.xls'
 					i=0
@@ -310,8 +308,7 @@ class VaryDibbleDist(PMSimSeries):
 		folder=self.makeFolder()
 		if not dList: dList=[0.6, 0.8, 1.0, 1.5] #default
 		for d in dList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(d)+'inv'+str(inv)+'.xls'
 					i=0
@@ -338,8 +335,7 @@ class VaryMoundingBladeWidth(PMSimSeries):
 		folder=self.makeFolder()
 		if not wList: wList=[None, 0.4, 0.5, 0.6] #default
 		for w in wList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(w)+'inv'+str(inv)+'.xls'
 					i=0
@@ -349,7 +345,6 @@ class VaryMoundingBladeWidth(PMSimSeries):
 						G.simParam['inverting']=inv
 						G.simParam['wMB']=w
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -368,8 +363,7 @@ class VaryTimeFindMuSite(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[0, 0.1] #[s] default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(t)+'inv'+str(inv)+'.xls'
 					i=0
@@ -379,7 +373,6 @@ class VaryTimeFindMuSite(PMSimSeries):
 						G.simParam['inverting']=inv
 						G.simParam['multiplierFindMuSite']=t #needs to be connected
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -400,7 +393,7 @@ class VaryImpObAv(PMSimSeries):
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(bladewidth*100)+'.xls'
+					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(ObAv[0]*100)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -410,7 +403,6 @@ class VaryImpObAv(PMSimSeries):
 						G.simParam['vertOccStone']=ObAv[1]
 						G.simParam['angImpRoot']=ObAv[2]
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -429,8 +421,7 @@ class VaryTimeWhenInvKO(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[1 ,3 ,5] #[s] default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				i=0
 				while i<it or not quitPossible:
@@ -439,7 +430,6 @@ class VaryTimeWhenInvKO(PMSimSeries):
 					G.simParam['tCWhenInvKO']=t
 					G.simParam['inverting']=True
 					quitPossible=False
-					G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 					i+=1
 					print "No of sims: %d"%(i)
@@ -459,8 +449,7 @@ class VaryInvExc(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[10 ,13 ,16] #default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
 				i=0
 				while i<it or not quitPossible:
@@ -471,7 +460,6 @@ class VaryInvExc(PMSimSeries):
 					G.simParam['ExcavatorInverting']=True
 					G.simParam['KOInverting']=False
 					quitPossible=False
-					G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 					s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 					i+=1
 					print "No of sims: %d"%(i)
@@ -496,8 +484,7 @@ class TryNoRemound(PMSimSeries):
 		folder=self.makeFolder()
 		if not tList: tList=[False, True] #default
 		for t in tList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(t)+'inv'+str(inv)+'.xls'
 					i=0
@@ -507,7 +494,6 @@ class TryNoRemound(PMSimSeries):
 						G.simParam['inverting']=inv
 						G.simParam['noRemound']=t
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -525,8 +511,7 @@ class VaryCriticalStoneSize(PMSimSeries):
 		folder=self.makeFolder()
 		if not sList: sList=[0.006,0.008,0.01] #default
 		for s in sList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(s)+'inv'+str(inv)+'.xls'
 					i=0
@@ -536,7 +521,6 @@ class VaryCriticalStoneSize(PMSimSeries):
 						G.simParam['inverting']=inv
 						G.simParam['critStoneSize']=s
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -554,8 +538,7 @@ class VaryMoundRadius(PMSimSeries):
 		folder=self.makeFolder()
 		if not rList: rList=[0.15, 0.2] #default
 		for r in rList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(r)+'inv'+str(inv)+'.xls'
 					i=0
@@ -565,7 +548,6 @@ class VaryMoundRadius(PMSimSeries):
 						G.simParam['inverting']=inv
 						G.simParam['moundRadius']=r
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -585,8 +567,7 @@ class VaryRectScoop(PMSimSeries):
 		folder=self.makeFolder()
 		if not wList: wList=[0.4, 0.5, 0.6] #default
 		for w in wList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(w)+'inv'+str(inv)+'.xls'
 					i=0
@@ -597,7 +578,6 @@ class VaryRectScoop(PMSimSeries):
 						G.simParam['rectangular']=True
 						G.simParam['wMB']=w
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
@@ -615,8 +595,7 @@ class VaryTSR(PMSimSeries):
 		folder=self.makeFolder()
 		if not TSRList: TSRList=[1500, 2000, 2500] #default
 		for TSR in TSRList:
-			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:
-			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_'+str(TSR)+'inv'+str(inv)+'.xls'
 					i=0
@@ -626,11 +605,36 @@ class VaryTSR(PMSimSeries):
 						G.simParam['TSR']=TSR
 						G.simParam['inverting']=inv
 						quitPossible=False
-						G.terrain.restart() #makes the stumps non-static.. different distributions every time.
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
 						print "No of sims: %d"%(i)
 					self.reset()
+
+class VarySBM(PMSimSeries):
+	"""
+	This class describes a simulation that varies the SBM for all the interesting machine configurations
+	in article 3. only inverting.
+	tested: No
+	"""
+	def __init__(self,it=2,G=None):
+		PMSimSeries.__init__(self,G)
+		if not G:
+			self.G.terrain=PlantMTerrain(G=self.G)
+		folder=self.makeFolder()
+		for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
+			self.filename=folder+'/'+mtype+'_SBM_625'+'.xls'
+			i=0
+			while i<it or (not quitPossible):
+				G=copy.deepcopy(self.G)
+				paramsForSensAn(G.simParam)
+				G.simParam['SBM']=6.25
+				G.simParam['inverting']=True
+				quitPossible=False
+				s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
+				i+=1
+				print "No of sims: %d"%(i)
+			self.reset()
+
 
 def varyAll(i=1):
 	"""
