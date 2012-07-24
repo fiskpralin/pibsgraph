@@ -431,15 +431,25 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					ray1=[orig,fun.getCartesian([0,1],fromLocalCart=True, origin=orig, direction=r.direction)]
 					ray2=[orig,fun.getCartesian([0,1],fromLocalCart=True, origin=orig, direction=direct)]
 					angle=fun.getAngle(ray1, ray2) #angle between root and planting head
+					pH.strikedImmobile=True
+					self.cmnd(commands, t['haltTime'],auto['haltMound'])
+					for head in pHeads: head.timeConsumption['halting']+=t['haltTime']
 					if self.G.simParam['noRemound'] or angle>self.m.rootDegreesOK:
 						self.debugPrint('pos: %s collided with root. angle was too much %s'%(str(orig), str(angle*180.0/pi)))
 						pH.abort=True
 						pH.done=True
 					else: #remound
-						print "remounds" #later..
-						pH.strikedImmobile=True
-					self.cmnd(commands, t['haltTime'],auto['haltMound'])
-					for head in pHeads: head.timeConsumption['halting']+=t['haltTime']
+						print "remounds"
+						self.cmnd(commands, t['haltTime'],auto['haltMound'])
+						timeTmp=digTime+t['heapTime']
+						self.cmnd(commands, timeTmp, auto['mound'])
+						for pH in pHeads:
+							pH.timeConsumption['halting']+=t['haltTime'] #that's for both, if 2h
+							pH.remounded=True
+							pH.timeConsumption['mounding']+=timeTmp
+						
+
+					
 			if not (pH.abort or pH.strikedImmobile):
 				for b in boul:
 					#check if we are inside the scoop. It's the middle of the stone that matters
@@ -449,7 +459,6 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 					inside=False #just to skip a really long if-statement
 					if self.G.simParam['rectangular']:
 						if b.radius+b.z>-pH.depth and collide(pH, b, o1pos=orig):
-							print (b.radius+pH.depth)**2 < b.z**2+twoDdist[1]**2
 							inside=True
 					elif b.z**2+twoDdist[1]**2<(b.radius+pH.depth)**2 and collide(pH, b, o1pos=orig): #the first check is for the cylinder, through pythagoras with 2D[1] since cylinder and not sphere
 						inside=True
@@ -497,30 +506,26 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		
 							points=col.circlesIntersectPoints((0,0), localPos, pH.depth, b.radius)
 							assert points != False # we know that these circles collide.
-							if points== True:
-								hInside=2*b.radius
+							if points== True: #all of the stone inside or huge stone
+								upper=b.z+b.radius
+								lower=b.z-b.radius
 							else:
 								upper=max(points[0][1], points[1][1])
 								if col.pointInCircle((-twoDdist[1], b.z+b.radius), (0,0), pH.depth):
 									assert b.z+b.radius>=upper
 									upper=b.z+b.radius
-								else:
-									upper=upper[1]
 								lower=min(points[0][1], points[1][1])
 								if col.pointInCircle((-twoDdist[1], b.z-b.radius), (0,0), pH.depth):
 									assert b.z-b.radius<=lower
 									lower=b.z-b.radius
-								else:
-									lower=lower[1]
 						hInside=upper-lower
 						assert hInside>=0
 						ratio=hInside/float(pH.depth)
-						self.debugPrint("%s percent is vertically occupided by an imobile boulder"%str(ratio))
+						pH.strikedImmobile=True
+						self.sim.stats['immobile boulder struck']+=1
+						self.sim.stats['immobile vol sum']+=b.volume
 						if ratio>self.m.immobilePercent:
-							pH.strikedImmobile=True
-							self.sim.stats['immobile boulder struck']+=1
-							self.sim.stats['immobile vol sum']+=b.volume
-							print "ABORTS"
+							self.debugPrint("ABORTS %s percent is vertically occupided by an imobile boulder"%str(ratio))
 							pH.abort=True
 							pH.done=True
 							commands=self.cmnd(commands, t['haltTime'],auto['haltMound'])
@@ -548,30 +553,38 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 			pH.timeConsumption['mounding']+=timeTmp
 		#mounding failures
 		for h in self.plantHeads:
-			if random.uniform(0,1)<self.m.moundingFailureProb: #failure..
+			if random.uniform(0,1)<self.m.moundingFailureProb and not h.remounded: #failure..
+					
 				if self.G.simParam['noRemound']:
 					h.debugPrint('failed mounding')
 					h.abort=True
 				else:
 					h.debugPrint('Failed mounding.. the other heads have to wait')
 					commands=self.cmnd(commands, digTime+t['heapTime'],auto['mound'])
-					h.timeConsumption['mounding']+=digTime+t['heapTime']
+					for pH in self.plantHeads:
+						self.sim.stats['remound attempts']+=1
+						pH.timeConsumption['mounding']+=digTime+t['heapTime']
+						pH.remounded=True
 		#it's time to invert
 		if self.m.inverting:
 			print "inverts automatically, not sure if this is correct"
 			commands=self.cmnd([], invertTime, auto=True)
+			reinverted=False
 			for h in self.plantHeads:
 				if pH.abort: continue
+				self.sim.stats['inverting attempts']+=1
 				h.timeConsumption['inverting']+=invertTime
 				if random.uniform(0,1)<self.m.invertFailureProb: #failure..
 					if self.G.simParam['noRemound']:
 						h.debugPrint('failed inverting')
 						h.abort=True
-					else:
-						print "not sure which time we should use for reinverting... fix"
+					elif not reinverted:
+						reinverted=True
 						h.debugPrint('Failed mounding.. the other heads have to wait')
 						commands=self.cmnd(commands,digTime+t['heapTime'],auto['mound'])
-						h.timeConsumption['inverting']+=digTime+t['heapTime']
+						for pH in self.plantHeads:
+							self.sim.stats['reinverting attempts']+=1
+							h.timeConsumption['inverting']+=digTime+t['heapTime']
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]

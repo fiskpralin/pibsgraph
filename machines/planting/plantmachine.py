@@ -118,14 +118,9 @@ class PlantMachine(Machine):
 		self.inPlaceEvent=SimEvent('machine has moved in place', sim=self.sim) #event fired when machine has moved
 		self.calcVisibleObstInWA() #some statistics updates needed
 		if self.headType=='Mplanter' or self.headType=='MultiHead':
-			try:
-				multiplier=self.G.simParam['tFindMuSite']
-			except:
-				multiplier=0.1 #default..
+			multiplier=self.G.simParam['multiplierFindMuSite']
 			self.times['searchTime']=multiplier*self.sim.stats['visible obstacles in WA'] #specifics for this head..0 otherwise
-		elif self.headType=='Bracke':
-			pass
-		else:
+		elif self.headType!='Bracke':
 			raise Exception('could not identify head type %s'%self.headType) #safety first..
 		
 	def run(self): #the method has to be here in order to be counted as an entity
@@ -271,6 +266,7 @@ class PlantMachine(Machine):
 			print "Stop Reason:", reason
 		print self.sim.stats['mound attempts'],len( self.treesPlanted)
 		self.sim.stopSimulation()
+		
 	def isWithinPlantingBorders(self, pos, c='cartesian'):
 		#plantingarea is approximated as circle.
 		w=self.pDevs[0].plantAreaW #2.5 def
@@ -288,12 +284,15 @@ class PlantMachine(Machine):
 		#is radius too small or too big?
 		if r<self.craneMinL+L-l/2 or r > self.craneMaxL-l/2.:
 			return False
-		if self.headType=='Mplanter': thInner=asin((w/2.)/r)
-		else: thInner=0
+		if len(self.pDevs[0].plantHeads)>1:
+			thInner=asin((w/2.)/r)
+		else:
+			thInner=0
 		#is angle too small or too big?
 		if th>pi-thInner or th<thInner:
 			return False
 		return True
+	
 	def calcVisibleObstInWA(self):
 		"""
 		required statistics. Roots are included
@@ -321,6 +320,7 @@ class PlantMachine(Machine):
 					sdiam+=o.dbh
 		self.sim.stats['visible obstacles in WA']=obstNo
 		self.sim.stats['stumps in WA sum diamater']=sdiam
+		
 	def draw(self, ax):
 		cart=self.getCartesian
 		v=self.visual

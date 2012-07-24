@@ -68,6 +68,7 @@ class PlantHead(Process, UsesDriver, Obstacle):
 		commands.append((hold, self, time))
 		self.usesDriver=True #this means that a reservation from the driver has been sent, not that he currently has the attention here.
 		return commands
+	
 	def reset(self):
 		"""called before a new cycle begins."""
 		self.moundSuccess=False
@@ -81,6 +82,7 @@ class PlantHead(Process, UsesDriver, Obstacle):
 		self.done=False
 		self.remounded=False
 		self.cause=None
+		
 	def getPos(self, plant=False):
 		"""returns the position of the plantHead"""
 		p=self.p
@@ -94,11 +96,15 @@ class PlantHead(Process, UsesDriver, Obstacle):
 			return p1
 		else:
 			raise Exception("Error, leftright is undefined for plantHead.")
+		
 	def getNodes(self, pos=None):
 		if pos is None: pos=self.getPos()
 		return self.p.getPhNodes(self, pos)
+	
 	def scramble(self):
-		"""scramble the moundobst. This function is invoked after mound is complete and dibble is about to begin. Simply create a heap at the location of the planthead. Dimension is length,width adn depth specified above but with depth as positive. Heap is a half circle extended as a cylinder in width-dimension."""
+		"""
+		scramble the moundobst. This function is invoked after mound is complete and dibble is about to begin. Simply create a heap at the location of the planthead. Dimension is length,width adn depth specified above but with depth as positive. Heap is a half circle extended as a cylinder in width-dimension.
+		"""
 		pos=self.getPos()
 		p=self.p
 		l=self.length #i.e length of "tracks" 
@@ -184,25 +190,6 @@ class MultiHead(PlantHead):
 						lim=sqrt((0.10**2)/pi)#model has rectangular stones. 10cm side
 						if self.biggestBlock < lim:
 							debugPrint("plants, no of stones:%f sumA: %f biggestBl:%f"%(len(self.moundObst),self.moundSumA,self.biggestBlock))
-						elif self.strikedImmobile: #boulder did not occupy more than 50% of z-axis, or root was correctly aligned.
-							assert not p.G.simParam['noRemound'] #we should not be here in that case
-							#remound, this is guaranteed to work..
-							if not self.remounded:
-								debugPrint("striked immobile, remounds")
-								self.sim.stats['remound attempts']+=1
-								self.remounded=True
-								for otherHead in self.otherHeads:
-									otherHead.remounded=True
-
-									otherHead.cause='reMound'
-									yield hold, self, 0.0000001 #to let the other head wake up
-									self.interrupt(self.otherHead) #cannot do anything with other head while this head works..
-									debugPrint("interrupts other head.")
-									yield hold, self, 0.0000001 #time for other head to release driver
-								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads)
-								for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
-								self.timeConsumption['mounding']+=digTime+t['heapTime']
-								self.reMoundSignal.signal()
 						else: #biggestblock between limits, check if dibble succeeds.
 							#scramble boulders.
 							self.scramble()
@@ -233,21 +220,24 @@ class MultiHead(PlantHead):
 									break
 							if not done: #remound, always works..
 								if self.p.G.simParam['noRemound']:
+									assert self.remounded==False
 									self.abort=True
 									break
-								debugPrint("remounds")
-								self.sim.stats['remound attempts']+=1
-								self.remounded=True
-								for otherHead in self.otherHeads:
-									otherHead.remounded=True
-									otherHead.cause='reMound'
-									self.interrupt(otherHead) #cannot do anything with other head while this head works..
-									yield hold, self, 0.0000001 #time for other head to release driver
-									self.debugPrint("interrupts other head.")
-								assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads) #less if two heads reMounds at the same time
-								for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
-								self.timeConsumption['mounding']+=digTime+t['heapTime']
-								self.reMoundSignal.signal()
+								if not self.remounded:
+									debugPrint("remounds")
+									self.sim.stats['remound attempts']+=1
+									self.remounded=True
+									for otherHead in self.otherHeads:
+										self.sim.stats['remound attempts']+=1
+										otherHead.remounded=True
+										otherHead.cause='reMound'
+										self.interrupt(otherHead) #cannot do anything with other head while this head works..
+										yield hold, self, 0.0000001 #time for other head to release driver
+										self.debugPrint("interrupts other head.")
+									assert len(self.reMoundSignal.waits)+len([h for h in self.otherHeads if h.sleeping])<=len(self.otherHeads) #less if two heads reMounds at the same time
+									for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
+									self.timeConsumption['mounding']+=digTime+t['heapTime']
+									self.reMoundSignal.signal()
 								debugPrint("plants after remound/heap.")
 					else: #moundSumA was to much..
 						for c in self.cmnd([], t['haltTime'], auto['haltMound']):
@@ -281,6 +271,7 @@ class MultiHead(PlantHead):
 					self.reset() #planthead was idle, and can remain idle.
 				else:
 					raise Exception("Planthead could not recognice interruptcause: %s"%cause)
+				
 	def getPos(self, plant=False):
 		"""
 		returns the position of the plantHead
@@ -291,6 +282,7 @@ class MultiHead(PlantHead):
 		else:
 			posList=p.getPlantingCoord(p.posCyl, 'cylindrical')
 		return posList[self.number]
+	
 	def checkIfInterupted(self):
 		cmd=[]
 		if self.interrupted():
