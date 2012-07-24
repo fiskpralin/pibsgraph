@@ -1008,6 +1008,7 @@ vv
 	s['moundRadius']=0.2 #[m] 0.15
 	s['rectangular']=False#False #[bool] True
 	s['TSR']=2000 #[plants/ha] 1500, 2500
+	s['SBM']=6.0
 	"""Other parameters for the simulations
 	------------------------------------"""
 	s['inverting'] = True # False. This shows whether there is inverting (true) or just mounding (false) going on.
