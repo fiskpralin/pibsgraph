@@ -280,7 +280,7 @@ class Terrain():
 			raise Exception('obstacles should be removed by now.')
 		if 'Stump' in type:
 			self.readStumps()
-		if 'tree' in type:
+		if 'tre e' in type:
 			if self.generate:
 				self.generateTrees(self.dens, self.dbh_mean, self.dbh_std)
 			else:

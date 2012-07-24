@@ -72,9 +72,9 @@ class PMSimSeries(SimSeries):
 		t.append(s.stats['mound attempts'])#fix this to include inverting
 		t.append(s.stats['remound attempts'])#fix this to include inverting
 		t.append(s.stats['visible obstacles in WA'])
-		t.append(s.stats['stumps in WA sum diamater'])
-		t.append(s.stats['noSurfBoulders'])#set in plantmsim
-		t.append(s.stats['meanSurfBoulderDiam']*10)#changed to dm, set in plantmsim
+		t.append(s.stats['stumps in WA sum diameter'])
+		t.append(s.stats['noSurfBouldersWA'])#set in calcVisibleObstInWA (plantmachine)
+		t.append(s.stats['meanSurfBoulderDiamWA']*10)#changed to dm, set in calcVisibleObstInWA (plantmachine)
 		t.append(s.stats['immobile boulder struck'])
 		t.append(s.stats['immobile vol sum']*1000) #changed to dm3
 		t.append(s.stats['number of dibble disr stones in mound'])
@@ -186,11 +186,13 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 6, s.G.terrain.boulderFreq)
 			e.modify(paramRow, 7, s.G.terrain.meanBoulderV*1000)
 			e.modify(paramRow, 8, s.G.terrain.humusType) #humustype
-			e.modify(paramRow, 10, s.m.craneMaxL)
-			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 11, s.m.pDevs[0].plantSepDist*100)
-			e.modify(paramRow, 12, s.m.pDevs[0].plantHeads[0].width*100)
-			e.modify(paramRow, 13, s.G.simParam['critStoneSize']*1000)
-			e.modify(paramRow, 14, s.G.simParam['TSR'])
+			e.modify(paramRow, 9, s.stats['noSurfBoulders'])#set in plantmsim
+			e.modify(paramRow, 10, s.stats['meanSurfBoulderDiam']*10)#changed to dm, set in plantmsim
+			e.modify(paramRow, 12, s.m.craneMaxL)
+			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 13, s.m.pDevs[0].plantSepDist*100)
+			e.modify(paramRow, 14, s.m.pDevs[0].plantHeads[0].width*100)
+			e.modify(paramRow, 15, s.G.simParam['critStoneSize']*1000)
+			e.modify(paramRow, 16, s.G.simParam['TSR'])
 			if s.G.simParam['inverting']==True and s.G.simParam['ExcavatorInverting']==True:
 				noManRemInv = 5
 				cycleTimeInv = s.G.simParam['tInvExcavator']
@@ -200,13 +202,13 @@ class PMSimSeries(SimSeries):
 			elif s.G.simParam['inverting']==False:
 				noManRemInv = 5
 				cycleTimeInv = 0
-			e.modify(paramRow, 15, cycleTimeInv)
-			e.modify(paramRow, 16, noManRemInv)
+			e.modify(paramRow, 17, cycleTimeInv)
+			e.modify(paramRow, 18, noManRemInv)
 			if s.G.simParam['rectangular']==False: scoopshape='SemiCyl'
 			elif s.G.simParam['rectangular']==True: scoopshape='Rect'
-			e.modify(paramRow, 17, scoopshape)
-			e.modify(paramRow, 18, s.G.simParam['multiplierFindMuSite'])
-			e.modify(paramRow, 19, s.G.simParam['moundRadius'])
+			e.modify(paramRow, 19, scoopshape)
+			e.modify(paramRow, 20, s.G.simParam['multiplierFindMuSite'])
+			e.modify(paramRow, 21, s.G.simParam['moundRadius'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
@@ -278,7 +280,7 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
-			ttype='5' #for debug
+			ttype='5' #debug remove
 			for mtype in ['1a1h','1a2h','1a3h','1a4h','1a1hMag','1a2hMag']:#slightly smaller than the real one, for debug
 			#for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
@@ -287,6 +289,7 @@ class VaryTerrain(PMSimSeries):
 					paramsForSensAn(G.simParam)
 					G.simParam['inverting']=inv
 					G.terrain=PlantMTerrain(G=G, ttype=ttype)
+					print 'No surface boulders in vary:', len(G.terrain.surfaceBoulders)
 					quitPossible=False
 					i=0
 					while i<it or (not quitPossible):
@@ -895,7 +898,7 @@ class PlantmSim(SimExtend):
 		if not self.G.simParam:
 			self.G.simParam=paramsForSensAn()
 			assert self.G.simParam
-		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0, 'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0, 'humus depths':[]}
+		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0,'meanSurfBoulderDiamWA':0,'noSurfBouldersWA':0,'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0, 'humus depths':[]}
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
 		self.stats['noSurfBoulders']=self.G.terrain.noSBoulders
@@ -903,7 +906,7 @@ class PlantmSim(SimExtend):
 			self.stats['meanSurfBoulderDiam']=0
 	   	else:
 			self.stats['meanSurfBoulderDiam']=sum([2*sstone.radius for sstone in self.G.terrain.surfaceBoulders])/float(self.stats['noSurfBoulders']) #gives mean diameter
-			print 'average surface boulder diameter:',self.stats['meanSurfBoulderDiam']
+			print 'average surface boulder diameter in total area:',self.stats['meanSurfBoulderDiam']
 		if self.G.automatic=='undefined':
 			if mtype[0:2]=='1a':
 				self.G.automatic={'mound': False, 'plant': True, 'automove': False, 'micrositeSelection': False, 'moveToMicro': False,'haltMound':False, 'clearForOtherHead': False}
@@ -916,7 +919,9 @@ class PlantmSim(SimExtend):
 		self.productivity=len(self.m.treesPlanted)/(self.now()/3600.) #trees/hour
 		print "result: %d trees in %d time, productivity: %f trees/hour"%(len(self.m.treesPlanted), self.now(), self.productivity)		
 		self.setQueuePerc()
-		print "stumps in WA sum diameter:", self.stats['stumps in WA sum diamater']
+		print "stumps in WA sum diameter:", self.stats['stumps in WA sum diameter']
+		print 'Mean diameter of surfaceboulders in WA',self.stats['meanSurfBoulderDiamWA']
+		print 'Number of SurfaceBoulders in WA',self.stats['noSurfBouldersWA']
 		print "time to search for microsite", self.m.timeConsumption['searchTime']
 		print "number of remounds", self.stats['remound attempts']
 		if self.p: #if we have a plotter instance
@@ -985,7 +990,7 @@ def paramsForSensAn(simParam={}):
 
 	"""
 	s=simParam
-
+vv
 	"""Sensitivity analysis parameters
 	-------------------------------"""
 	s['dibbleDist']=1 #[m] 0.6 0.8, 1.5
