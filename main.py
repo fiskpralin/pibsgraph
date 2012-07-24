@@ -120,20 +120,20 @@ if __name__=='__main__':
 		import cProfile
 		from sim.planting.plantMTerrain import PlantMTerrain
 		seed=int(random.uniform(0,100000))
-		#seed=56389
+		#seed=70974
 		random.seed(seed)
 		print "seed2:", seed
 		G=tools.globalVar()
 		G.noMonitors=True
 		G.seed=seed
 		#TH.testMemory()
-		G.terrain=PlantMTerrain(G, ttype='4')
+		G.terrain=PlantMTerrain(G, ttype='1')
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
 		#G.plotDelay=20
 		#s=PM.VaryTerrain(1)
 		#s=PM.doTheSenseAn(i=1)
-		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a2h', ttype='4')
+		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a1h', ttype='4')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=True, observer=True)
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=False, observer=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)

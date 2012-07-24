@@ -35,8 +35,8 @@ class PlantMachine(Machine):
 	"""
 	allowedTypes= ['1h', '2h','1a1h','1a2h','2a1h', '2a2h', '1a2hObAv','1a3h', '3h','1a3hObAv','1a4h','4h','1a4hObAv','1a1hMag','1a2hMag']
 	def __init__(self, name, sim, G, mtype='2h', craneLim=None):
-		#if not mtype in self.allowedTypes or 'ObAv' in mtype:
-		#	raise Exception('Machine type %s no allowed'%str(mtype))
+		if not mtype in self.allowedTypes:
+			raise Exception('Machine type %s no allowed'%str(mtype))
 		if not craneLim: craneLim=[4.0,9.0]
 		Machine.__init__(self, name, sim, G=G, mass=21000)
 		self.driver=Operator(sim=self.sim, delay=10000) #does not go on breaks..
@@ -119,14 +119,9 @@ class PlantMachine(Machine):
 		self.inPlaceEvent=SimEvent('machine has moved in place', sim=self.sim) #event fired when machine has moved
 		self.calcVisibleObstInWA() #some statistics updates needed
 		if self.headType=='Mplanter' or self.headType=='MultiHead':
-			try:
-				multiplier=self.G.simParam['tFindMuSite']
-			except:
-				multiplier=0.1 #default..
+			multiplier=self.G.simParam['multiplierFindMuSite']
 			self.times['searchTime']=multiplier*self.sim.stats['visible obstacles in WA'] #specifics for this head..0 otherwise
-		elif self.headType=='Bracke':
-			pass
-		else:
+		elif self.headType!='Bracke':
 			raise Exception('could not identify head type %s'%self.headType) #safety first..
 		
 	def run(self): #the method has to be here in order to be counted as an entity
@@ -272,6 +267,7 @@ class PlantMachine(Machine):
 			print "Stop Reason:", reason
 		print self.sim.stats['mound attempts'],len( self.treesPlanted)
 		self.sim.stopSimulation()
+		
 	def isWithinPlantingBorders(self, pos, c='cartesian'):
 		#plantingarea is approximated as circle.
 		w=self.pDevs[0].plantAreaW #2.5 def
@@ -289,12 +285,15 @@ class PlantMachine(Machine):
 		#is radius too small or too big?
 		if r<self.craneMinL+L-l/2 or r > self.craneMaxL-l/2.:
 			return False
-		if self.headType=='Mplanter': thInner=asin((w/2.)/r)
-		else: thInner=0
+		if len(self.pDevs[0].plantHeads)>1:
+			thInner=asin((w/2.)/r)
+		else:
+			thInner=0
 		#is angle too small or too big?
 		if th>pi-thInner or th<thInner:
 			return False
 		return True
+	
 	def calcVisibleObstInWA(self):
 		"""
 		required statistics. Roots are included

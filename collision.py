@@ -241,18 +241,20 @@ def intersectRaySphere(ray, r, pos, additionalInfo=False):
 		if t<=tmax:
 			p1=ray[0]+t*d2
 			if t==tmax: #one root
-				return True, [list(p1)]
+				return True, p1.tolist()
 			else:
 				t=-b+sqrt(b**2-c)
 				if t>tmax:
-					return True, [list(p1)]
+					return True, p1.tolist()
 				p2=ray[0]+t*d2
-				return True, [list(p1),list(p2)]
+				return True, p1.tolist(),p2.tolist()
 			
 	if t>tmax:
 		return False #on ray, but ray ended before reaching the sphere
 	if additionalInfo:
-		return True, [list(ray[0]+t*d2)]
+		p=ray[0]+t*d2
+		p.tolist()
+		return True, p
 	return True #all the test passed. intersects.
 
 def pointInCircle(p, pm, r):
