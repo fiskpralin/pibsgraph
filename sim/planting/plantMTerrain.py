@@ -62,7 +62,7 @@ class PlantMTerrain(Terrain):
 			self.humusType = '4'
 			self.withSurfaceBoulders= True
 			
-		elif ttype=='3':
+		elif ttype=='3':#medelhygget och default
 			self.stumpFile = 452
 			self.stumpsPerH = 730
 			self.boulderFreq = 43
@@ -82,7 +82,7 @@ class PlantMTerrain(Terrain):
 			self.humusType = '2'
 			self.withSurfaceBoulders= True
 			
-		elif ttype=='5': #medelhygget
+		elif ttype=='5':
 			self.stumpFile = 553
 			self.stumpsPerH = 635
 			self.boulderFreq = 23
@@ -106,6 +106,6 @@ if __name__=="__main__":
 	"""example code:"""
 	terrain=Terrain()
 	terrain.readTrees() #random
-	terrain.makeSurfaceBoudlers() #from file
+	terrain.makeSurfaceBoulders() #from file
 	terrain.draw()
 	plt.show()

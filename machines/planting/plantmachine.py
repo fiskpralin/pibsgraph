@@ -9,6 +9,7 @@ from terrain.tree import Tree
 from terrain.hole import Hole
 from terrain.seedling import Seedling
 from terrain.stump import Stump
+from terrain.surfaceBoulder import SurfaceBoulder
 from collision import *
 from functions import *
 import numpy as np
@@ -312,15 +313,25 @@ class PlantMachine(Machine):
 		pol=Polygon(self.pos, polynodes)
 		potentialObst=[o for o in self.G.terrain.GetVisibleObstacles(self.pos, self.craneMaxL) if o.visible]
 		obstNo=0
-		sdiam=0
+		stumpDiam=0
+		sBDiam=0
+		noSB=0
 		for o in potentialObst:
 			if collide(o,pol):
 				obstNo+=1
 				if isinstance(o, Stump):
-					sdiam+=o.dbh
+					stumpDiam+=o.dbh
+				elif isinstance(o, SurfaceBoulder):
+					noSB+=1
+					sBDiam+=o.radius*2.0
 		self.sim.stats['visible obstacles in WA']=obstNo
-		self.sim.stats['stumps in WA sum diamater']=sdiam
-		
+		self.sim.stats['stumps in WA sum diameter']+=stumpDiam
+		self.sim.stats['noSurfBouldersWA']+=noSB
+		if noSB!=0:
+			self.sim.stats['meanSurfBoulderDiamWA']=sBDiam/float(noSB)
+		print(self.sim.stats['noSurfBouldersWA'])
+		print(self.sim.stats['meanSurfBoulderDiamWA'])
+
 	def draw(self, ax):
 		cart=self.getCartesian
 		v=self.visual
