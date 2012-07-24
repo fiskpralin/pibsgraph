@@ -404,7 +404,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		#gather information about the soil at site
 		deepest=0
 		deepestPos=None
-		for h in self.plantingheads:
+		for h in pHeads:
 			depth=self.G.terrain.humusLayer.getDepth(h.getPos())
 			assert depth>=0
 			if depth>deepest:
