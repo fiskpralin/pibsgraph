@@ -137,10 +137,13 @@ def getAngle(r1, r2):
 		points.append(point)
 	p1=np.array(points[0])-p
 	p2=np.array(points[1])-p
-	th=acos(np.dot(p1,p2)/(np.linalg.norm(p1)*np.linalg.norm(p2)))
+	#due to round-off errors, we get a domain error if e.g. arg=-1.000000000001. thus round
+	arg=np.dot(p1,p2)/(np.linalg.norm(p1)*np.linalg.norm(p2))
+	th=acos(round(arg,7))
 	if th>pi:
 		if th>2*pi: raise Exception('something is wrong with getAngle')
 		th=pi-th
+	assert th>=0
 	return th
 
 def getPointBetween(p1,p2):

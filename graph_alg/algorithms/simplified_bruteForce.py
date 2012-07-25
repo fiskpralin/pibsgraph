@@ -13,7 +13,8 @@ from graph_alg.grid import *
 import graph_alg.graph_operations as go
 from graph_alg.draw import *
 import graph_alg.costFunctions as cf
-from common import get_shortest_and_second, sortRemList, remove_edge, cost, forcePaths
+from graphph_alg.costFunctions import routingCost as cost
+from common import get_shortest_and_second, sortRemList, remove_edge, forcePaths
 
 def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=False):
 	"""

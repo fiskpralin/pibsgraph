@@ -333,8 +333,8 @@ for i in range(len(areaPoly)): areaPoly[i]=tuple(areaPoly[i])
 #cProfile.run("tmp(areaPoly)")
 
 globalOrigin= 596250, 6727996 #coordinate
-#R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin, angle=3.14/4+0.1)
-R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin, angle=3.14/4+0.1)
+#R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 print "algorithm time... "
 R=simplified_bruteForce(R,aCap=0.2,warmup=False, anim=False)
 #R=bruteForce(R,aCap=0.2, add=False)

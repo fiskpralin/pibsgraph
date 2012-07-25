@@ -107,8 +107,8 @@ def nodeEdgesBendable(G,n):
 		ray1=n, neighbors[0]
 		ray2=n, neighbors[1]
 		th=fun.getAngle(ray1,ray2)
-		if abs(th-np.pi)>0.01 and abs(th-np.pi/2.)<0.1:
-			#not a straight line and corner angle ~90 degrees
+		if abs(th-np.pi)>0.01 and np.pi/5.0<th<np.pi-np.pi/5.0:
+			#not a straight line and corner angle is not too sharp (pi/5)
 			return True
 	return False
 

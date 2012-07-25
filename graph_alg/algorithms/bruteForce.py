@@ -14,9 +14,11 @@ import copy
 
 from graph_alg.grid import *
 import graph_alg.costFunctions as cf
+from graphph_alg.costFunctions import routingCost as cost
 import graph_alg.graph_operations as go
 from graph_alg.draw import *
 from functions import getDistance
+
 
 
 def distToOrigin(e,R):

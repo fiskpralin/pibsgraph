@@ -55,6 +55,7 @@ def get_shortest_and_second(R,node):
 		p2=alternative #take the loop instead for second shortest
 	e_data['weight']=wstore
 	return p1,p2
+
 def sortRemList(R,list):
 	"""
 	sorts remList.
@@ -64,7 +65,6 @@ def sortRemList(R,list):
 		e_data=R.get_edge_data(*edge)
 		costs[edge]=e_data['c']
 	return sorted(list, key=lambda edge: costs[edge]) #first sort
-
 
 def update_after_mod(ein,R):
 	"""
@@ -116,21 +116,7 @@ def remove_edge(ein, R):
 		e=ein
 	R.remove_edge(e[0], e[1])
 	update_after_mod(e,R)
-	
-def cost(R,ein,storeData=False):
-	"""
-	Calculates the extra routing cost of removing e
-	needs edge data, i.e. e[2] should be available. (use: R.edges(data=True))
-	
-	This cost thing is based on the assumption that every edge fills the forwarder..
-	..not really true. 	
-	"""
-	e_data=R.get_edge_data(ein[0], ein[1])
-	e=(ein[0],ein[1],e_data) #subfunctions assume this behaviour. Now we have the right data
-	assert R.has_edge(e[0],e[1])
-	c=pathsDiff(R,e,storeData)
-	assert c>=0 #should always be..
-	return c
+
 
 def pathsDiff(R,e,storeData=False):
 	"""

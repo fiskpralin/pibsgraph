@@ -222,6 +222,7 @@ class MultiHead(PlantHead):
 								if self.p.G.simParam['noRemound']:
 									assert self.remounded==False
 									self.abort=True
+									for c in self.releaseDriver(): yield c
 									break
 								if not self.remounded:
 									debugPrint("remounds")
