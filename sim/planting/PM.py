@@ -403,7 +403,7 @@ class VaryImpObAv(PMSimSeries):
 						if ObAv[0]==0.4:
 							G.simParam['vertOccStoneObAv40']=ObAv[1]
 							G.simParam['angRootObAv40']=ObAv[2]
-						elis ObAv[0]==0.6:
+						elif ObAv[0]==0.6:
 							G.simParam['vertOccStoneObAv60']=ObAv[1]
 							G.simParam['angRootObAv60']=ObAv[2]
 						quitPossible=False
