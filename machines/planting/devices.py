@@ -575,24 +575,25 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 						pH.remounded=True
 		#it's time to invert
 		if self.m.inverting:
-			print "inverts automatically, not sure if this is correct"
-			commands=self.cmnd([], invertTime, auto=True)
+			commands=self.cmnd([], invertTime, auto=False)
 			reinverted=False
+			reinvertTime=digTime+t['heapTime'] #same for KO and Excv
 			for h in self.plantHeads:
 				if pH.abort: continue
 				self.sim.stats['inverting attempts']+=1
 				h.timeConsumption['inverting']+=invertTime
 				if random.uniform(0,1)<self.m.invertFailureProb: #failure..
+					self.debugPrint('reinverts')
 					if self.G.simParam['noRemound']:
 						h.debugPrint('failed inverting')
 						h.abort=True
 					elif not reinverted:
 						reinverted=True
 						h.debugPrint('Failed mounding.. the other heads have to wait')
-						commands=self.cmnd(commands,digTime+t['heapTime'],auto['mound'])
+						commands=self.cmnd(commands,reinvertTime,auto['mound'])
 						for pH in self.plantHeads:
 							self.sim.stats['reinverting attempts']+=1
-							h.timeConsumption['inverting']+=digTime+t['heapTime']
+							h.timeConsumption['inverting']+=reinvertTime
 		self.plantSignals=0
 		self.pHeadsUsed=0
 		ev=[]
