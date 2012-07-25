@@ -905,6 +905,9 @@ class PlantmSim(SimExtend):
 		self.stats={'plant attempts':0, 'mound attempts':0, 'remound attempts':0, 'stumps in WA':None, 'stumps in WA sum diameter':0,'meanSurfBoulderDiamWA':0,'noSurfBouldersWA':0,'immobile boulder struck':0, 'immobile vol sum':0, 'number of dibble disr stones in mound':0, 'dibble distr stone vol cum':0, 'queue percent':0,'work percent':0, 'work time':0,'rest time':0, 'humus depths':[], 'inverting attempts':0, 'reinverting attempts':0}
 		if not self.G.terrain:
 			self.G.terrain=PlantMTerrain(ttype=ttype)
+		else:
+			if ttype!='random':
+				raise Exception('Terrain is already specified. The input ttype is only used if G.terrain=None')
 		self.stats['noSurfBoulders']=self.G.terrain.noSBoulders
 	   	if self.stats['noSurfBoulders']==0: 
 			self.stats['meanSurfBoulderDiam']=0
