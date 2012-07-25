@@ -259,7 +259,7 @@ def doTheSenseAn(i=1):
 	#VaryDibbleDist(i)#
 	#VaryTimeFindMuSite(i)#
 	#VaryMoundingBladeWidth(i)#
-	VaryImpObAv(i, ObAvList=[[0.4,0.0,0.0],[0.6,0.0,0.0]])# #the list is just debug in order to check 0,0
+	VaryImpObAv(i)#
 	#VaryTimeWhenInvKO(i)#
 	#VaryInvExc(i)#
 	#TryNoRemound(i)#
@@ -389,11 +389,11 @@ class VaryImpObAv(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not ObAvList: ObAvList=[[0.4,50,45],[0.4,75,50],[0.4,88,55],[0.6,50,45],[0.6,65,50],[0.6,0.75,55]] #[s] default
+		if not ObAvList: ObAvList=[[0.4,75,50],[0.4,88,55],[0.6,65,50],[0.6,0.75,55]] #[s] default
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'wMB'+str(ObAv[0]*100)+'.xls'
+					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -996,9 +996,8 @@ def paramsForSensAn(simParam={}):
 	s['dibbleDist']=1 #[m] 0.6 0.8, 1.5
 	s['multiplierFindMuSite']=0.1 #[s] 0, 0.1
 	s['wMB']=None #[m]0.4, 0.5, 0.6
-
-	s['vertOccStone']=50 #% 75,88 ; 65, 75
-	s['angImpRoot']=45 #deg 50,55 ; 50,55
+	s['vertOccStone']=50
+	s['angImpRoot']=45
 	s['KOInverting']=True #default
 	s['ExcavatorInverting']=False
 	s['tCWhenInvKO']=3 #[s] 1, 5
@@ -1019,5 +1018,17 @@ def paramsForSensAn(simParam={}):
 	s['MagMatnReload1h']=320	
 	s['MagMatTCReload2h']=444
 	s['MagMatnReload2h']=640
+
+	"""For the ObAv parameters
+	-----------------------"""
+	s['vertOccStoneStand405060']=50
+	s['vertOccStoneObAv40']=75
+	s['vertOccStoneImpObAv40']=88
+	s['vertOccStoneObAv50']=70
+	s['vertOccStoneObAv60']=65
+	s['vertOccStoneImpObAv60']=75
+	s['angImpRootStand']=45
+	s['angImpRootObAv']=50
+	s['angImpRootImpObAv']=55 
 	
 	return s
