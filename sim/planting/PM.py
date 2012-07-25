@@ -259,15 +259,15 @@ def doTheSenseAn(i=1):
 	#VaryDibbleDist(i)#
 	#VaryTimeFindMuSite(i)#
 	#VaryMoundingBladeWidth(i)#
-	VaryImpObAv(i)#
+	#VaryImpObAv(i)#
 	#VaryTimeWhenInvKO(i)#
-	#VaryInvExc(i)#
-	#TryNoRemound(i)#
-	#VaryCriticalStoneSize(i)#
-	#VaryMoundRadius(i)#
-	#VaryRectScoop(i)#
-	#VaryTSR(i)#
-	#VarySBM(i)#
+	VaryInvExc(i)#
+	TryNoRemound(i)#
+	VaryCriticalStoneSize(i)#
+	VaryMoundRadius(i)#
+	VaryRectScoop(i)#
+	VaryTSR(i)#
+	VarySBM(i)#
 	
 
 class VaryTerrain(PMSimSeries):
@@ -459,7 +459,7 @@ class VaryInvExc(PMSimSeries):
 				while i<it or not quitPossible:
 					G=copy.deepcopy(self.G)
 					paramsForSensAn(G.simParam)
-					G.simparam['inverting']=True
+					G.simParam['inverting']=True
 					G.simParam['tInvExcavator']=t
 					G.simParam['ExcavatorInverting']=True
 					G.simParam['KOInverting']=False
