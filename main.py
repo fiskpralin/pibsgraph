@@ -133,7 +133,7 @@ if __name__=='__main__':
 		#G.plotDelay=20
 		#s=PM.VaryTerrain(1)
 		#s=PM.doTheSenseAn(i=1)
-		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a3h', ttype='4')
+		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a3h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=True, observer=True)
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=False, observer=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)

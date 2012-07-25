@@ -109,7 +109,7 @@ def totalCost(R):
 	for n in R.nodes(data=True):
 		C+=R.beta*go.sumWeights(R,n[1]['shortest_path'])
 		C+=go.sumWeights(R,n[1]['second_shortest'])
-	return C
+	return C/len(R.nodes())
 		
 def routingCost(R,e,storeData=False, add=False):
 	"""
@@ -132,4 +132,4 @@ def routingCost(R,e,storeData=False, add=False):
 			raise Exception('dfsd')
 		e[2]=R.get_edge_data(e[0], e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
-	return c
+	return c/len(R.nodes())

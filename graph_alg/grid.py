@@ -506,14 +506,13 @@ class TriGridGraph(ExtendedGraph):
 					self.add_edge((x,y), neig, weight=self.edgeWeightCalc((x,y),neig), visits=0, visited_from_node=[],c=0)
 				self.add_edge((x,y),tuple([round(x-dx,digits), round(y,digits)]), weight=self.edgeWeightCalc((x,y),tuple([round(x-dx,digits), round(y,digits)])), visits=0, visited_from_node=[],c=0)
 				if yloc==0 or angle==0: sl=[1]
-				else: sl=[1,-1]
+				else: sl=[1]
 				for sign in sl:
 					x,y=tuple(cart((xloc,sign*yloc), origin=(0,0), direction=direction, fromLocalCart=True))
 					x,y=round(x,digits), round(y,digits)
 					#x,y is now real coordinates, transformed through angle.
 					if not self.inside((x,y)): continue
  					self.add_node((x, y))
-					el+=1
 					if y != 0:
 						if index != 0:
 							neig=tuple(cart([xloc-dx/2., round(yloc-dy,digits)], origin=(0,0), direction=direction, fromLocalCart=True))
