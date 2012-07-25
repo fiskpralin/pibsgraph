@@ -223,7 +223,6 @@ class MultiHead(PlantHead):
 									assert self.remounded==False
 									self.abort=True
 									for c in self.releaseDriver(): yield c
-									break
 								if not self.remounded:
 									debugPrint("remounds")
 									self.sim.stats['remound attempts']+=1
@@ -239,7 +238,7 @@ class MultiHead(PlantHead):
 									for c in self.cmnd([], digTime+t['heapTime'],auto['mound']): yield c
 									self.timeConsumption['mounding']+=digTime+t['heapTime']
 									self.reMoundSignal.signal()
-								debugPrint("plants after remound/heap.")
+									debugPrint("plants after remound/heap.")
 					else: #moundSumA was to much..
 						for c in self.cmnd([], t['haltTime'], auto['haltMound']):
 							yield c
@@ -247,9 +246,10 @@ class MultiHead(PlantHead):
 						self.timeConsumption['halting']+=t['haltTime']
 						self.abort=True #should later check if it was successfull.
 						debugPrint("striked >4dm2: %f, aborts"%self.moundSumA)
+									
+					self.sim.stats['plant attempts']+=1
 					if not self.abort: #plant
 						self.debugPrint("plants...")
-						self.sim.stats['plant attempts']+=1
 						tree=Seedling(pos=self.getPos(plant=True),radius=0.025, terrain=p.G.terrain, plantMinDist=self.p.m.plantMinDist)
 						plantTime=t['dibbleDownTime']+t['relSeedlingTime']+t['dibbleUpTime']
 						for c in self.cmnd([], plantTime, auto['plant']):
