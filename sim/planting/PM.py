@@ -261,8 +261,8 @@ def doTheSenseAn(i=1):
 	#VaryMoundingBladeWidth(i)#
 	#VaryImpObAv(i)#
 	#VaryTimeWhenInvKO(i)#
-	VaryInvExc(i)#
-	TryNoRemound(i)#
+	#VaryInvExc(i)#
+	#TryNoRemound(i)#
 	VaryCriticalStoneSize(i)#
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
@@ -514,16 +514,16 @@ class VaryCriticalStoneSize(PMSimSeries):
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
 		if not sList: sList=[0.006,0.008,0.01] #default
-		for s in sList:
+		for stonesize in sList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(s)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_'+str(stonesize)+'inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
 						paramsForSensAn(G.simParam)
 						G.simParam['inverting']=inv
-						G.simParam['critStoneSize']=s
+						G.simParam['critStoneSize']=stonesize
 						quitPossible=False
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
