@@ -972,22 +972,6 @@ def paramsForSensAn(simParam={}):
 	and the method articleThree. In general simParam is saved in G. Below set values are default and
 	the commented values are what to be tested in the sensitivity analysis.
 
-	implement list:
-	
-	param 				implemented?	verified?
-	s['dibbleDist']         yes			Yes
-	s['multiplierFindMuSite']yes		Yes
-	s['wMB']				yes			Yes
-	s['shift']				-
-	s['rotCap']				yes
-	s['tCWhenInvKO']		yes			yes
-	s['tInvExcavator']		yes			yes
-	s['noRemound']			yes			yes
-	s['critStoneSize']		yes			yes
-	s['moundRadius']		yes			yes
-	s['rectangular']		yes			yes
-	s['TSR']				yes			yes			
-
 	"""
 	s=simParam
 
