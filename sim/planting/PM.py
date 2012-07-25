@@ -975,7 +975,6 @@ def paramsForSensAn(simParam={}):
 	hence easy change of parameter values in e.g. a for-loop in the Umbrella, see 'Vary*'-classes above
 	and the method articleThree. In general simParam is saved in G. Below set values are default and
 	the commented values are what to be tested in the sensitivity analysis.
-
 	"""
 	s=simParam
 
