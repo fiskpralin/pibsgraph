@@ -1009,7 +1009,6 @@ def paramsForSensAn(simParam={}):
 
 	"""For the ObAv parameters
 	-----------------------"""
-	s['vertOccStoneStand405060']=50
 	s['vertOccStoneObAv40']=75
 	s['vertOccStoneImpObAv40']=88
 	s['vertOccStoneObAv50']=70

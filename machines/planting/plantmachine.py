@@ -78,9 +78,19 @@ class PlantMachine(Machine):
 				self.invertFailureProb=G.simParam['invertKOFailureProb']
 			else:
 				self.invertingMethod='Excavator'
-				self.invertFailureProb=G.simParam['invertExcFailureProb']			
-		self.rootDegreesOK=pi/180.0*G.simParam['angImpRoot']
-		self.immobilePercent=G.simParam['vertOccStone']
+				self.invertFailureProb=G.simParam['invertExcFailureProb']
+
+		if 'ObAv' in self.type:
+			self.rootDegreesOK=self.G.simParam['angRootObAv']
+			if self.G.simParam['wMB']==0.6:
+				self.immobilePercent=self.G.simParam['vertOccStoneObAv60']
+			elif self.G.simParam['wMB']==0.5:
+				self.immobilePercent=self.G.simParam['vertOccStoneObAv50']
+			else:
+				self.immobilePercent=self.G.simParam['vertOccStoneObAv40']				
+		else:
+			self.rootDegreesOK=pi/180.0*G.simParam['angRoot']
+			self.immobilePercent=G.simParam['vertOccStone']
 		self.nSeedlingsPWArea=max(floor(self.stockingRate/10000.*self.workingArea),1)
 		print "sPerWorkarea:", self.nSeedlingsPWArea, "cranemax:", self.craneMaxL, "cranemin:",self.craneMinL, "attach:", self.craneIntersect
 		self.direction=random.uniform(0,2*pi)
