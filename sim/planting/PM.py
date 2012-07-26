@@ -210,6 +210,7 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 18, scoopshape)
 			e.modify(paramRow, 19, s.G.simParam['multiplierFindMuSite'])
 			e.modify(paramRow, 20, s.G.simParam['moundRadius'])
+			e.modify(paramRow, 21, s.G.simParam['SBM'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
