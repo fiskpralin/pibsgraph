@@ -71,6 +71,66 @@ class ExtendedGraph(nx.Graph):
 		self.moviefig=None #may be used for movies later
 		self.cmdfolder=os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
 		self.aPInnerCircleM=None #used later for polygon calculations
+
+	def getSimplePitch(self,p1,p2,points=20):
+		"""
+		Gives the pitch along a line from point p1 to point p2.
+		output:
+		pitch - a list with the pitch in every point on the line
+		Not tested, and not called 
+		"""
+		pitch=[]
+		x=np.linspace(p1[0], p2[0], points)
+		y=np.linspace(p1[1], p2[1], points)
+		z=self.interpol.ev(x,y)
+		length=fun.getDistance(p1,p2)
+		piInv=1/pi
+		for ent in range(len(z)):
+			if ent==0:
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points))) #forward difference
+			elif ent==len(z)-1:
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent],length/float(points))) #backward difference
+				break
+			else:
+				pitch.append(180*piInv*atan2(z[ent+1]-z[ent-1],2*length/float(points))) #central difference
+		if len(pitch)!=len(z): raise Exception('Something wrong with the dimensions of the pitch')
+		return pitch
+
+	def getRoll(self,p1,p2,points=20,style='naive'):
+		"""
+		Provided choice of style is 'naive' or 'weighted', this method outputs the roll along a
+		road specified by the start point p1 and end point p2.
+		Not tested, and not called
+		"""
+		alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1]))
+		length=fun.getDistance(p1,p2)
+		piInv=1/pi
+		roll=[]
+		p11=fun.getCartesian([-self.roadwidth*0.5,0], direction=pi*0.5-alpha, origin=p1,fromLocalCart=True)
+		p12=fun.getCartesian([self.roadwidth*0.5,0], direction=pi*0.5-alpha, origin=p1,fromLocalCart=True)
+		p21=fun.getCartesian([-self.roadwidth*0.5,0], direction=pi*0.5-alpha, origin=p2,fromLocalCart=True)
+		p22=fun.getCartesian([self.roadwidth*0.5,0], direction=pi*0.5-alpha, origin=p2,fromLocalCart=True)
+		x1=np.linspace(p11[0], p21[0], points)
+		x2=np.linspace(p12[0], p22[0], points)
+		y1=np.linspace(p11[1], p21[1], points)
+		y2=np.linspace(p12[1], p22[1], points)
+		z1=self.interpol.ev(x1,y1)
+		z2=self.interpol.ev(x2,y2)
+		if style=='naive':#This is the most naive method, called naiveroll in intro_interpol.py
+			for ent in range(len(z1)):
+				roll.append(180*piInv*atan2((z2[ent]-z1[ent]),self.roadwidth))
+		elif style=='weighted':#This method is originally called GISroll or GIScopy-method in intro_interpol.py
+			for ent in range(len(z1)):
+				if ent==0:
+					roll.append(180*piInv*atan2(((2*z2[ent]+z2[ent+1])-(2*z1[ent]+z1[ent+1])),6*self.roadwidth*0.5))
+				elif ent==len(z1)-1:
+					roll.append(180*piInv*atan2(((z2[ent-1]+2*z2[ent])-(z1[ent-1]+2*z1[ent])),6*self.roadwidth*0.5))
+					break
+				else:
+					roll.append(180*piInv*atan2(((z2[ent-1]+2*z2[ent]+z2[ent+1])-(z1[ent-1]+2*z1[ent]+z1[ent+1])),8*self.roadwidth*0.5))
+		else: raise Exception('getRoll need a correct style to be supplied at call')
+		return roll
+
 		
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""

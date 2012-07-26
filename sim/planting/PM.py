@@ -193,8 +193,7 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 12, s.m.craneMaxL)
 			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 13, s.m.pDevs[0].plantSepDist*100)
 			e.modify(paramRow, 14, s.m.pDevs[0].plantHeads[0].width*100)
-			e.modify(paramRow, 15, s.G.simParam['critStoneSize']*1000)
-			e.modify(paramRow, 16, s.G.simParam['TSR'])
+			e.modify(paramRow, 15, s.G.simParam['TSR'])
 			if s.G.simParam['inverting']==True and s.G.simParam['ExcavatorInverting']==True:
 				noManRemInv = 5
 				cycleTimeInv = s.G.simParam['tInvExcavator']
@@ -204,13 +203,14 @@ class PMSimSeries(SimSeries):
 			elif s.G.simParam['inverting']==False:
 				noManRemInv = 5
 				cycleTimeInv = 0
-			e.modify(paramRow, 17, cycleTimeInv)
-			e.modify(paramRow, 18, noManRemInv)
+			e.modify(paramRow, 16, cycleTimeInv)
+			e.modify(paramRow, 17, noManRemInv)
 			if s.G.simParam['rectangular']==False: scoopshape='SemiCyl'
 			elif s.G.simParam['rectangular']==True: scoopshape='Rect'
-			e.modify(paramRow, 19, scoopshape)
-			e.modify(paramRow, 20, s.G.simParam['multiplierFindMuSite'])
-			e.modify(paramRow, 21, s.G.simParam['moundRadius'])
+			e.modify(paramRow, 18, scoopshape)
+			e.modify(paramRow, 19, s.G.simParam['multiplierFindMuSite'])
+			e.modify(paramRow, 20, s.G.simParam['moundRadius'])
+			e.modify(paramRow, 21, s.G.simParam['SBM'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
@@ -242,7 +242,7 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
 	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
@@ -256,18 +256,19 @@ def doTheSenseAn(i=1):
 	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations. Done
 	"""
 	
-	#VaryDibbleDist(i)#
-	#VaryTimeFindMuSite(i)#
-	#VaryMoundingBladeWidth(i)#
-	#VaryImpObAv(i)#
-	#VaryTimeWhenInvKO(i)#
+	VaryDibbleDist(i)#
+	VaryTimeFindMuSite(i)#
+	VaryMoundingBladeWidth(i)#
+	VaryImpObAv(i)#
+	VaryTimeWhenInvKO(i)#
 	VaryInvExc(i)#
 	TryNoRemound(i)#
-	VaryCriticalStoneSize(i)#
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
 	VaryTSR(i)#
 	VarySBM(i)#
+
+	#VaryCriticalStoneSize(i)# This is now left out of the simulations due to changes in the algorithms.
 	
 
 class VaryTerrain(PMSimSeries):
@@ -389,7 +390,7 @@ class VaryImpObAv(PMSimSeries):
 		if not G:
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
-		if not ObAvList: ObAvList=[[0.4,75,50],[0.4,88,55],[0.6,65,50],[0.6,0.75,55]] #[s] default OBS! These need to be adapted to the values in simParam called *ObAvImp!! They can't but you must check they are the same.
+		if not ObAvList: ObAvList=[[0.4,75,50],[0.4,63,50],[0.4,69,50],[0.4,88,55],[0.6,65,50],[0.6,0.75,55]] #[s] default OBS! These need to be adapted to the values in simParam called *ObAvImp!! They can't but you must check they are the same.
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
@@ -514,16 +515,16 @@ class VaryCriticalStoneSize(PMSimSeries):
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
 		if not sList: sList=[0.006,0.008,0.01] #default
-		for s in sList:
+		for stonesize in sList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(s)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_'+str(stonesize)+'inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
 						paramsForSensAn(G.simParam)
 						G.simParam['inverting']=inv
-						G.simParam['critStoneSize']=s
+						G.simParam['critStoneSize']=stonesize
 						quitPossible=False
 						s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 						i+=1
@@ -1011,13 +1012,16 @@ def paramsForSensAn(simParam={}):
 
 	"""For the ObAv parameters
 	-----------------------"""
+
 	s['vertOccStoneObAv40']=75
-	s['vertOccStoneImpObAv40']=88
+	s['vertOccStoneImp3ObAv40']=88
+	s['vertOccStoneImp1ObAv40']=63	
+	s['vertOccStoneImp2ObAv40']=69
 	s['vertOccStoneObAv50']=70
 	s['vertOccStoneObAv60']=65
 	s['vertOccStoneImpObAv60']=75
 	s['angRootStand']=45
 	s['angRootObAv']=50
-	s['angRootImpObAv']=55 
+	s['angRootImpObAv']=55
 	
 	return s
