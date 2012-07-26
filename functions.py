@@ -116,6 +116,8 @@ def getAngle(r1, r2):
 	ray1=np.array(r1)
 	ray2=np.array(r2)
 	inters,p=col.linesIntersect(ray1,ray2, getPoint=True)
+	if np.isnan(p[0]):
+		return pi #parallel rays. Angle defined as pi, not 0
 	if inters:
 		pts=[r1[0],r1[1], r2[0], r2[1]]
 		found=False
@@ -142,7 +144,7 @@ def getAngle(r1, r2):
 	th=acos(round(arg,7))
 	if th>pi:
 		if th>2*pi: raise Exception('something is wrong with getAngle')
-		th=pi-th
+		th=2*pi-th
 	assert th>=0
 	return th
 

@@ -11,10 +11,11 @@ import copy
 
 from graph_alg.grid import *
 import graph_alg.graph_operations as go
+from graph_alg.graph_operations import get_shortest_and_second, sortRemList, remove_edge, forcePaths
 from graph_alg.draw import *
 import graph_alg.costFunctions as cf
-from graphph_alg.costFunctions import routingCost as cost
-from common import get_shortest_and_second, sortRemList, remove_edge, forcePaths
+from graph_alg.costFunctions import cost as cost
+
 
 def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=False):
 	"""
@@ -29,8 +30,6 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 	eps=1e-9
 	lastAdded=None
 	origin=R.origin
-	if __debug__:
-		for e in R.edges(data=True): assert e[2]['weight']>=0
 	if not origin:
 		raise Exception('need info about origin')
 
@@ -87,6 +86,7 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 				if d['c']>=inf:
 					remList.remove(e)
 			remList=sortRemList(R,remList) #sort it, try again..
+		#found our candidate
 		if e_data['c']>=inf: break #if last in remList and infinite cost..
 		remList.remove(e)
 		e_data['c']=cost(R,e,storeData=True) #in order to store the new path..
