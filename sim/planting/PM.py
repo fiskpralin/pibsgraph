@@ -242,7 +242,7 @@ def articleThree(i=1):
 	In VaryTerrain the main simulation is run, and in doTheSenseAn the sensitivityanalysis is
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
-	#VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
+	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
 	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
@@ -256,13 +256,13 @@ def doTheSenseAn(i=1):
 	* Also we need to connect the parameters in paramsForSensAn to the machine or simulation in order to actually have different configurations. Done
 	"""
 	
-	#VaryDibbleDist(i)#
-	#VaryTimeFindMuSite(i)#
-	#VaryMoundingBladeWidth(i)#
-	#VaryImpObAv(i)#
-	#VaryTimeWhenInvKO(i)#
-	#VaryInvExc(i)#
-	#TryNoRemound(i)#
+	VaryDibbleDist(i)#
+	VaryTimeFindMuSite(i)#
+	VaryMoundingBladeWidth(i)#
+	VaryImpObAv(i)#
+	VaryTimeWhenInvKO(i)#
+	VaryInvExc(i)#
+	TryNoRemound(i)#
 	VaryCriticalStoneSize(i)#
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
