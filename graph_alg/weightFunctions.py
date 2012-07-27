@@ -3,6 +3,7 @@ import functions as fun
 
 from math import atan, pi
 import operator
+from grid import getSimplePitch, getRoll 
 
 #################
 #Below is a number of weight functions
@@ -37,4 +38,26 @@ def normalizedPitchDist(x,y,z):
 	if alpha>alim: return 1e15
 	d=fun.getDistance((x[0], y[0]), (x[-1], y[-1]))
 	w=d*(A+B*alpha/alim)
+	return w
+
+def normPitchRollDist(x,y,z):
+	"""
+	Still only uses the maximum value of the pitch and the roll. The weight of each edge
+	need be modeled in a way thought through thoroughly.
+	"""
+	A=0.3 #Pitch
+	B=0.3 #Roll
+	C=1.0-A-B #Distance
+	pitchlim=18.4 #deg This limit is approximate
+	rollim=11.3 #deg This limit is approximate
+	p1 = (x[0],y[0]) 
+	p2 = (x[-1],y[-1])
+	d = fun.getDistance(p1,p2)
+	points = max(10,int(d)) #every meter
+	rollist = getRoll(p1,p2,points=points,style='weighted')
+	pitchlist = getSimplePitch(p1,p2,points=points)
+	rollmax = max(abs(rollist))#Doesnt work
+	pitchmax = max(abs(pitchlist))#Doesnt work
+	if rollmax > rollim or pitchmax > pitchlim: return 1e15
+	w = d*(A*pitchmax/pitchlim+B*rollmax/rollim+C)
 	return w

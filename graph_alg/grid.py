@@ -19,7 +19,7 @@ if __name__=='__main__':
 import functions as fun
 import collision as col
 import draw
-from weightFunctions import weightFunctionFirst, normalizedPitchDist
+from weightFunctions import weightFunctionFirst, normalizedPitchDist, normPitchRollDist
 
 
 class ExtendedGraph(nx.Graph):
