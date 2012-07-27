@@ -132,8 +132,7 @@ class PMSimSeries(SimSeries):
 				refillTime=G.simParam['MagMatnReload2h']
 			else:
 				raise Exception('Does not support more than 2 heads and MagMat')
-
-		if '1h' in mtype:
+		elif '1h' in mtype:
 			headsCapacity=72
 			refillTime=223
 		elif '2h' in mtype:
