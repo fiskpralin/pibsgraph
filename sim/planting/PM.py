@@ -189,7 +189,7 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 7, s.G.terrain.meanBoulderV*1000)
 			e.modify(paramRow, 8, s.G.terrain.humusType) #humustype
 			e.modify(paramRow, 9, s.stats['noSurfBoulders'])#set in plantmsim
-			e.modify(paramRow, 10, s.stats['meanSurfBoulderDiam']*10)#changed to dm, set in plantmsim
+			e.modify(paramRow, 10, round(s.stats['meanSurfBoulderDiam']*10,1))#changed to dm, set in plantmsim
 			e.modify(paramRow, 12, s.m.craneMaxL)
 			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 13, s.m.pDevs[0].plantSepDist*100)
 			e.modify(paramRow, 14, s.m.pDevs[0].plantHeads[0].width*100)
@@ -210,7 +210,10 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 18, scoopshape)
 			e.modify(paramRow, 19, s.G.simParam['multiplierFindMuSite'])
 			e.modify(paramRow, 20, s.G.simParam['moundRadius'])
-			e.modify(paramRow, 21, s.G.simParam['SBM'])
+			if s.G.simParam['inv']==True:
+				e.modify(paramRow, 21, s.G.simParam['SBMinvert'])
+			elif s.G.simParam['inv']==False:
+				e.modify(paramRow, 21, s.G.simParam['SBMmound'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
 		for col,val in enumerate(self.timeData):
@@ -266,8 +269,8 @@ def doTheSenseAn(i=1):
 	VaryMoundRadius(i)#
 	VaryRectScoop(i)#
 	VaryTSR(i)#
-	VarySBM(i)#
 
+	#VarySBM(i)# Not wanted and not up to date
 	#VaryCriticalStoneSize(i)# This is now left out of the simulations due to changes in the algorithms.
 	
 
@@ -284,7 +287,7 @@ class VaryTerrain(PMSimSeries):
 		for ttype in tList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+'ttype'+str(ttype)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_ttype'+str(ttype)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or (not quitPossible):
 						G=copy.deepcopy(self.G)
@@ -311,7 +314,7 @@ class VaryDibbleDist(PMSimSeries):
 		for d in dList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(d)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_ddist'+str(d)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -338,7 +341,7 @@ class VaryMoundingBladeWidth(PMSimSeries):
 		for w in wList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(w)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_wMB'+str(w)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -366,7 +369,7 @@ class VaryTimeFindMuSite(PMSimSeries):
 		for t in tList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(t)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_tmusite'+str(t)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -394,7 +397,7 @@ class VaryImpObAv(PMSimSeries):
 		for ObAv in ObAvList:
 			for mtype in ['1a2hObAv','1a3hObAv','1a4hObAv']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(ObAv)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_vOccStone'+str(ObAv[1])+'_angRoot'+str(ObAv[2])+'_wMB'+str(ObAv[0]*100)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -427,7 +430,7 @@ class VaryTimeWhenInvKO(PMSimSeries):
 		if not tList: tList=[1 ,3 ,5] #[s] default
 		for t in tList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
+				self.filename=folder+'/'+mtype+'_tInvKO'+str(t)+'.xls'
 				i=0
 				while i<it or not quitPossible:
 					G=copy.deepcopy(self.G)
@@ -455,7 +458,7 @@ class VaryInvExc(PMSimSeries):
 		if not tList: tList=[10 ,13 ,16] #default
 		for t in tList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				self.filename=folder+'/'+mtype+'_'+str(t)+'.xls'
+				self.filename=folder+'/'+mtype+'_tInvExc'+str(t)+'.xls'
 				i=0
 				while i<it or not quitPossible:
 					G=copy.deepcopy(self.G)
@@ -491,7 +494,7 @@ class TryNoRemound(PMSimSeries):
 		for t in tList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(t)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_noRemound'+str(t)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -518,7 +521,7 @@ class VaryCriticalStoneSize(PMSimSeries):
 		for stonesize in sList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(stonesize)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_critStoneSize'+str(stonesize)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -545,7 +548,7 @@ class VaryMoundRadius(PMSimSeries):
 		for r in rList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(r)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_moundRad'+str(r*10)+'inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -574,7 +577,7 @@ class VaryRectScoop(PMSimSeries):
 		for w in wList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(w)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_wMB'+str(w*100)+'_Rect'+str(True)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -602,7 +605,7 @@ class VaryTSR(PMSimSeries):
 		for TSR in TSRList:
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
 				for inv in [True, False]:
-					self.filename=folder+'/'+mtype+'_'+str(TSR)+'inv'+str(inv)+'.xls'
+					self.filename=folder+'/'+mtype+'_TSR'+str(TSR)+'_inv'+str(inv)+'.xls'
 					i=0
 					while i<it or not quitPossible:
 						G=copy.deepcopy(self.G)
@@ -620,6 +623,8 @@ class VarySBM(PMSimSeries):
 	This class describes a simulation that varies the SBM for all the interesting machine configurations
 	in article 3. only inverting.
 	tested: No
+
+	Not up to date!
 	"""
 	def __init__(self,it=2,G=None):
 		PMSimSeries.__init__(self,G)
@@ -627,13 +632,13 @@ class VarySBM(PMSimSeries):
 			self.G.terrain=PlantMTerrain(G=self.G)
 		folder=self.makeFolder()
 		for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-			self.filename=folder+'/'+mtype+'_SBM_625'+'.xls'
+			self.filename=folder+'/'+mtype+'_SBM6.25'+'.xls'
 			i=0
 			while i<it or (not quitPossible):
 				G=copy.deepcopy(self.G)
 				paramsForSensAn(G.simParam)
-				G.simParam['SBM']=6.25
 				G.simParam['inverting']=True
+				#set the SBM here!
 				quitPossible=False
 				s, quitPossible=self._singleSim(G,mtype) #G is copied later, so does not affect G
 				i+=1
@@ -998,7 +1003,8 @@ def paramsForSensAn(simParam={}):
 	s['moundRadius']=0.2 #[m] 0.15
 	s['rectangular']=False#False #[bool] True
 	s['TSR']=2000 #[plants/ha] 1500, 2500
-	s['SBM']=6.0
+	s['SBMmound']=6.0
+	s['SBMinvert']=7.2
 	"""Other parameters for the simulations
 	------------------------------------"""
 	s['inverting'] = True # False. This shows whether there is inverting (true) or just mounding (false) going on.
