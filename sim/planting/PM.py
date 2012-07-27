@@ -209,9 +209,9 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 18, scoopshape)
 			e.modify(paramRow, 19, s.G.simParam['multiplierFindMuSite'])
 			e.modify(paramRow, 20, s.G.simParam['moundRadius'])
-			if s.G.simParam['inv']==True:
+			if s.G.simParam['inverting']==True:
 				e.modify(paramRow, 21, s.G.simParam['SBMinvert'])
-			elif s.G.simParam['inv']==False:
+			elif s.G.simParam['inverting']==False:
 				e.modify(paramRow, 21, s.G.simParam['SBMmound'])
 		e.changeSheet(1) #the time-data sheet
 		tdrow=2+self.sims
