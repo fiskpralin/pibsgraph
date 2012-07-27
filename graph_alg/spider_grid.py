@@ -14,6 +14,12 @@ from grid import ExtendedGraph
 from draw import *
 from functions import *
 
+"""
+A curious grid... see the documentation for more info.
+
+This code is not that well tested. Should be placed in grid.py but is now in a stand alone file since the code has a lot of bugs right now.. Want to separate the good parts from the bad parts.
+"""
+
 
 class SpiderGridGraph(ExtendedGraph):
 	"""
@@ -102,7 +108,7 @@ class SpiderGridGraph(ExtendedGraph):
 				if not p2 in G.nodes():
 					G.add_node(p2)
 					el+=1
-				G.add_edge(p1,p2, weight=getDistance(p1,p2), visits=0, visited_from_node=[], c=0)
+				G.add_edge(p1,p2, weight=self.edgeWeightCalc(p1,p2), visits=0, visited_from_node=[], c=0)
 				if left.order <= line.order: break
 		print "add neighbors"
 		#we have the pattern. Add edges to neighbors in not that dens regions
@@ -117,7 +123,7 @@ class SpiderGridGraph(ExtendedGraph):
 				if d<closDist:
 					closDist=d
 					closest=pTmp
-			G.add_edge(line.p2, closest, weight=getDistance(line.p2,leftBuddy.p2), visits=0, visited_from_node=[], c=0)
+			G.add_edge(line.p2, closest, weight=self.edgeWeightCalc(line.p2, closest), visits=0, visited_from_node=[], c=0)
 		lOrdered=copy.copy(lines) #not deepcopy, line instances are the same
 		lOrdered=sorted(lOrdered, key=lambda line: line.order)
 		for line in lOrdered:
@@ -189,9 +195,9 @@ class SpiderGridGraph(ExtendedGraph):
 							if not a: raise Exception('expected to find p here..')
 							p=tuple(p)
 						if pL:
-							G.add_edge(pL,p,weight=getDistance(pL,p), visits=0, visited_from_node=[], c=0)
+							G.add_edge(pL,p,weight=self.edgeWeightCalc(pL,p), visits=0, visited_from_node=[], c=0)
 						if pR:
-							G.add_edge(pR,p, weight=getDistance(pR,p), visits=0, visited_from_node=[], c=0)
+							G.add_edge(pR,p, weight=self.edgeWeightCalc(pR,p), visits=0, visited_from_node=[], c=0)
 						if not pL and not pR:
 							G.add_node(p)
 						line.gridPoints.append(tuple(p))
@@ -203,17 +209,35 @@ class SpiderGridGraph(ExtendedGraph):
 			line.gridPoints=sorted(line.gridPoints, key=lambda point: -getDistance(point, origin))
 			last=line.gridPoints[0]
 			for node in line.gridPoints[1:]:
-				G.add_edge(last, node,weight=getDistance(last, node), visits=0, visited_from_node=[], c=0)
+				G.add_edge(last, node,weight=self.edgeWeightCalc(last, node), visits=0, visited_from_node=[], c=0)
 				last=node
-		G.roadWidth=4
-		A=polygon_area(areaPoly)
-		G.elements=el
-		G.A=A
-		G.Ainv=1./G.A
-		G.density=el/G.A
-		G.areaPoly=areaPoly
-		lim=polygonLim(areaPoly)
-		G.lim=np.array(lim)
+		rem=True
+		for n in self.nodes():
+			if not self.inside(n):
+				self.remove_node(n)
+		while rem:
+			rem=False
+			for n in self.nodes(): #pretty ugly, but a must..
+				if self.degree(n)<=1:
+					rem=True
+					self.remove_node(n)
+					break
+		self.overlap={} #will later be filled.
+		self.roadWidth=4
+		self.L=L
+		if not self.origin in self.nodes():
+			shortest=None
+			short_dist=1e10
+			for n in self.nodes():
+				d=fun.getDistance(n, self.origin)
+				if d<short_dist:
+					short_dist=d
+					shortest=n
+			self.origin=shortest
+		elements=len(self.nodes())
+		self.elements=elements
+		self.density=elements/self.A
+		self.density=elements/self.A
 		#graph should be done by now.
 
 def findIntersection(origin, th, areaPoly):
@@ -224,18 +248,19 @@ def findIntersection(origin, th, areaPoly):
 	#find intersection with areaPoly
 	p1=getCartesian([0, inf], origin=origin, direction=th, fromLocalCart=True)
 	p2=list(origin)#getCartesian([0, 0.1], origin=origin, direction=th, fromLocalCart=True) #should be inside polygon
-	ray=np.array([p1,p2])
+	ray=np.array([p1,p2], dtype='float64')
 	last=areaPoly[-1]
 	point=None
 	for p in areaPoly:
-		borderRay=np.array([last,p])
-		int, pInt=col.linesIntersect(borderRay, ray, getPoint=True) 
+		borderRay=np.array([last,p], dtype='float64')
+		int, pInt=col.linesIntersect(borderRay, ray, getPoint=True)
 		if int:
 			point=pInt
 			break #we have found intersection point
 		last=p
 	if point==None:
 		print "areaPoly:", areaPoly
+		print origin,th, "ray:", ray
 		raise Exception('line has no intersection with polygon area')
 	return tuple(point)
 
@@ -264,35 +289,14 @@ class Line():
 		self.no=Line.lines #personal identifier, we know that this is a unique number
 		self.order=order
 
-def angle(r1, r2):
+def angle(ray):
 	"""
-	returns the smallest positive radian angle between two rays [p11,p12], [p21,p22]
+	returns the angle in relation to the xaxis.
+	vector from p1 to p2
+	"""
+	r,th=getCylindrical(ray[1], origin=ray[0], direction=0)
+	return th	
 
-	not fully tested
-	"""
-	ray1=np.array(r1)
-	ray2=np.array(r2)
-	inters,p=col.linesIntersect(ray1,ray2, getPoint=True)
-	if inters:
-		pts=[r1[0],r1[1], r2[0], r2[1]]
-		if not tuple(p) in pts: raise Exception('lines are intersecting and not incident, angle not defined')
-	p=np.array(p)
-	points=[]
-	for ray in ray1,ray2:
-		furthestDist=-1
-		for point in ray:
-			dist=getDistance(p,point)
-			if dist>furthestDist:
-				furthest=point
-				furthestDist=dist
-		points.append(point)
-	p1=np.array(points[0])-p
-	p2=np.array(points[1])-p
-	th=acos(np.dot(p1,p2)/(getDistance(p,p1)*getDistance(p,p2)))
-	if th>pi:
-		if th>2*pi: raise Exception('something is wrong with getAngle')
-		th=pi-th
-	return th
 
 def makeLines(areaPoly, origin, L, C, thMin):
 	"""

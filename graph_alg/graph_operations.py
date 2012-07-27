@@ -165,7 +165,7 @@ def shortestCycle(R,source, cutoff=None):
 	id=0
 	current=0 #indicates where in the lists we are
 	potential_winner=None 
-	pwsum=1e15
+	pwsum=1e12
 	shortest_paths=None #will be calc. and set if needed below.
 
 	while sums[current]<cutoff:
@@ -243,7 +243,7 @@ def get_shortest_and_second(R,node):
 
 	This function is used heavily. Most of the program time is spent in here.
 	"""
-	inf=1e15
+	inf=1e12
 	node=node[0] #no data dictionary included
 	assert len(node)==2 #otherwise node was not given in the way we wanted
 	if node==R.origin: return [], []
@@ -291,7 +291,7 @@ def update_after_mod(ein,R):
 		raise Exception('update_after_mod needs ein[2] data dictionary.' )
 	assert len(ein)==3 #data must be given
 	assert not ein in R #it must be removed..
-	inf=1e15
+	inf=1e12
 	e_data=ein[2]
 	e=(ein[0], ein[1]) #if data is given, we skip it.
 
@@ -346,7 +346,7 @@ def pathsDiff(R,e,storeData=False):
 	w=R.roadWidth #width of roads
 	C=0 #cost
 	origin=R.origin
-	inf=1e15
+	inf=1e12
 	eps=1e-8
 	etpl=tuple(e)
 
