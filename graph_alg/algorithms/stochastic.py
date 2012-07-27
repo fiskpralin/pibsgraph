@@ -16,11 +16,11 @@ import matplotlib.pyplot as plt
 
 from graph_alg.grid import *
 import graph_alg.costFunctions as cf
-from graphph_alg.costFunctions import routingCost as cost
+from graph_alg.costFunctions import cost as cost
 import graph_alg.graph_operations as go
+from graph_alg.graph_operations import get_shortest_and_second, sortRemList, remove_edge, forcePaths
 from graph_alg.draw import *
 from functions import getDistance
-from common import get_shortest_and_second, sortRemList, remove_edge
 
 class ProbListGen:
 	"""

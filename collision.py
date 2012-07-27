@@ -17,8 +17,6 @@ import scipy.weave as weave
 def collide(o1, o2, o1pos=None, o2pos=None):
 	"""
 	This function is the main function, it categorizes the objects and make the required tests
-
-	Some functions requre 
 	"""
 	if not o1pos:
 		o1pos=o1.pos
@@ -206,7 +204,7 @@ def linesIntersect(ray1, ray2, getPoint=False):
 		if p[0]==p[1]==0:
 			point=A
 		else:
-			if getPoint: return False, (np.nan, np.nan) #point does not exist, but have to give it
+			if getPoint: return False, [np.nan, np.nan] #point does not exist, but have to give it
 			return False #infinitely far away
 	else:
 		point=A+t*(B-A)
