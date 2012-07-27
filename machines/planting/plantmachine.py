@@ -136,8 +136,10 @@ class PlantMachine(Machine):
 		
 	def run(self): #the method has to be here in order to be counted as an entity
 		#get machine in place. Assumes that machine comes from last position in half-cricle pattern.
-		distance=self.G.simParam['SBM'] #not exact, half circle may overlap more or less than this.
-
+		if self.inverting:
+			distance=self.G.simParam['SBMinvert'] 
+		else:
+			distance=self.G.simParam['SBMmound'] 
 		time=self.timeConstants['machine']+distance/self.velocities['machine']
 		yield request, self, self.driver
 		yield hold, self, time
@@ -145,7 +147,7 @@ class PlantMachine(Machine):
 		self.timeConsumption['machineMovement']=time
 		self.inPlaceEvent.signal()
 		while True:
-			yield hold, self, 1
+			yield hold, self, 0.1
 			self.stopControl()
 	def exceedsAngleLim(self, p1in, pos1in,p2in, pos2in='undefined'):
 		"""move p1 to pos1, do we exceed the angular limits and do the cranes intersect?
