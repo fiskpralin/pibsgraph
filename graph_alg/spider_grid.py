@@ -264,6 +264,36 @@ class Line():
 		self.no=Line.lines #personal identifier, we know that this is a unique number
 		self.order=order
 
+def angle(r1, r2):
+	"""
+	returns the smallest positive radian angle between two rays [p11,p12], [p21,p22]
+
+	not fully tested
+	"""
+	ray1=np.array(r1)
+	ray2=np.array(r2)
+	inters,p=col.linesIntersect(ray1,ray2, getPoint=True)
+	if inters:
+		pts=[r1[0],r1[1], r2[0], r2[1]]
+		if not tuple(p) in pts: raise Exception('lines are intersecting and not incident, angle not defined')
+	p=np.array(p)
+	points=[]
+	for ray in ray1,ray2:
+		furthestDist=-1
+		for point in ray:
+			dist=getDistance(p,point)
+			if dist>furthestDist:
+				furthest=point
+				furthestDist=dist
+		points.append(point)
+	p1=np.array(points[0])-p
+	p2=np.array(points[1])-p
+	th=acos(np.dot(p1,p2)/(getDistance(p,p1)*getDistance(p,p2)))
+	if th>pi:
+		if th>2*pi: raise Exception('something is wrong with getAngle')
+		th=pi-th
+	return th
+
 def makeLines(areaPoly, origin, L, C, thMin):
 	"""
 	given an origin and an areaPolygon, this function creates lines from a specific spidernet pattern.
