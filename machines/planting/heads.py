@@ -222,7 +222,7 @@ class MultiHead(PlantHead):
 								if self.p.G.simParam['noRemound']:
 									assert self.remounded==False
 									self.abort=True
-								if not self.remounded:
+								elif not self.remounded:
 									debugPrint("remounds")
 									self.sim.stats['remound attempts']+=1
 									self.remounded=True

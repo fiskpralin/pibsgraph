@@ -415,7 +415,7 @@ class PlantingDevice(Process, Obstacle, UsesDriver):
 		self.sim.stats['humus depths'].append(depth)
 		if self.m.inverting: #determine the time. Dependent on digTime
 			if self.m.invertingMethod=='KO':
-				invertTime=self.G.simParam['invertKOFailureProb']
+				invertTime=self.G.simParam['tCWhenInvKO']
 			elif self.m.invertingMethod=='Excavator':
 				invertTime=self.G.simParam['tInvExcavator']-digTime
 			else:
