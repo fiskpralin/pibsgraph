@@ -7,8 +7,6 @@ import copy
 import graph_operations as go
 import functions as fun
 
-
-
 def totalCost(R):
 	"""
 	prototype, just to get a hint of how good it is..

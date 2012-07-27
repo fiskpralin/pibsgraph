@@ -22,10 +22,10 @@ class SpiderGridGraph(ExtendedGraph):
 	"spider grid, spider grid, does whatever a spider grid does..."
 	
 	"""
-	def __init__(self,L=24, umin=0, umax=0, diagonals=False, angle=None, areaPoly=None, origin=None, globalOrigin=None, thMin=pi/7.):
-		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, gridtype='spiderGridGraph')
-		G=self #remove later and change to self below.
+	def __init__(self,L=24, diagonals=False, angle=None, areaPoly=None, origin=None, globalOrigin=None, thMin=pi/7.):
 		C=L/2.
+		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C,gridtype='spiderGridGraph')
+		G=self #remove later and change to self below.
 		longest=L*1.4 #longest allowed distance between two nodes on a line.
 		eqL=L/6. #length where two points should be merged to one,m which is done in some cases
 		if not areaPoly: #use default

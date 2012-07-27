@@ -24,6 +24,7 @@ def sumWeights(R, P):
 			raise Exception("SumWeights: something is wrong. Edge does not seem to exist:",(last, nTmp2))
 		last=nTmp2
 	return C
+
 def roadAreaCoverage(R):
 	"""
 	calculate the percentage of the area that is covered by roads.
@@ -62,7 +63,6 @@ def singleRoadSegmentCoverage(e, R, add=False, remove=False):
 			a=overLapA(e, (node, neigh), R)
 			A-=a*modif #compensate for overlap.
 	return A
-
 
 def get_angle(e1,e2):
 	"""
@@ -141,19 +141,20 @@ def overLapA(e1,e2, R=None):
 	overlap[(e1,e2)]=a #save so we don't have to calculate next time
 	return a
 
-
-
 def shortestCycle(R,source, cutoff=None):
 	"""
 	Shortest cycle.
 
-	Cutoff is the maximum weight we can accept. Important to set cutoff as small as possible since it is a very complex algorithm.
+	Cutoff is the maximum sum weight of paths we can accept.
+	Important to set cutoff as small as possible since it is a very complex algorithm.
 
 	This is a brute force search, takes some time. May be refined.
 
 	When a potential "winner" is found, all the other paths are explored until
 	their weight-sum is bigger than the "winner"-one. If a better soulution is
 	found in this process, we do the same for that one.
+
+	There's a lot of asserts in here. Remove them if you find the distracting.
 	"""
 	assert cutoff!=None #otherwise we are screwed..
 	assert source in R #hard if n is not in our graph
@@ -163,11 +164,6 @@ def shortestCycle(R,source, cutoff=None):
 
 	id=0
 	current=0 #indicates where in the lists we are
-	"""from matplotlib import pyplot as plt
-	from draw import *
-	import time
-	plt.ion()
-	fig=plt.figure()"""
 	potential_winner=None 
 	pwsum=1e15
 	shortest_paths=None #will be calc. and set if needed below.
@@ -175,21 +171,9 @@ def shortestCycle(R,source, cutoff=None):
 	while sums[current]<cutoff:
 		path=paths[current]
 		node=path[-1] #last node in path
-
-		"""fig.clear()
-		plt.plot(source[0], source[1], 'o')
-		ax=fig.add_subplot('111', aspect='equal')
-		ax=R.draw(ax=ax, background=False, weight=True)
-		draw_road(path, ax, color='b')
-		plt.draw()
-		raw_input('dfs')"""
-		
 		for neigh in R[node]: #neighbors
 			if len(path)>1 and neigh == path[-2]:
 				continue #we do not allow going back again
-
-
-			
 			elif len(path)!=1 and neigh in path: #we might have found it.
 				if neigh==source: #we are there..
 					e_data=R.get_edge_data(node,neigh)
@@ -210,7 +194,6 @@ def shortestCycle(R,source, cutoff=None):
 						shortest_paths=nx.algorithms.shortest_paths.weighted.single_source_dijkstra_path(R,source,cutoff=cutoff)
 						for i in shortest_paths.keys(): #reverse the paths
 							shortest_paths[i].reverse()
-						
 					ptmp=shortest_paths[neigh]
 					s=sums[current]+sumWeights(R,ptmp)
 					if s>=pwsum:
@@ -223,7 +206,7 @@ def shortestCycle(R,source, cutoff=None):
 					assert ptmp.count(neigh)==2
 				potential_winner=ptmp
 				pwsum=s
-				continue #should not fork this one since we reached the goal
+				continue #should not fork this one since we've reached the goal
 			#if we have come this far, we should fork, i.e. start a new branch.
 			e_data=R.get_edge_data(node, neigh)
 			newsum=sums[current]+e_data['weight']
@@ -258,9 +241,7 @@ def get_shortest_and_second(R,node):
 
 	assumes that R has origin info. R is of grid-type
 
-	We have a known bug in the cycle thing. It does not consider all cycles..
-	
-	NOT tested
+	This function is used heavily. Most of the program time is spent in here.
 	"""
 	inf=1e15
 	node=node[0] #no data dictionary included
@@ -280,7 +261,6 @@ def get_shortest_and_second(R,node):
 	if cycle:
 		altW=w1+sumWeights(R,cycle)
 		alternative=cycle[:-1]+p1 #-1 to avoid double use of node in path..
-
 	if w2>=inf: #if we are forced to use e in second shortest as well -> no p2 or cycle
 		if cycle:
 			p2=alternative
@@ -303,11 +283,14 @@ def sortRemList(R,list):
 
 def update_after_mod(ein,R):
 	"""
-	updates graph after edge was removed or added. Assumes that routingcost function has stored correct data before.
+	updates graph after edge was removed or added. Assumes that routingcost function has stored correct data before. I.e. cost has been called with argument storeData=True
 
 	Because ein is removed from R, the data dictionary e[2] must be included
 	"""
+	if len(ein)<3:
+		raise Exception('update_after_mod needs ein[2] data dictionary.' )
 	assert len(ein)==3 #data must be given
+	assert not ein in R #it must be removed..
 	inf=1e15
 	e_data=ein[2]
 	e=(ein[0], ein[1]) #if data is given, we skip it.
@@ -357,8 +340,6 @@ def pathsDiff(R,e,storeData=False):
 	"""
 	culculates the difference in the sum of the paths from removing/adding edge e.
 	May store the new paths as well if storeData==True.
-
-	This function is a freaking mess.. clean up..
 	"""
 	assert len(e)>=3
 	beta=R.beta

@@ -27,6 +27,7 @@ def getGlobalCoordinate(globalOrigin, localPos=None, areaPoly=None):
 		for i in range(len(areaPoly)):
 			pol.append((globalOrigin[0]+areaPoly[i][0],globalOrigin[1]+areaPoly[i][1] )) #same format, meters.
 		return pol
+	
 def getFileList(areaPoly):
 	"""
 	returns a list of the files that contains the data for the positions.
@@ -58,7 +59,7 @@ def readTerrain(globalOrigin=None, areaPoly=None):
 	reads in data and returns local grid  x,y,z coordinates.
 
 	Notes:
-	-sweref koordinates are in m, useful. We just need to normalize them to our new origin.
+	-sweref coordinates are basically in [m], useful. We just need to normalize them to our new origin.
 	-Problem with intersections between the files... how to handle?
 	"""
 	if not globalOrigin: globalOrigin=(596120, 6727530) #located on map.. nice position..

@@ -12,6 +12,12 @@ import matplotlib.image as mpimg
 from matplotlib.colors import LinearSegmentedColormap
 from matplotlib import cm
 
+"""
+This module hadles all the plotting of road nets.
+
+Usually, you don't use these directly. Instead you call Grid.draw() with desired arguments. See ExtendedGraph class function draw.
+"""
+
 def draw_custom(G=None, ax=None, edge_visits=False, cost=False, weight=False,road_color='k', road_width=1, poly=False):
 	assert G != None
 	if edge_visits or cost or weight:
@@ -28,7 +34,7 @@ def draw_custom(G=None, ax=None, edge_visits=False, cost=False, weight=False,roa
 	for e in G.edges(data=True):
 		x=e[0][0], e[1][0]
 		y=e[0][1], e[1][1]
-		pos=middle([x[0],y[0]], [x[1],y[1]]) #used for edge text..
+		pos=fun.getPointBetween([x[0],y[0]], [x[1],y[1]]) #used for edge text..
 		if weight:
 			ax.text(pos[0],pos[1],' '+'w:%.0f'%e[2]['weight'])
 		if cost:
@@ -112,10 +118,6 @@ def nodeEdgesBendable(G,n):
 			return True
 	return False
 
-def middle(p1,p2):
-	"""returns the point in the middle"""
-	return fun.getPointBetween(p1,p2)
-
 def plot_coverage(G=None, ax=None, color='#666677'):
 	"""
 	plots coverage from the road. Shows overlaps and spots missed.
@@ -180,11 +182,6 @@ def plotSurface(x=None,y=None,z=None):
 	ax2.set_zlim3d(50, 105)
 	plt.colorbar()
 	return ax
-
-
-####
-# The following functions all do plots of raster GIS data.
-####
 
 
 def plot2DContour(x=None,y=None,z=None, ax=None, w=1, colorscheme=cm.Greens):
@@ -256,6 +253,9 @@ def plotBackground(areaPoly=None, ax=None, globalOrigin=None):
 
 
 def draw_road(p, ax, color='c'):
+	"""
+	draws a specific path in the color "color" at the axis "ax"
+	"""
 	assert ax
 	last=None
 	for node in p:
