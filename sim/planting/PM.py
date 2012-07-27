@@ -190,7 +190,7 @@ class PMSimSeries(SimSeries):
 			e.modify(paramRow, 9, s.stats['noSurfBoulders'])#set in plantmsim
 			e.modify(paramRow, 10, round(s.stats['meanSurfBoulderDiam']*10,1))#changed to dm, set in plantmsim
 			e.modify(paramRow, 12, s.m.craneMaxL)
-			if len(s.m.pDevs[0].plantHeads)>=2: e.modify(paramRow, 13, s.m.pDevs[0].plantSepDist*100)
+			e.modify(paramRow, 13, s.m.plantMinDist*100)
 			e.modify(paramRow, 14, s.m.pDevs[0].plantHeads[0].width*100)
 			e.modify(paramRow, 15, s.G.simParam['TSR'])
 			if s.G.simParam['inverting']==True and s.G.simParam['ExcavatorInverting']==True:
