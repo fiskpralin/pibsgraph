@@ -8,6 +8,14 @@ from grid import getSimplePitch, getRoll
 #################
 #Below is a number of weight functions
 ##################
+
+def weightFromLength(x,y,z):
+	p1=x[0], y[0]
+	p2=x[-1], y[-1]
+	c=fun.getDistance(p1,p2)
+	assert c>=0
+	return c
+
 def weightFunctionFirst(x,y,z):
 	"""
 	a weight function that has 3 vectors with positions as input and returns a weight

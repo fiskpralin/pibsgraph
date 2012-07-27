@@ -196,22 +196,25 @@ def linesIntersect(ray1, ray2, getPoint=False):
 	C=ray2[0]
 	D=ray2[1]
 	#FIND NORMAL TO CD. 
-	n=np.array((-(C[1]-D[1]),C[0]-D[0]), dtype='float32') #one of the two normals
-	n=n/sqrt(np.dot(n,n))#normalize
+	n=np.array((-(C[1]-D[1]),C[0]-D[0]), dtype='float64') #one of the two normals
+	n=n/np.sqrt(np.dot(n,n))#normalize
 	t=np.dot(n, C-A)/(np.dot(n, B-A))
 	if t==np.inf or t==-np.inf:
 		p=B-A
 		if p[0]==p[1]==0:
 			point=A
 		else:
-			if getPoint: return False, [np.nan, np.nan] #point does not exist, but have to give it
+			if getPoint:
+				return False, [np.nan, np.nan] #point does not exist, but have to give it
 			return False #infinitely far away
 	else:
 		point=A+t*(B-A)
 	if pointOnLine(ray1, point) and pointOnLine(ray2,point):
-		if getPoint: return True, point
+		if getPoint:
+			return True, point
 		return True
-	if getPoint: return False, point
+	if getPoint:
+		return False, point
 	return False
 	
 def intersectRaySphere(ray, r, pos, additionalInfo=False):

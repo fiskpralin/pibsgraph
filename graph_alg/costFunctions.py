@@ -7,8 +7,6 @@ import copy
 import graph_operations as go
 import functions as fun
 
-
-
 def totalCost(R):
 	"""
 	prototype, just to get a hint of how good it is..
@@ -32,4 +30,7 @@ def cost(R,ein,storeData=False):
 	assert R.has_edge(e[0],e[1])
 	c=go.pathsDiff(R,e,storeData)
 	assert c>=0 #should always be..
-	return c/len(R.nodes())
+	if c>=1e12:
+		return c
+	else:
+		return c/len(R.nodes())

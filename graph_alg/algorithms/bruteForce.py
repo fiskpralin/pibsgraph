@@ -21,7 +21,7 @@ from functions import getDistance
 
 
 """
-This is mostly old code and unnecessary complicated. Instead, look inte simplified_bruteForce.
+This is mostly old code and unnecessary complicated. Don't use it. Instead, look inte simplified_bruteForce. 
 
 This code is kept since it has some functionality that was not continued with, such as add functionality.
 
@@ -41,7 +41,7 @@ def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 	R.beta=beta	
 	if not G: G=copy.deepcopy(R)
 
-	inf = 1e15
+	inf = 1e12
 	eps=1e-9
 	lastAdded=None
 	origin=G.origin
@@ -104,9 +104,6 @@ def bruteForce(R, G=None, ax=None, aCap=0.25, beta=1.5, add=True):
 			remList=sorted(remList, key=lambda edge: edge[2]['c'])#+edge[2]['visits'])#-edge[2]['origin_dist']*0.1) #first sort
 			e=remList[0] # could be the same..
 			if first: first=False
-		print "the chosen one:",e[2]['c'], e[0:2]
-		print "areacover:", R.areaCover
-		print "cost:", cf.totalCost(R)
 		e[2]=R.get_edge_data(*e) # Update again, to get "new second shortest"
 		if add and random.uniform(0,1)<0.33:
 			print "adds"
@@ -162,7 +159,7 @@ def sumPathsDiff(R,e,storeData=False, add=False):
 	w=R.roadWidth #width of roads
 	C=0 #cost
 	origin=R.origin
-	inf=1e15
+	inf=1e12
 	eps=1e-8
 	etpl=tuple(e) 
 	if add: #different orders of things, but otherwise the same.
@@ -265,6 +262,7 @@ def routingCost(R,e,storeData=False, add=False):
 			raise Exception('dfsd')
 		e[2]=R.get_edge_data(e[0], e[1]) #sumPathsDiff takes away e from R, thus we need to update to have the
 	#right references
+	if c>=1e12: return c #our inf.
 	return c/len(R.nodes())
 
 

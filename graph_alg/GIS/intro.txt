@@ -1,1 +1,3 @@
-this is example GIS_files for a specific area. Taken from lantmäteriet.
+this is example GIS_files for a specific area. Taken from lantmäteriet with sweref99 coordinates
+
+Gis.py has some routines that are used mostly for reading the GIS data

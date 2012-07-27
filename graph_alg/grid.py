@@ -19,20 +19,33 @@ if __name__=='__main__':
 import functions as fun
 import collision as col
 import draw
-from weightFunctions import weightFunctionFirst, normalizedPitchDist, normPitchRollDist
+from weightFunctions import weightFunctionFirst, normalizedPitchDist, normPitchRollDist , weightFromLength
 
+"""
+This module is where a lot our things happen.
+
+Contains ExtendedGraph class and some grids classes that inherit from ExtendedGraph
+
+Might be a good idea to create a package out of this instead, since the file is so long.
+"""
 
 class ExtendedGraph(nx.Graph):
 	"""
-	intended as an extension of networkx graph with some features that we want.
+	This class is the foundation of everything we do.
+	
+	Intended as an extension of networkx graph with some new features that we want.
 
 	Grids inherit from this class, with basically just a different constructor.
 
-	Modifies networkX methods for adding and removing edges/nodes so that we can do some more refined statistics for this.
+	Modifies networkX methods for adding and removing edges/nodes so that we can do some more refined statistics for this, i.e. save info.
 
-	
+	Has functionality for pitch and roll calculations. (not really clear that they should be methods.. but whatever)
+
+	The weight function is given as an argument. I have implemented it that way to be able to implement everything for an abritrary weight function. For examples, see weightFunctions.py
+
+	Supports movies. See movieFlush method.
 	"""
-	def __init__(self, origin=None, globalOrigin=None,areaPoly=None,L=None, C=None, gridtype=None):
+	def __init__(self, origin=None, globalOrigin=None,areaPoly=None,L=None, C=None, gridtype=None, weightFunction=weightFromLength):
 		if not areaPoly:
 			raise Exception('areaPoly must be given.')
 		if not origin:
@@ -66,7 +79,7 @@ class ExtendedGraph(nx.Graph):
 		self.t_z=z
 		self.roadWidth=4 #width of road
 		self.overlap={} #will later be filled. A speedup thing
-		self.weightFunction=normalizedPitchDist #reference to exter
+		self.weightFunction=weightFunction #reference to exter
 		self.areaCover=go.roadAreaCoverage(self)
 		self.moviefig=None #may be used for movies later
 		self.cmdfolder=os.path.split(os.path.dirname(os.path.abspath(__file__)))[0]
@@ -130,7 +143,6 @@ class ExtendedGraph(nx.Graph):
 					roll.append(180*piInv*atan2(((z2[ent-1]+2*z2[ent]+z2[ent+1])-(z1[ent-1]+2*z1[ent]+z1[ent+1])),8*self.roadwidth*0.5))
 		else: raise Exception('getRoll need a correct style to be supplied at call')
 		return roll
-
 		
 	def getLineElevationCurve(self,p1,p2, points=10):
 		"""
@@ -165,7 +177,6 @@ class ExtendedGraph(nx.Graph):
 		reason for using self.weightFunction is that several externa functions can be tested..
 		"""
 		d=fun.getDistance(p1,p2)
-		return d #remove! just temporary...
 		x,y,z=self.getLineElevationCurve(p1,p2, points=max(5, int(d/2))) #every 2 m at least..
 		w=self.weightFunction(x,y,z)
 		return w
@@ -313,19 +324,26 @@ class ExtendedGraph(nx.Graph):
 			draw.plot_coverage(self,ax, color='r')
 		return ax
 
-
+#####################
+#grids!
+#####################
 
 
 class SqGridGraph(ExtendedGraph):
 	"""
 	A square grid graph with dx=dy=L.
+	
 	xyRatio =0 creates a square area. xyRatio>1 creates an "x>y" rectangle.
+	
 	angle is how the grid is turned in radians. 0=default
+	
 	Strategy for angle: setup the "base line" by turning the coordinate system by angle. Do a while loop where y is incremented and decremented until we are out of borders.
+
+	Coordinates are rounded of in order to avoid numerical errors.
 	"""
-	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None, shift=(0,0)):
+	def __init__(self,L=24, xyRatio=1,origin=None, globalOrigin=None,areaPoly=None, diagonals=False, angle=None, shift=(0,0), weightFunction=weightFromLength):
 		C=L/2.0
-		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C, gridtype='sqGridGraph')
+		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C, gridtype='sqGridGraph', weightFunction=weightFunction)
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
 		origin=self.origin
 		
@@ -454,7 +472,7 @@ class TriGridGraph(ExtendedGraph):
 	"""
 	A triangular grid. Extends from ExtendedGraph
 	"""
-	def __init__(self,L=None, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None):
+	def __init__(self,L=None, xyRatio=1, origin=None, globalOrigin=None,angle=None, areaPoly=None,  weightFunction=weightFromLength):
 		"""The strategy is to first cover an extra large area, and then take away the nodes that are outside.
 		for a square area, the maximum "x-distance" is sqrt(2) times the side. This corresponds to angle pi/4 or
 		5pi/4. The strategy is to always use this maximum length and then take away the ones outisde the area.
@@ -469,23 +487,19 @@ class TriGridGraph(ExtendedGraph):
 		digits=3 #used later..
 		if L==None:
 			L=C/(sin(1/3.0*pi)*0.5)
-		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C,gridtype='triGridGraph')
+		ExtendedGraph.__init__(self, origin=origin, globalOrigin=globalOrigin,areaPoly=areaPoly, L=L, C=C,gridtype='triGridGraph', weightFunction=weightFunction)
 		#C=L/2. #preference questions, this does not span entirely all of space but is a good compromise
 		self.L=L
 		self.C=C
 		dx=L
 		dy=L*round(sqrt(3)/2., digits)
 		cart=fun.getCartesian
-		#xl=np.arange(0,Nx*dx, dx, dtype
-
-
 
 		xmin,xmax,ymin,ymax=fun.polygonLim(areaPoly)
 		x1=np.arange(xmin,ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float)
 		x2=np.arange(xmin-dx/2., ceil(sqrt(xmax**2+ymax**2)), dx, dtype=np.float)
 		yl=np.arange(ymin,ceil(sqrt(xmax**2+ymax**2)), dy, dtype=np.float) #hypothenuse in another way
 		if not angle: angle=0
-		#G=nx.Graph( L=L, type='sqGridGraph', C=C)
 		self.lim=np.array([xmin-0.5*L,xmax+0.5*L, ymin-0.5*L, ymax+0.5*L])
 		direction=angle+pi/2.
 

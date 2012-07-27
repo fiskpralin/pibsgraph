@@ -26,7 +26,7 @@ def simplified_bruteForce(R, ax=None, aCap=0.20, beta=1.5, warmup=False, anim=Fa
 	anim=True creates a movie.
 	"""
 	R.beta=beta	
-	inf = 1e15
+	inf = 1e12
 	eps=1e-9
 	lastAdded=None
 	origin=R.origin
