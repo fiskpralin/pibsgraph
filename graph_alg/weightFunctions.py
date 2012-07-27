@@ -64,8 +64,8 @@ def normPitchRollDist(x,y,z):
 	points = max(10,int(d)) #every meter
 	rollist = getRoll(p1,p2,points=points,style='weighted')
 	pitchlist = getSimplePitch(p1,p2,points=points)
-	rollmax = max(abs(rollist))#Doesnt work
-	pitchmax = max(abs(pitchlist))#Doesnt work
+	rollmax = max(np.abs(np.array(rollist)))#Doesnt work fix with np
+	pitchmax = max(np.abs(np.array(pitchlist)))#Doesnt work fix with np
 	if rollmax > rollim or pitchmax > pitchlim: return 1e15
 	w = d*(A*pitchmax/pitchlim+B*rollmax/rollim+C)
 	return w
