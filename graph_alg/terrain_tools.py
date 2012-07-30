@@ -3,14 +3,19 @@ from math import *
 
 import functions as fun
 
+"""
+This file contains a bunch of functions that are used to evaluate the terrain data.
+From here we can get the roll, pitch or height along certain lines, in a point or whatever.
+"""
+
 
 def getSimplePitch(R,p1,p2,points=20):
 	"""
 	Gives the pitch along a line from point p1 to point p2.
 	output:
 	pitch - a list with the pitch in every point on the line
-	Not tested, and not called 
 	"""
+	if not R: raise Exception('getSimplePitch need the graph R in order to have the interpolation of terrain data.')
 	pitch=[]
 	x=np.linspace(p1[0], p2[0], points)
 	y=np.linspace(p1[1], p2[1], points)
@@ -32,8 +37,8 @@ def getRoll(R,p1,p2,points=20,style='naive'):
 	"""
 	Provided choice of style is 'naive' or 'weighted', this method outputs the roll along a
 	road specified by the start point p1 and end point p2.
-	Not tested, and not called
 	"""
+	if not R: raise Exception('getRoll need the graph R to get interpolation of the terrain data.')
 	alpha=atan2((p2[0]-p1[0]),(p2[1]-p1[1]))
 	length=fun.getDistance(p1,p2)
 	piInv=1/pi
@@ -51,7 +56,7 @@ def getRoll(R,p1,p2,points=20,style='naive'):
 	if style=='naive':#This is the most naive method, called naiveroll in intro_interpol.py
 		for ent in range(len(z1)):
 			roll.append(180*piInv*atan2((z2[ent]-z1[ent]),R.roadWidth))
-	elif style=='weighted':#This method is originally called GISroll or GIScopy-method in intro_interpol.py
+	elif style=='weighted':#This method was originally called GISroll or GIScopy-method in intro_interpol.py
 		for ent in range(len(z1)):
 			if ent==0:
 				roll.append(180*piInv*atan2(((2*z2[ent]+z2[ent+1])-(2*z1[ent]+z1[ent+1])),6*R.roadWidth*0.5))

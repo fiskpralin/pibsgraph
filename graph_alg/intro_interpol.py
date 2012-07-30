@@ -12,6 +12,8 @@ import graph_alg.GIS.GIS as GIS #Gis folder -> GIS.py
 from math import *
 import graph_alg.draw as draw
 from functions import getCartesian as getCa,getCylindrical as getCy
+from terrain_tools import getRoll, getSimplePitch
+
 ###
 #This file is supposed to be a script that introduces how the interpolation and plotting works.
 #A lot of things implemented in the ExtendedGraph class has been left out, just to show the methods used so that everything is in one place..
@@ -151,5 +153,3 @@ ax3.set_title('The roll with positive as falling left and negative as falling ri
 plt.show()
 
 #we are done and have z data for this point. Also some simple routines for getting the roll are implemented.
-
-
