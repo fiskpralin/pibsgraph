@@ -40,7 +40,7 @@ class ExtendedGraph(nx.Graph):
 
 	Modifies networkX methods for adding and removing edges/nodes so that we can do some more refined statistics for this, i.e. save info.
 
-	Has functionality for pitch and roll calculations. (not really clear that they should be methods.. but whatever)
+	Has functionality for pitch and roll calculations in terrain_tools.py
 
 	The weight function is given as an argument. I have implemented it that way to be able to implement everything for an abritrary weight function. For examples, see weightFunctions.py
 
