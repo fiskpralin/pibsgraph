@@ -119,21 +119,26 @@ if __name__=='__main__':
 	else:
 		import cProfile
 		from sim.planting.plantMTerrain import PlantMTerrain
-		seed=int(random.uniform(0,100000))
-		#seed=70974
+		#seed=int(random.uniform(0,100000))
+		seed=70974
 		random.seed(seed)
 		print "seed2:", seed
 		G=tools.globalVar()
 		G.noMonitors=True
 		G.seed=seed
 		#TH.testMemory()
-		G.terrain=PlantMTerrain(G, ttype='4')
+		G.terrain=PlantMTerrain(G, ttype='5')
 	   	#s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='2a4h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='BC', nCranes=2)
 		#G.plotDelay=20
 		#s=PM.VaryTerrain(1)
 		#s=PM.doTheSenseAn(i=1)
-		s=PM.PlantmSim(vis=True,anim=anim,G=G, mtype='1a3h')
+		s=None
+		while s==None or s.productivity>5:
+			seed=random.uniform(0,100000)
+			print "seed:", seed
+			random.seed(seed)
+			s=PM.PlantmSim(vis=True,anim=anim,G=copy.deepcopy(G), mtype='1a3h')
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=True, observer=True)
 		#TH.ThinningSim(vis=True,anim=anim,G=G, head='convAcc', nCranes=2, bundler=False, twigCrack=False, observer=True)
 		#FW.ForwarderSim(vis=True, anim=anim, G=G)
