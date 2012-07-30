@@ -44,7 +44,8 @@ for i in range(len(areaPoly)): #just some type conversion
 globalOrigin= 596250, 6727996 #SWEREF99 coordinate around sandviken in this case
 
 #create a grid from our polygon
-R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
+from weightFunctions import normPitchRollDist
+R=gr.SqGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin, weightFunction=normPitchRollDist)
 #R=gr.TriGridGraph(areaPoly=areaPoly, globalOrigin=globalOrigin)
 #R=sg.SpiderGridGraph(origin=(0,0),areaPoly=areaPoly, globalOrigin=globalOrigin) #a little buggy. beware..
 

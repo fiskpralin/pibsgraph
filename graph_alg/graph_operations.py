@@ -349,7 +349,6 @@ def pathsDiff(R,e,storeData=False):
 	inf=1e12
 	eps=1e-8
 	etpl=tuple(e)
-
 	for nTmp in e[2]['visited_from_node']: 
 		if nTmp[0]==R.origin: continue
 		P11,P12=get_shortest_and_second(R, nTmp)

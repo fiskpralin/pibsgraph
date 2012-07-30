@@ -1,22 +1,23 @@
+
 import numpy as np
 import functions as fun
 
 from math import atan, pi
 import operator
-#from grid import getSimplePitch, getRoll #doesn't work
+from terrain_tools import getSimplePitch, getRoll #doesn't work
 
 #################
 #Below is a number of weight functions
 ##################
 
-def weightFromLength(x,y,z):
+def weightFromLength(R,x,y,z):
 	p1=x[0], y[0]
 	p2=x[-1], y[-1]
 	c=fun.getDistance(p1,p2)
 	assert c>=0
 	return c
 
-def weightFunctionFirst(x,y,z):
+def weightFunctionFirst(R,x,y,z):
 	"""
 	a weight function that has 3 vectors with positions as input and returns a weight
 	that is independent of the sampling rate etc.
@@ -28,7 +29,7 @@ def weightFunctionFirst(x,y,z):
 	w=d+sum(abs(z-mu))/len(z)
 	return w
 
-def normalizedPitchDist(x,y,z):
+def normalizedPitchDist(R, x,y,z):
 	"""
 	see the documentation.
 	Look at the two extreme values for the pitch
@@ -47,12 +48,13 @@ def normalizedPitchDist(x,y,z):
 	d=fun.getDistance((x[0], y[0]), (x[-1], y[-1]))
 	w=d*(A+B*alpha/alim)
 	return w
-'''
-def normPitchRollDist(x,y,z):
+
+def normPitchRollDist(R,x,y,z):
 	"""
 	Still only uses the maximum value of the pitch and the roll. The weight of each edge
 	need be modeled in a way thought through thoroughly.
 	"""
+	inf=1e9
 	A=0.3 #Pitch
 	B=0.3 #Roll
 	C=1.0-A-B #Distance
@@ -62,11 +64,11 @@ def normPitchRollDist(x,y,z):
 	p2 = (x[-1],y[-1])
 	d = fun.getDistance(p1,p2)
 	points = max(10,int(d)) #every meter
-	rollist = getRoll(p1,p2,points=points,style='weighted')
-	pitchlist = getSimplePitch(p1,p2,points=points)
+	rollist = getRoll(R, p1,p2,points=points,style='weighted')
+	pitchlist = getSimplePitch(R,p1,p2,points=points)
 	rollmax = max(np.abs(np.array(rollist)))#Doesnt work fix with np
 	pitchmax = max(np.abs(np.array(pitchlist)))#Doesnt work fix with np
-	if rollmax > rollim or pitchmax > pitchlim: return 1e15
+	if rollmax > rollim or pitchmax > pitchlim: return inf
 	w = d*(A*pitchmax/pitchlim+B*rollmax/rollim+C)
 	return w
-'''
+
