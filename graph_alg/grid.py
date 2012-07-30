@@ -19,7 +19,7 @@ if __name__=='__main__':
 import functions as fun
 import collision as col
 import draw
-from weightFunctions import weightFunctionFirst, normalizedPitchDist, normPitchRollDist , weightFromLength
+from weightFunctions import weightFunctionFirst, normalizedPitchDist, weightFromLength#, normPitchRollDist
 
 """
 This module is where a lot our things happen.
