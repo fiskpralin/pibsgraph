@@ -245,7 +245,7 @@ def articleThree(i=1):
 	performed. That way this method can easily be adapted to run only one of the two.
 	"""
 	VaryTerrain(i)#This is actually almost all simulations apart from the fact that some sensitivityanalysis is required
-	#doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
+	doTheSenseAn(i)# Here the sensitivity analysis is managed, see method below. 
 
 def doTheSenseAn(i=1):
 	"""
@@ -284,9 +284,7 @@ class VaryTerrain(PMSimSeries):
 		folder=self.makeFolder()
 		tList=['1','2','3','4','5']
 		for ttype in tList:
-			ttype='5' #debug remove
 			for mtype in ['1a1h','1a2h','1a2hObAv','1a3h','1a3hObAv','1a4h','1a4hObAv','1a1hMag','1a2hMag']:
-				mtype='1a4h' #debug remove
 				for inv in [True, False]:
 					self.filename=folder+'/'+mtype+'_ttype'+str(ttype)+'_inv'+str(inv)+'.xls'
 					i=0
